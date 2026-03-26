@@ -8,27 +8,51 @@ cloudinary.config({
   api_secret: process.env.CLOUDINARY_API_SECRET,
 })
 
-const ALLOWED_TYPES = ["image/jpeg", "image/png", "image/webp", "image/gif"]
-const MAX_SIZE = 5 * 1024 * 1024 // 5MB
+const ALLOWED_EXTENSIONS = [".jpg", ".jpeg", ".png", ".webp", ".gif", ".mp4", ".webm", ".mov"]
+
+function checkConfig() {
+  if (!process.env.CLOUDINARY_CLOUD_NAME || !process.env.CLOUDINARY_API_KEY || !process.env.CLOUDINARY_API_SECRET) {
+    throw new Error("Missing Cloudinary env vars")
+  }
+}
+
+function uploadStream(buffer: Buffer, options: Record<string, unknown>): Promise<{ secure_url: string }> {
+  return new Promise((resolve, reject) => {
+    cloudinary.uploader.upload_stream(options, (err, result) => {
+      if (err || !result) return reject(err ?? new Error("No result"))
+      resolve(result as { secure_url: string })
+    }).end(buffer)
+  })
+}
 
 export async function POST(req: Request) {
   try { await requireAuth() } catch (e) { return e as Response }
 
   try {
+    checkConfig()
+
     const formData = await req.formData()
     const file = formData.get("file") as File | null
 
     if (!file) return NextResponse.json({ message: "No file provided" }, { status: 400 })
-    if (file.size > MAX_SIZE) return NextResponse.json({ message: "File size must not exceed 5MB" }, { status: 400 })
-    if (!ALLOWED_TYPES.includes(file.type)) return NextResponse.json({ message: "Only image files are accepted" }, { status: 400 })
 
-    const buffer = Buffer.from(await file.arrayBuffer())
-    const dataUri = `data:${file.type};base64,${buffer.toString("base64")}`
+    const ext = ("." + file.name.split(".").pop()?.toLowerCase()) as string
+    if (!ALLOWED_EXTENSIONS.includes(ext)) {
+      return NextResponse.json({ message: "File type not allowed" }, { status: 400 })
+    }
 
-    const result = await cloudinary.uploader.upload(dataUri, { folder: "portfolio" })
+    const isVideo = [".mp4", ".webm", ".mov"].includes(ext)
+    const buffer  = Buffer.from(await file.arrayBuffer())
+
+    const result = await uploadStream(buffer, {
+      folder:        "portfolio",
+      resource_type: isVideo ? "video" : "image",
+    })
+
     return NextResponse.json({ url: result.secure_url })
-  } catch (e) {
-    console.error(e)
-    return NextResponse.json({ message: "Image upload failed" }, { status: 500 })
+  } catch (e: unknown) {
+    const msg = e instanceof Error ? e.message : String(e)
+    console.error("Upload error:", msg)
+    return NextResponse.json({ message: `Upload failed: ${msg}` }, { status: 500 })
   }
 }

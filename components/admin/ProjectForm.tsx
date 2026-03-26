@@ -2,7 +2,7 @@
 
 import { useState } from "react"
 import { useRouter } from "next/navigation"
-import { Loader2, Upload } from "lucide-react"
+import { Loader2, Upload, X, Plus } from "lucide-react"
 
 interface ProjectFormProps {
   initial?: Record<string, unknown>
@@ -11,15 +11,17 @@ interface ProjectFormProps {
 
 export function ProjectForm({ initial, projectId }: ProjectFormProps) {
   const router = useRouter()
-  const [loading, setLoading]   = useState(false)
+  const [loading, setLoading]     = useState(false)
   const [uploading, setUploading] = useState(false)
-  const [error, setError]       = useState("")
+  const [uploadingScreenshot, setUploadingScreenshot] = useState(false)
+  const [error, setError]         = useState("")
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({})
 
   const [form, setForm] = useState({
     title:             (initial?.title             as string) ?? "",
     description:       (initial?.description       as string) ?? "",
     image:             (initial?.image             as string) ?? "",
+    screenshots:       ((initial?.screenshots as string[]) ?? []),
     tags:              ((initial?.tags as string[]) ?? []).join(", "),
     stack:             ((initial?.stack as string[]) ?? []).join(", "),
     category:          ((initial?.category as string[]) ?? []).join(", "),
@@ -32,7 +34,7 @@ export function ProjectForm({ initial, projectId }: ProjectFormProps) {
     caseStudyOutcome:  (initial?.caseStudyOutcome  as string) ?? "",
   })
 
-  function set(field: string, value: string | boolean) {
+  function set(field: string, value: string | boolean | string[]) {
     setForm(f => ({ ...f, [field]: value }))
     setFieldErrors(e => ({ ...e, [field]: "" }))
   }
@@ -50,6 +52,34 @@ export function ProjectForm({ initial, projectId }: ProjectFormProps) {
     else setError(data.message ?? "Upload failed")
   }
 
+  async function handleScreenshotUpload(e: React.ChangeEvent<HTMLInputElement>) {
+    const files = Array.from(e.target.files ?? [])
+    if (!files.length) return
+    setUploadingScreenshot(true)
+    const urls: string[] = []
+
+    for (const file of files) {
+      try {
+        const fd = new FormData()
+        fd.append("file", file)
+        const res = await fetch("/api/upload", { method: "POST", body: fd })
+        const data = await res.json()
+        if (res.ok) urls.push(data.url)
+        else setError(data.message ?? "Upload failed")
+      } catch {
+        setError("Upload failed")
+      }
+    }
+
+    setForm(f => ({ ...f, screenshots: [...f.screenshots, ...urls] }))
+    setUploadingScreenshot(false)
+    e.target.value = ""
+  }
+
+  function removeScreenshot(idx: number) {
+    setForm(f => ({ ...f, screenshots: f.screenshots.filter((_, i) => i !== idx) }))
+  }
+
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
     setLoading(true)
@@ -58,9 +88,10 @@ export function ProjectForm({ initial, projectId }: ProjectFormProps) {
 
     const payload = {
       ...form,
-      tags:     form.tags.split(",").map(s => s.trim()).filter(Boolean),
-      stack:    form.stack.split(",").map(s => s.trim()).filter(Boolean),
-      category: form.category.split(",").map(s => s.trim()).filter(Boolean),
+      tags:        form.tags.split(",").map(s => s.trim()).filter(Boolean),
+      stack:       form.stack.split(",").map(s => s.trim()).filter(Boolean),
+      category:    form.category.split(",").map(s => s.trim()).filter(Boolean),
+      screenshots: form.screenshots,
     }
 
     const url    = projectId ? `/api/projects/${projectId}` : "/api/projects"
@@ -126,8 +157,41 @@ export function ProjectForm({ initial, projectId }: ProjectFormProps) {
           />
           <label className="flex items-center gap-2 px-3 py-2 bg-secondary text-secondary-foreground rounded-lg text-sm cursor-pointer hover:bg-secondary/80 transition-colors">
             {uploading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Upload className="w-4 h-4" />}
-            Upload
-            <input type="file" accept="image/*" className="hidden" onChange={handleImageUpload} />
+            Image / Video
+            <input type="file" accept=".jpg,.jpeg,.png,.webp,.gif,.mp4,.webm,.mov" className="hidden" onChange={handleImageUpload} />
+          </label>
+        </div>
+      </div>
+
+      {/* Screenshots / preview media */}
+      <div>
+        <label className="block text-sm font-medium text-foreground mb-2">
+          Preview Media <span className="text-xs text-muted-foreground">(images or video shown in the preview modal)</span>
+        </label>
+        <div className="flex flex-wrap gap-3 mb-3">
+          {form.screenshots.map((url, idx) => {
+            const isVid = /\.(mp4|webm|mov)(\?|$)/i.test(url) || url.includes("/video/upload/")
+            return (
+              <div key={idx} className="relative w-24 h-16 rounded-lg overflow-hidden border border-border group">
+                {isVid
+                  ? <video src={url} muted className="w-full h-full object-cover" />
+                  // eslint-disable-next-line @next/next/no-img-element
+                  : <img src={url} alt="" className="w-full h-full object-cover" />
+                }
+                <button
+                  type="button"
+                  onClick={() => removeScreenshot(idx)}
+                  className="absolute top-0.5 right-0.5 w-5 h-5 bg-red-500 text-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                >
+                  <X className="w-3 h-3" />
+                </button>
+              </div>
+            )
+          })}
+          <label className="w-24 h-16 rounded-lg border border-dashed border-border flex flex-col items-center justify-center cursor-pointer hover:border-primary/50 transition-colors text-muted-foreground hover:text-primary">
+            {uploadingScreenshot ? <Loader2 className="w-4 h-4 animate-spin" /> : <Plus className="w-5 h-5" />}
+            <span className="text-xs mt-1">Add</span>
+            <input type="file" accept=".jpg,.jpeg,.png,.webp,.gif,.mp4,.webm,.mov" multiple className="hidden" onChange={handleScreenshotUpload} />
           </label>
         </div>
       </div>

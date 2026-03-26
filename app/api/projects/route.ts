@@ -30,16 +30,18 @@ export async function POST(req: Request) {
       data: {
         ...clean,
         slug,
-        tags:     Array.isArray(clean.tags)     ? (clean.tags as string[])     : [],
-        stack:    Array.isArray(clean.stack)    ? (clean.stack as string[])    : [],
-        category: Array.isArray(clean.category) ? (clean.category as string[]) : [],
-      } as Parameters<typeof prisma.project.create>[0]["data"],
+        tags:        Array.isArray(clean.tags)        ? (clean.tags as string[])        : [],
+        stack:       Array.isArray(clean.stack)       ? (clean.stack as string[])       : [],
+        category:    Array.isArray(clean.category)    ? (clean.category as string[])    : [],
+        screenshots: Array.isArray(clean.screenshots) ? (clean.screenshots as string[]) : [],
+      } as unknown as Parameters<typeof prisma.project.create>[0]["data"],
     })
 
     return NextResponse.json(project, { status: 201 })
   } catch (e) {
     if (e instanceof Response || (e as { status?: number })?.status) return e as Response
-    console.error(e)
-    return NextResponse.json({ message: "Internal server error" }, { status: 500 })
+    const msg = e instanceof Error ? e.message : String(e)
+    console.error("POST /api/projects error:", msg)
+    return NextResponse.json({ message: `Internal server error: ${msg}` }, { status: 500 })
   }
 }

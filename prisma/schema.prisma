@@ -12,6 +12,7 @@ model Project {
   title              String
   description        String
   image              String   @default("")
+  screenshots        String[] @default([])
   tags               String[]
   stack              String[]
   category           String[]

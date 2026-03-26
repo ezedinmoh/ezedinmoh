@@ -16,15 +16,22 @@ const categories = ["All", "Frontend", "Full-Stack", "AI"]
 
 // ── Demo Modal ──────────────────────────────────────────────────────────────
 function DemoModal({ project, onClose }: { project: Project; onClose: () => void }) {
+  const media: string[] = (project.screenshots?.length)
+    ? project.screenshots
+    : project.image ? [project.image] : []
+  const [idx, setIdx] = useState(0)
+  const current = media[idx]
+  const isVideo = (url: string) => /\.(mp4|webm|mov)(\?|$)/i.test(url) || url.includes("/video/upload/")
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-background/80 backdrop-blur-sm"
       onClick={onClose}>
-      <div className="bg-card border border-border rounded-2xl shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-hidden animate-scale-in"
+      <div className="bg-card border border-border rounded-2xl shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-hidden animate-scale-in flex flex-col"
         onClick={e => e.stopPropagation()}>
-        <div className="flex items-center justify-between p-4 border-b border-border">
+        <div className="flex items-center justify-between p-4 border-b border-border shrink-0">
           <div>
             <h3 className="font-semibold text-foreground">{project.title}</h3>
-            <p className="text-xs text-muted-foreground">{project.liveUrl}</p>
+            <p className="text-xs text-muted-foreground">{media.length > 1 ? `${idx + 1} / ${media.length}` : project.liveUrl}</p>
           </div>
           <div className="flex items-center gap-2">
             {project.liveUrl && (
@@ -39,24 +46,67 @@ function DemoModal({ project, onClose }: { project: Project; onClose: () => void
             </button>
           </div>
         </div>
-        {/* Preview area */}
-        <div className="relative bg-secondary/30 h-[60vh] flex items-center justify-center">
-          <div className="absolute inset-0 opacity-5"
-            style={{ backgroundImage: "linear-gradient(rgba(100,200,180,0.5) 1px, transparent 1px), linear-gradient(90deg, rgba(100,200,180,0.5) 1px, transparent 1px)", backgroundSize: "40px 40px" }} />
-          <div className="text-center relative z-10">
-            <div className="w-20 h-20 mx-auto mb-4 rounded-2xl bg-primary/10 border border-primary/20 flex items-center justify-center">
-              <Monitor className="w-10 h-10 text-primary" />
+
+        <div className="relative bg-secondary/30 flex-1 min-h-0 h-[55vh] flex items-center justify-center overflow-hidden">
+          {current ? (
+            <>
+              {isVideo(current) ? (
+                <video key={current} src={current} autoPlay muted loop playsInline controls className="w-full h-full object-contain" />
+              ) : (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img key={current} src={current} alt={project.title} className="w-full h-full object-contain" />
+              )}
+              {/* Info overlay */}
+              <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-4 pointer-events-none">
+                <p className="text-white font-semibold text-sm">{project.title}</p>
+                <p className="text-white/70 text-xs line-clamp-2 mt-0.5">{project.description}</p>
+                {project.liveUrl && (
+                  <a href={project.liveUrl} target="_blank" rel="noopener noreferrer"
+                    className="inline-flex items-center gap-2 mt-3 px-4 py-2 bg-primary text-primary-foreground rounded-full text-sm font-bold pointer-events-auto hover:opacity-90 transition-all hover:scale-105 shadow-lg">
+                    Visit Live Site <ArrowUpRight className="w-4 h-4" />
+                  </a>
+                )}
+              </div>
+            </>
+          ) : (
+            <div className="text-center p-8">
+              <div className="w-20 h-20 mx-auto mb-4 rounded-2xl bg-primary/10 border border-primary/20 flex items-center justify-center">
+                <Monitor className="w-10 h-10 text-primary" />
+              </div>
+              <p className="text-foreground font-semibold mb-1">{project.title}</p>
+              <p className="text-muted-foreground text-sm mb-4 max-w-xs">{project.description}</p>
+              {project.liveUrl && (
+                <a href={project.liveUrl} target="_blank" rel="noopener noreferrer"
+                  className="inline-flex items-center gap-2 px-5 py-2.5 bg-primary text-primary-foreground rounded-full text-sm font-medium hover:opacity-90 transition-all">
+                  Visit Live Site <ArrowUpRight className="w-4 h-4" />
+                </a>
+              )}
             </div>
-            <p className="text-foreground font-semibold mb-1">{project.title}</p>
-            <p className="text-muted-foreground text-sm mb-4 max-w-xs">{project.description}</p>
-            {project.liveUrl && (
-              <a href={project.liveUrl} target="_blank" rel="noopener noreferrer"
-                className="inline-flex items-center gap-2 px-5 py-2.5 bg-primary text-primary-foreground rounded-full text-sm font-medium hover:opacity-90 transition-all">
-                Visit Live Site <ArrowUpRight className="w-4 h-4" />
-              </a>
-            )}
-          </div>
+          )}
+          {media.length > 1 && (
+            <>
+              <button onClick={() => setIdx(i => (i - 1 + media.length) % media.length)}
+                className="absolute left-3 top-1/2 -translate-y-1/2 w-9 h-9 bg-background/80 backdrop-blur-sm rounded-full flex items-center justify-center text-foreground hover:bg-background transition-all text-lg font-bold">‹</button>
+              <button onClick={() => setIdx(i => (i + 1) % media.length)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 w-9 h-9 bg-background/80 backdrop-blur-sm rounded-full flex items-center justify-center text-foreground hover:bg-background transition-all text-lg font-bold">›</button>
+            </>
+          )}
         </div>
+
+        {media.length > 1 && (
+          <div className="flex gap-2 p-3 overflow-x-auto border-t border-border bg-background/50 shrink-0">
+            {media.map((url, i) => (
+              <button key={i} onClick={() => setIdx(i)}
+                className={cn("shrink-0 w-16 h-10 rounded-lg overflow-hidden border-2 transition-all",
+                  i === idx ? "border-primary" : "border-transparent opacity-50 hover:opacity-100")}>
+                {isVideo(url)
+                  ? <video src={url} muted className="w-full h-full object-cover" />
+                  // eslint-disable-next-line @next/next/no-img-element
+                  : <img src={url} alt="" className="w-full h-full object-cover" />}
+              </button>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   )
@@ -136,15 +186,17 @@ function ProjectCard({ project, index, onDemo, onCaseStudy }: {
     >
       {/* Image / preview area */}
       <div className="relative aspect-video overflow-hidden">
-        {/* Image if available, otherwise gradient */}
+        {/* Image/video if available, otherwise gradient */}
         {project.image ? (
           <>
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              src={project.image}
-              alt={project.title}
-              className={cn("absolute inset-0 w-full h-full object-cover transition-transform duration-700", hovered ? "scale-110" : "scale-100")}
-            />
+            {/\.(mp4|webm|mov)(\?|$)/i.test(project.image) || project.image.includes("/video/upload/") ? (
+              <video src={project.image} autoPlay muted loop playsInline
+                className={cn("absolute inset-0 w-full h-full object-cover transition-transform duration-700", hovered ? "scale-110" : "scale-100")} />
+            ) : (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img src={project.image} alt={project.title}
+                className={cn("absolute inset-0 w-full h-full object-cover transition-transform duration-700", hovered ? "scale-110" : "scale-100")} />
+            )}
             <div className="absolute inset-0 bg-gradient-to-t from-card via-card/30 to-transparent" />
           </>
         ) : (
@@ -181,7 +233,7 @@ function ProjectCard({ project, index, onDemo, onCaseStudy }: {
         <div className="absolute inset-0 bg-background/60 opacity-0 group-hover:opacity-100 transition-all duration-300 flex items-center justify-center gap-3">
           <button onClick={onDemo}
             className="flex items-center gap-1.5 px-4 py-2 bg-primary text-primary-foreground rounded-full text-sm font-medium hover:opacity-90 transition-all hover:scale-105">
-            <Monitor className="w-3.5 h-3.5" /> Live Preview
+            <Monitor className="w-3.5 h-3.5" /> Preview
           </button>
           {project.caseStudy && (
             <button onClick={onCaseStudy}
@@ -246,6 +298,7 @@ export default function ProjectsPage() {
           ...p,
           github: p.githubUrl,
           link: p.liveUrl,
+          screenshots: Array.isArray(p.screenshots) ? p.screenshots : [],
           caseStudy: p.caseStudyProblem ? {
             problem:  p.caseStudyProblem,
             solution: p.caseStudySolution,
