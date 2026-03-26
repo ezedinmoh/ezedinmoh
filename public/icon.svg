@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" fill="none">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="32" y2="32" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#1a1a2e"/>
+      <stop offset="100%" stop-color="#0f2027"/>
+    </linearGradient>
+    <linearGradient id="letter" x1="6" y1="6" x2="26" y2="26" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#64c8b4"/>
+      <stop offset="100%" stop-color="#4db8a8"/>
+    </linearGradient>
+  </defs>
+  <!-- Background rounded square -->
+  <rect width="32" height="32" rx="8" fill="url(#bg)"/>
+  <!-- Subtle inner glow ring -->
+  <rect x="1" y="1" width="30" height="30" rx="7.5" fill="none" stroke="url(#letter)" stroke-width="0.5" opacity="0.4"/>
+  <!-- Stylized E letterform -->
+  <text
+    x="16"
+    y="23"
+    font-family="'Inter', 'Helvetica Neue', Arial, sans-serif"
+    font-size="20"
+    font-weight="700"
+    text-anchor="middle"
+    fill="url(#letter)"
+    letter-spacing="-0.5"
+  >E</text>
+</svg>
