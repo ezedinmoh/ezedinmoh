@@ -136,30 +136,39 @@ function ProjectCard({ project, index, onDemo, onCaseStudy }: {
     >
       {/* Image / preview area */}
       <div className="relative aspect-video overflow-hidden">
-        {/* Morphing gradient background — same as home ProjectCard */}
-        <div className={cn(
-          "absolute inset-0 bg-gradient-to-br from-primary/20 to-accent/20 transition-all duration-700",
-          hovered ? "scale-110 animate-morph" : "scale-100"
-        )} />
-        <div className={cn(
-          "absolute inset-0 bg-card-foreground/5 transition-opacity duration-500",
-          hovered ? "opacity-0" : "opacity-100"
-        )} />
-        {/* Pulsing dot grid */}
-        <div className="absolute inset-0 flex items-center justify-center">
-          <div className="grid grid-cols-3 gap-2 p-8 opacity-20">
-            {[...Array(9)].map((_, i) => (
-              <div key={i} className={cn(
-                "w-8 h-8 rounded-lg bg-primary transition-all duration-500",
-                hovered && "animate-pulse-3d"
-              )} style={{ animationDelay: `${i * 0.1}s` }} />
-            ))}
-          </div>
-        </div>
-        <div className={cn(
-          "absolute inset-0 bg-gradient-to-t from-card via-transparent to-transparent transition-opacity duration-500",
-          hovered ? "opacity-100" : "opacity-60"
-        )} />
+        {/* Image if available, otherwise gradient */}
+        {project.image ? (
+          <>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={project.image}
+              alt={project.title}
+              className={cn("absolute inset-0 w-full h-full object-cover transition-transform duration-700", hovered ? "scale-110" : "scale-100")}
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-card via-card/30 to-transparent" />
+          </>
+        ) : (
+          <>
+            <div className={cn(
+              "absolute inset-0 bg-gradient-to-br from-primary/20 to-accent/20 transition-all duration-700",
+              hovered ? "scale-110 animate-morph" : "scale-100"
+            )} />
+            <div className="absolute inset-0 flex items-center justify-center">
+              <div className="grid grid-cols-3 gap-2 p-8 opacity-20">
+                {[...Array(9)].map((_, i) => (
+                  <div key={i} className={cn(
+                    "w-8 h-8 rounded-lg bg-primary transition-all duration-500",
+                    hovered && "animate-pulse-3d"
+                  )} style={{ animationDelay: `${i * 0.1}s` }} />
+                ))}
+              </div>
+            </div>
+            <div className={cn(
+              "absolute inset-0 bg-gradient-to-t from-card via-transparent to-transparent transition-opacity duration-500",
+              hovered ? "opacity-100" : "opacity-60"
+            )} />
+          </>
+        )}
         {/* Tags */}
         <div className="absolute top-3 left-3 flex flex-wrap gap-1.5">
           {project.tags.slice(0, 3).map(tag => (
