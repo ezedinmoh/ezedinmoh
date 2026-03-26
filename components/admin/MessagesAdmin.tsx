@@ -1,11 +1,24 @@
 "use client"
 
 import { useState } from "react"
+import { useRouter } from "next/navigation"
+import { RefreshCw } from "lucide-react"
 import type { ContactMessage } from "@prisma/client"
 
 export function MessagesAdmin({ messages: initial }: { messages: ContactMessage[] }) {
+  const router = useRouter()
   const [messages, setMessages] = useState(initial)
   const [open, setOpen] = useState<string | null>(null)
+  const [refreshing, setRefreshing] = useState(false)
+
+  async function refresh() {
+    setRefreshing(true)
+    router.refresh()
+    const res = await fetch("/api/messages")
+    const data = await res.json()
+    setMessages(data)
+    setRefreshing(false)
+  }
 
   async function markRead(id: string) {
     await fetch(`/api/messages/${id}/read`, { method: "PATCH" })
@@ -19,6 +32,11 @@ export function MessagesAdmin({ messages: initial }: { messages: ContactMessage[
 
   return (
     <div className="space-y-3">
+      <div className="flex justify-end">
+        <button onClick={refresh} disabled={refreshing} className="flex items-center gap-1.5 px-3 py-1.5 bg-secondary text-muted-foreground hover:text-foreground rounded-lg text-xs font-medium transition-all disabled:opacity-50">
+          <RefreshCw className={`w-3.5 h-3.5 ${refreshing ? "animate-spin" : ""}`} /> Refresh
+        </button>
+      </div>
       {messages.length === 0 && <p className="text-muted-foreground text-sm">No messages yet</p>}
       {messages.map(m => (
         <div key={m.id} className="bg-card border border-border rounded-xl overflow-hidden">

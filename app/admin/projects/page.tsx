@@ -3,6 +3,8 @@ import { prisma } from "@/lib/db"
 import { Plus } from "lucide-react"
 import { ProjectsTable } from "@/components/admin/ProjectsTable"
 
+export const dynamic = "force-dynamic"
+
 export default async function AdminProjects() {
   const projects = await prisma.project.findMany({ orderBy: { sortOrder: "asc" } })
 

@@ -2,13 +2,24 @@
 
 import { useState } from "react"
 import { useRouter } from "next/navigation"
-import { Pin, Trash2, MessageSquare } from "lucide-react"
+import { Pin, Trash2, MessageSquare, RefreshCw } from "lucide-react"
 import type { GuestbookEntry } from "@prisma/client"
 
 export function GuestbookAdmin({ entries: initial }: { entries: GuestbookEntry[] }) {
   const router = useRouter()
   const [entries, setEntries] = useState(initial)
   const [replyText, setReplyText] = useState<Record<string, string>>({})
+  const [refreshing, setRefreshing] = useState(false)
+
+  async function refresh() {
+    setRefreshing(true)
+    router.refresh()
+    // re-fetch latest from API and update local state
+    const res = await fetch("/api/guestbook")
+    const data = await res.json()
+    setEntries(data)
+    setRefreshing(false)
+  }
 
   async function togglePin(id: string, pinned: boolean) {
     await fetch(`/api/guestbook/${id}`, {
@@ -39,6 +50,11 @@ export function GuestbookAdmin({ entries: initial }: { entries: GuestbookEntry[]
 
   return (
     <div className="space-y-4">
+      <div className="flex justify-end">
+        <button onClick={refresh} disabled={refreshing} className="flex items-center gap-1.5 px-3 py-1.5 bg-secondary text-muted-foreground hover:text-foreground rounded-lg text-xs font-medium transition-all disabled:opacity-50">
+          <RefreshCw className={`w-3.5 h-3.5 ${refreshing ? "animate-spin" : ""}`} /> Refresh
+        </button>
+      </div>
       {entries.length === 0 && <p className="text-muted-foreground text-sm">No entries yet</p>}
       {entries.map(entry => (
         <div key={entry.id} className="bg-card border border-border rounded-xl p-5 space-y-3">

@@ -3,6 +3,8 @@ import { BarChart2, Monitor, Smartphone, Tablet } from "lucide-react"
 import { StatCard } from "@/components/admin/StatCard"
 import { AnalyticsChart } from "@/components/admin/AnalyticsChart"
 
+export const dynamic = "force-dynamic"
+
 export default async function AdminAnalytics() {
   const now = new Date()
   const d7  = new Date(now.getTime() - 7  * 24 * 60 * 60 * 1000)

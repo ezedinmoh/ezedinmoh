@@ -1,6 +1,8 @@
 import { prisma } from "@/lib/db"
 import { MessagesAdmin } from "@/components/admin/MessagesAdmin"
 
+export const dynamic = "force-dynamic"
+
 export default async function AdminMessages() {
   const messages = await prisma.contactMessage.findMany({ orderBy: { createdAt: "desc" } })
   const unread = messages.filter(m => !m.read).length

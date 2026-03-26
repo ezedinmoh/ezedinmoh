@@ -1,6 +1,8 @@
 import { prisma } from "@/lib/db"
 import { GuestbookAdmin } from "@/components/admin/GuestbookAdmin"
 
+export const dynamic = "force-dynamic"
+
 export default async function AdminGuestbook() {
   const entries = await prisma.guestbookEntry.findMany({
     orderBy: [{ pinned: "desc" }, { createdAt: "desc" }],

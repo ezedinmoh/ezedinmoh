@@ -2,6 +2,8 @@ import { prisma } from "@/lib/db"
 import { StatCard } from "@/components/admin/StatCard"
 import { FolderKanban, MessageSquare, Mail, BarChart2 } from "lucide-react"
 
+export const dynamic = "force-dynamic"
+
 export default async function AdminOverview() {
   const now = new Date()
   const d30 = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000)
