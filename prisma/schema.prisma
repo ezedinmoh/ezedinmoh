@@ -66,3 +66,11 @@ model AnalyticsEvent {
 
   @@map("analytics_events")
 }
+
+model Resume {
+  id        String   @id @default("singleton")
+  data      Json
+  updatedAt DateTime @updatedAt
+
+  @@map("resume")
+}

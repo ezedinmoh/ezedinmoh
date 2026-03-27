@@ -121,20 +121,21 @@ export function ProjectForm({ initial, projectId }: ProjectFormProps) {
         value={form[key as keyof typeof form] as string}
         onChange={e => set(key, e.target.value)}
         placeholder={placeholder}
-        className="w-full px-3 py-2 bg-background border border-border rounded-lg text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+        className="w-full px-3 py-2 bg-background border border-border rounded-lg text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-primary placeholder:text-muted-foreground/40"
       />
       {fieldErrors[key] && <p className="text-xs text-red-500 mt-1">{fieldErrors[key]}</p>}
     </div>
   )
 
-  const textarea = (label: string, key: string, rows = 3) => (
+  const textarea = (label: string, key: string, rows = 3, placeholder = "") => (
     <div>
       <label className="block text-sm font-medium text-foreground mb-1">{label}</label>
       <textarea
         value={form[key as keyof typeof form] as string}
         onChange={e => set(key, e.target.value)}
         rows={rows}
-        className="w-full px-3 py-2 bg-background border border-border rounded-lg text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-primary resize-none"
+        placeholder={placeholder}
+        className="w-full px-3 py-2 bg-background border border-border rounded-lg text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-primary resize-none placeholder:text-muted-foreground/40"
       />
       {fieldErrors[key] && <p className="text-xs text-red-500 mt-1">{fieldErrors[key]}</p>}
     </div>
@@ -142,8 +143,8 @@ export function ProjectForm({ initial, projectId }: ProjectFormProps) {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6 max-w-2xl">
-      {field("Title", "title")}
-      {textarea("Description", "description", 4)}
+      {field("Title", "title", "text", "e.g. AR Soap & Detergent")}
+      {textarea("Description", "description", 4, "Brief description of what the project does and its key features...")}
 
       <div>
         <label className="block text-sm font-medium text-foreground mb-1">Image</label>
@@ -197,16 +198,16 @@ export function ProjectForm({ initial, projectId }: ProjectFormProps) {
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        {field("Tags (comma-separated)",  "tags",  "text", "React, Next.js")}
-        {field("Stack (comma-separated)", "stack", "text", "Next.js, Prisma")}
+        {field("Tags (comma-separated)",  "tags",  "text", "Next.js, React, Tailwind CSS")}
+        {field("Stack (comma-separated)", "stack", "text", "Next.js, Prisma, PostgreSQL")}
       </div>
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         {field("Category (comma-separated)", "category", "text", "Full-Stack, Frontend")}
         {field("Year", "year", "text", "2025")}
       </div>
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        {field("Live URL",   "liveUrl",   "url")}
-        {field("GitHub URL", "githubUrl", "url")}
+        {field("Live URL",   "liveUrl",   "url", "https://yourproject.vercel.app")}
+        {field("GitHub URL", "githubUrl", "url", "https://github.com/ezedinmoh/project-name")}
       </div>
 
       <div className="flex items-center gap-3">
@@ -222,9 +223,9 @@ export function ProjectForm({ initial, projectId }: ProjectFormProps) {
 
       <div className="border-t border-border pt-4 space-y-4">
         <p className="text-sm font-semibold text-foreground">Case Study (optional)</p>
-        {textarea("Problem",  "caseStudyProblem",  3)}
-        {textarea("Solution", "caseStudySolution", 3)}
-        {textarea("Outcome",  "caseStudyOutcome",  3)}
+        {textarea("Problem",  "caseStudyProblem",  3, "What problem did this project solve? What was the pain point or challenge?")}
+        {textarea("Solution", "caseStudySolution", 3, "How did you solve it? What approach, architecture, or technology did you use?")}
+        {textarea("Outcome",  "caseStudyOutcome",  3, "What was the result? Metrics, impact, or key achievements.")}
       </div>
 
       {error && <p className="text-sm text-red-500">{error}</p>}

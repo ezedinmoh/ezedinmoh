@@ -4,12 +4,13 @@ import { useState } from "react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { signOut } from "next-auth/react"
-import { LayoutDashboard, FolderKanban, MessageSquare, Mail, BarChart2, LogOut, Menu, X } from "lucide-react"
+import { LayoutDashboard, FolderKanban, MessageSquare, Mail, BarChart2, LogOut, Menu, X, FileText } from "lucide-react"
 import { cn } from "@/lib/utils"
 
 const links = [
   { href: "/admin",           label: "Overview",   icon: LayoutDashboard },
   { href: "/admin/projects",  label: "Projects",   icon: FolderKanban    },
+  { href: "/admin/resume",    label: "Resume",     icon: FileText        },
   { href: "/admin/guestbook", label: "Guestbook",  icon: MessageSquare   },
   { href: "/admin/messages",  label: "Messages",   icon: Mail            },
   { href: "/admin/analytics", label: "Analytics",  icon: BarChart2       },

@@ -1,6 +1,6 @@
 "use client"
 
-import { useRef, useState } from "react"
+import { useRef, useState, useEffect } from "react"
 import { Navigation } from "@/components/navigation"
 import { Footer } from "@/components/footer"
 import { ScrollProgress } from "@/components/scroll-progress"
@@ -88,6 +88,15 @@ const resumeData = {
 export default function ResumePage() {
   const printRef = useRef<HTMLDivElement>(null)
   const [downloading, setDownloading] = useState(false)
+  const [resume, setResume] = useState(resumeData)
+
+  // Fetch live resume data from API, fall back to static if unavailable
+  useEffect(() => {
+    fetch("/api/resume")
+      .then(r => r.json())
+      .then(data => { if (data?.name) setResume(data) })
+      .catch(() => {})
+  }, [])
 
   const handleDownloadPDF = async () => {
     setDownloading(true)
@@ -124,18 +133,18 @@ export default function ResumePage() {
       doc.setFont("helvetica", "bold")
       doc.setFontSize(28)
       doc.setTextColor(...white)
-      doc.text(resumeData.name, margin, 20)
+      doc.text(resume.name, margin, 20)
 
       doc.setFont("helvetica", "normal")
       doc.setFontSize(13)
       doc.setTextColor(...accent)
-      doc.text(resumeData.title, margin, 30)
+      doc.text(resume.title, margin, 30)
 
       // Contact row — two lines to avoid overflow
       doc.setFontSize(7.5)
       doc.setTextColor(180, 190, 210)
-      const line1 = `${resumeData.location}   •   ${resumeData.email}   •   ${resumeData.website}`
-      const line2 = `${resumeData.github}   •   ${resumeData.linkedin}`
+      const line1 = `${resume.location}   •   ${resume.email}   •   ${resume.website}`
+      const line2 = `${resume.github}   •   ${resume.linkedin}`
       doc.text(line1, margin, 40)
       doc.text(line2, margin, 46)
 
@@ -167,12 +176,12 @@ export default function ResumePage() {
 
       // ── Summary ──────────────────────────────────────────────────────────
       sectionTitle("Summary")
-      bodyText(resumeData.summary, 0, mid)
+      bodyText(resume.summary, 0, mid)
       y += 5
 
       // ── Experience ───────────────────────────────────────────────────────
       sectionTitle("Experience")
-      for (const exp of resumeData.experience) {
+      for (const exp of resume.experience) {
         checkPageBreak(28)
         // Role + period on same line
         doc.setFont("helvetica", "bold")
@@ -210,7 +219,7 @@ export default function ResumePage() {
 
       // ── Education ────────────────────────────────────────────────────────
       sectionTitle("Education")
-      for (const edu of resumeData.education) {
+      for (const edu of resume.education) {
         checkPageBreak(18)
         doc.setFont("helvetica", "bold")
         doc.setFontSize(10)
@@ -233,7 +242,7 @@ export default function ResumePage() {
 
       // ── Skills (2-column grid) ────────────────────────────────────────────
       sectionTitle("Skills")
-      const skillEntries = Object.entries(resumeData.skills)
+      const skillEntries = Object.entries(resume.skills)
       const colW = contentW / 2 - 4
       for (let i = 0; i < skillEntries.length; i += 2) {
         checkPageBreak(14)
@@ -262,7 +271,7 @@ export default function ResumePage() {
 
       // ── Certifications ───────────────────────────────────────────────────
       sectionTitle("Certifications")
-      for (const cert of resumeData.certifications) {
+      for (const cert of resume.certifications) {
         checkPageBreak(8)
         doc.setFont("helvetica", "normal")
         doc.setFontSize(9)
@@ -279,7 +288,7 @@ export default function ResumePage() {
         doc.setPage(p)
         doc.setFontSize(7)
         doc.setTextColor(...light)
-        doc.text(`${resumeData.name} — Resume`, margin, pageH - 6)
+        doc.text(`${resume.name} — Resume`, margin, pageH - 6)
         doc.text(`Page ${p} of ${totalPages}`, margin + contentW, pageH - 6, { align: "right" })
       }
 
@@ -336,8 +345,7 @@ export default function ResumePage() {
         {/* Resume card */}
         <div
           ref={printRef}
-          className="bg-card border border-border rounded-2xl overflow-hidden shadow-2xl print:shadow-none print:border-none print:rounded-none animate-scale-in opacity-0 stagger-2"
-          style={{ animationFillMode: "forwards" }}
+          className="bg-card border border-border rounded-2xl overflow-hidden shadow-2xl print:shadow-none print:border-none print:rounded-none"
         >
           {/* Header */}
           <div className="bg-gradient-to-br from-[oklch(0.15_0.03_250)] to-[oklch(0.12_0.02_220)] p-8 md:p-12 relative overflow-hidden">
@@ -345,14 +353,14 @@ export default function ResumePage() {
               <div className="absolute top-0 right-0 w-64 h-64 bg-primary/30 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
             </div>
             <div className="relative z-10">
-              <h2 className="text-4xl md:text-5xl font-bold text-white mb-1">{resumeData.name}</h2>
-              <p className="text-primary text-xl font-medium mb-6">{resumeData.title}</p>
+              <h2 className="text-4xl md:text-5xl font-bold text-white mb-1">{resume.name}</h2>
+              <p className="text-primary text-xl font-medium mb-6">{resume.title}</p>
               <div className="flex flex-wrap gap-4 text-sm text-white/70">
-                <span className="flex items-center gap-1.5"><MapPin className="w-3.5 h-3.5 text-primary" />{resumeData.location}</span>
-                <span className="flex items-center gap-1.5"><Mail className="w-3.5 h-3.5 text-primary" />{resumeData.email}</span>
-                <span className="flex items-center gap-1.5"><Globe className="w-3.5 h-3.5 text-primary" />{resumeData.website}</span>
-                <span className="flex items-center gap-1.5"><Github className="w-3.5 h-3.5 text-primary" />{resumeData.github}</span>
-                <span className="flex items-center gap-1.5"><Linkedin className="w-3.5 h-3.5 text-primary" />{resumeData.linkedin}</span>
+                <span className="flex items-center gap-1.5"><MapPin className="w-3.5 h-3.5 text-primary" />{resume.location}</span>
+                <span className="flex items-center gap-1.5"><Mail className="w-3.5 h-3.5 text-primary" />{resume.email}</span>
+                <span className="flex items-center gap-1.5"><Globe className="w-3.5 h-3.5 text-primary" />{resume.website}</span>
+                <span className="flex items-center gap-1.5"><Github className="w-3.5 h-3.5 text-primary" />{resume.github}</span>
+                <span className="flex items-center gap-1.5"><Linkedin className="w-3.5 h-3.5 text-primary" />{resume.linkedin}</span>
               </div>
             </div>
           </div>
@@ -360,7 +368,7 @@ export default function ResumePage() {
           <div className="p-8 md:p-12 space-y-10">
             {/* Summary */}
             <ResumeSection title="Summary">
-              <p className="text-muted-foreground leading-relaxed">{resumeData.summary}</p>
+              <p className="text-muted-foreground leading-relaxed">{resume.summary}</p>
             </ResumeSection>
 
             {/* Experience */}
@@ -368,7 +376,7 @@ export default function ResumePage() {
               <div className="relative">
                 <div className="absolute left-0 top-2 bottom-2 w-px bg-border" />
                 <div className="space-y-8 pl-6">
-                  {resumeData.experience.map((exp, i) => (
+                  {resume.experience.map((exp, i) => (
                     <TimelineItem key={i} index={i}>
                       <div className="flex flex-wrap items-start justify-between gap-2 mb-2">
                         <div>
@@ -398,7 +406,7 @@ export default function ResumePage() {
 
             {/* Education */}
             <ResumeSection title="Education">
-              {resumeData.education.map((edu, i) => (
+              {resume.education.map((edu, i) => (
                 <div key={i} className="flex flex-wrap items-start justify-between gap-2">
                   <div>
                     <h4 className="text-foreground font-semibold text-lg">{edu.degree}</h4>
@@ -413,7 +421,7 @@ export default function ResumePage() {
             {/* Skills */}
             <ResumeSection title="Skills">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                {Object.entries(resumeData.skills).map(([cat, items]) => (
+                {Object.entries(resume.skills).map(([cat, items]) => (
                   <div key={cat}>
                     <p className="text-sm font-semibold text-foreground mb-2">{cat}</p>
                     <div className="flex flex-wrap gap-2">
@@ -429,7 +437,7 @@ export default function ResumePage() {
             {/* Certifications */}
             <ResumeSection title="Certifications">
               <div className="space-y-2">
-                {resumeData.certifications.map((cert, i) => (
+                {resume.certifications.map((cert, i) => (
                   <div key={i} className="flex items-center justify-between py-2 border-b border-border last:border-0">
                     <span className="text-foreground text-sm">{cert.name}</span>
                     <span className="text-primary text-sm font-medium">{cert.year}</span>
