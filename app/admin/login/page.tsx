@@ -33,8 +33,8 @@ function LoginForm() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-background">
-      <div className="w-full max-w-sm bg-card border border-border rounded-2xl p-8 shadow-xl">
+    <div className="min-h-screen flex items-center justify-center bg-background px-4">
+      <div className="w-full max-w-sm bg-card border border-border rounded-2xl p-6 sm:p-8 shadow-xl">
         <h1 className="text-2xl font-bold text-foreground mb-2">Admin Login</h1>
         <p className="text-sm text-muted-foreground mb-6">Sign in to manage your portfolio</p>
 

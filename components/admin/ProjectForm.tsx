@@ -196,15 +196,15 @@ export function ProjectForm({ initial, projectId }: ProjectFormProps) {
         </div>
       </div>
 
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         {field("Tags (comma-separated)",  "tags",  "text", "React, Next.js")}
         {field("Stack (comma-separated)", "stack", "text", "Next.js, Prisma")}
       </div>
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         {field("Category (comma-separated)", "category", "text", "Full-Stack, Frontend")}
         {field("Year", "year", "text", "2025")}
       </div>
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         {field("Live URL",   "liveUrl",   "url")}
         {field("GitHub URL", "githubUrl", "url")}
       </div>

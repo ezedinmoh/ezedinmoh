@@ -1,26 +1,36 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import Link from "next/link"
 import { ArrowRight, ArrowUpRight, Github, ExternalLink, X, Monitor, Layers, ChevronRight, Target, Lightbulb, TrendingUp } from "lucide-react"
 import { cn } from "@/lib/utils"
-import { allProjects, type Project } from "@/lib/projects"
+import type { Project } from "@/lib/projects"
 
-const featuredIds = ["ar-soap", "gym-house", "ramadanly"]
-const featuredProjects = featuredIds.map(id => allProjects.find(p => p.id === id)).filter(Boolean) as Project[]
+function isVideoUrl(url: string) {
+  return /\.(mp4|webm|mov)(\?|$)/i.test(url) || url.includes("/video/upload/")
+}
 
-function DemoModal({ project, onClose }: { project: Project; onClose: () => void }) {
+type DBProject = Project & { screenshots?: string[] }
+
+function DemoModal({ project, onClose }: { project: DBProject; onClose: () => void }) {
+  const media: string[] = (project.screenshots?.length)
+    ? project.screenshots!
+    : project.image ? [project.image] : []
+  const [idx, setIdx] = useState(0)
+  const current = media[idx]
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-background/80 backdrop-blur-sm" onClick={onClose}>
-      <div className="bg-card border border-border rounded-2xl shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-hidden animate-scale-in" onClick={e => e.stopPropagation()}>
-        <div className="flex items-center justify-between p-4 border-b border-border">
+      <div className="bg-card border border-border rounded-2xl shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-hidden animate-scale-in flex flex-col" onClick={e => e.stopPropagation()}>
+        <div className="flex items-center justify-between p-4 border-b border-border shrink-0">
           <div>
             <h3 className="font-semibold text-foreground">{project.title}</h3>
-            <p className="text-xs text-muted-foreground">{project.liveUrl}</p>
+            <p className="text-xs text-muted-foreground">{media.length > 1 ? `${idx + 1} / ${media.length}` : project.liveUrl}</p>
           </div>
           <div className="flex items-center gap-2">
             {project.liveUrl && (
-              <a href={project.liveUrl} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1.5 px-3 py-1.5 bg-primary text-primary-foreground rounded-lg text-xs font-medium hover:opacity-90 transition-all">
+              <a href={project.liveUrl} target="_blank" rel="noopener noreferrer"
+                className="flex items-center gap-1.5 px-3 py-1.5 bg-primary text-primary-foreground rounded-lg text-xs font-medium hover:opacity-90 transition-all">
                 <ExternalLink className="w-3 h-3" /> Open
               </a>
             )}
@@ -29,27 +39,72 @@ function DemoModal({ project, onClose }: { project: Project; onClose: () => void
             </button>
           </div>
         </div>
-        <div className="relative bg-secondary/30 h-[60vh] flex items-center justify-center">
-          <div className="absolute inset-0 opacity-5" style={{ backgroundImage: "linear-gradient(rgba(100,200,180,0.5) 1px, transparent 1px), linear-gradient(90deg, rgba(100,200,180,0.5) 1px, transparent 1px)", backgroundSize: "40px 40px" }} />
-          <div className="text-center relative z-10">
-            <div className="w-20 h-20 mx-auto mb-4 rounded-2xl bg-primary/10 border border-primary/20 flex items-center justify-center">
-              <Monitor className="w-10 h-10 text-primary" />
+
+        <div className="relative bg-secondary/30 flex-1 min-h-0 h-[55vh] flex items-center justify-center overflow-hidden">
+          {current ? (
+            <>
+              {isVideoUrl(current) ? (
+                <video key={current} src={current} autoPlay muted loop playsInline controls className="w-full h-full object-contain" />
+              ) : (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img key={current} src={current} alt={project.title} className="w-full h-full object-contain" />
+              )}
+              <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-4 pointer-events-none">
+                <p className="text-white font-bold text-base">{project.title}</p>
+                <p className="text-white/70 text-xs line-clamp-2 mt-0.5">{project.description}</p>
+                {project.liveUrl && (
+                  <a href={project.liveUrl} target="_blank" rel="noopener noreferrer"
+                    className="inline-flex items-center gap-2 mt-3 px-4 py-2 bg-primary text-primary-foreground rounded-full text-sm font-bold pointer-events-auto hover:opacity-90 transition-all hover:scale-105 shadow-lg">
+                    Visit Live Site <ArrowUpRight className="w-4 h-4" />
+                  </a>
+                )}
+              </div>
+            </>
+          ) : (
+            <div className="text-center p-8">
+              <div className="w-20 h-20 mx-auto mb-4 rounded-2xl bg-primary/10 border border-primary/20 flex items-center justify-center">
+                <Monitor className="w-10 h-10 text-primary" />
+              </div>
+              <p className="text-foreground font-semibold mb-1">{project.title}</p>
+              <p className="text-muted-foreground text-sm mb-4 max-w-xs">{project.description}</p>
+              {project.liveUrl && (
+                <a href={project.liveUrl} target="_blank" rel="noopener noreferrer"
+                  className="inline-flex items-center gap-2 px-5 py-2.5 bg-primary text-primary-foreground rounded-full text-sm font-bold hover:opacity-90 transition-all hover:scale-105">
+                  Visit Live Site <ArrowUpRight className="w-4 h-4" />
+                </a>
+              )}
             </div>
-            <p className="text-foreground font-semibold mb-1">{project.title}</p>
-            <p className="text-muted-foreground text-sm mb-4 max-w-xs">{project.description}</p>
-            {project.liveUrl && (
-              <a href={project.liveUrl} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 px-5 py-2.5 bg-primary text-primary-foreground rounded-full text-sm font-medium hover:opacity-90 transition-all">
-                Visit Live Site <ArrowUpRight className="w-4 h-4" />
-              </a>
-            )}
-          </div>
+          )}
+          {media.length > 1 && (
+            <>
+              <button onClick={() => setIdx(i => (i - 1 + media.length) % media.length)}
+                className="absolute left-3 top-1/2 -translate-y-1/2 w-9 h-9 bg-background/80 backdrop-blur-sm rounded-full flex items-center justify-center text-foreground hover:bg-background transition-all text-lg font-bold">&#8249;</button>
+              <button onClick={() => setIdx(i => (i + 1) % media.length)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 w-9 h-9 bg-background/80 backdrop-blur-sm rounded-full flex items-center justify-center text-foreground hover:bg-background transition-all text-lg font-bold">&#8250;</button>
+            </>
+          )}
         </div>
+
+        {media.length > 1 && (
+          <div className="flex gap-2 p-3 overflow-x-auto border-t border-border bg-background/50 shrink-0">
+            {media.map((url, i) => (
+              <button key={i} onClick={() => setIdx(i)}
+                className={cn("shrink-0 w-16 h-10 rounded-lg overflow-hidden border-2 transition-all",
+                  i === idx ? "border-primary" : "border-transparent opacity-50 hover:opacity-100")}>
+                {isVideoUrl(url)
+                  ? <video src={url} muted className="w-full h-full object-cover" />
+                  // eslint-disable-next-line @next/next/no-img-element
+                  : <img src={url} alt="" className="w-full h-full object-cover" />}
+              </button>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   )
 }
 
-function CaseStudyModal({ project, onClose }: { project: Project; onClose: () => void }) {
+function CaseStudyModal({ project, onClose }: { project: DBProject; onClose: () => void }) {
   if (!project.caseStudy) return null
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-background/80 backdrop-blur-sm overflow-y-auto" onClick={onClose}>
@@ -86,12 +141,14 @@ function CaseStudyModal({ project, onClose }: { project: Project; onClose: () =>
           </div>
           <div className="flex gap-3 pt-2">
             {project.liveUrl && (
-              <a href={project.liveUrl} target="_blank" rel="noopener noreferrer" className="flex-1 flex items-center justify-center gap-2 py-2.5 bg-primary text-primary-foreground rounded-xl text-sm font-medium hover:opacity-90 transition-all">
+              <a href={project.liveUrl} target="_blank" rel="noopener noreferrer"
+                className="flex-1 flex items-center justify-center gap-2 py-2.5 bg-primary text-primary-foreground rounded-xl text-sm font-medium hover:opacity-90 transition-all">
                 <ExternalLink className="w-4 h-4" /> Live Demo
               </a>
             )}
             {project.github && (
-              <a href={project.github} target="_blank" rel="noopener noreferrer" className="flex-1 flex items-center justify-center gap-2 py-2.5 bg-secondary text-secondary-foreground rounded-xl text-sm font-medium hover:bg-secondary/80 transition-all">
+              <a href={project.github} target="_blank" rel="noopener noreferrer"
+                className="flex-1 flex items-center justify-center gap-2 py-2.5 bg-secondary text-secondary-foreground rounded-xl text-sm font-medium hover:bg-secondary/80 transition-all">
                 <Github className="w-4 h-4" /> Source Code
               </a>
             )}
@@ -102,8 +159,12 @@ function CaseStudyModal({ project, onClose }: { project: Project; onClose: () =>
   )
 }
 
-function ProjectCard({ project, index, large, onDemo, onCaseStudy }: { project: Project; index: number; large?: boolean; onDemo: () => void; onCaseStudy: () => void }) {
+function ProjectCard({ project, index, large, onDemo, onCaseStudy }: {
+  project: DBProject; index: number; large?: boolean; onDemo: () => void; onCaseStudy: () => void
+}) {
   const [hovered, setHovered] = useState(false)
+  const hasMedia = !!project.image
+
   return (
     <article
       className={cn(
@@ -117,26 +178,40 @@ function ProjectCard({ project, index, large, onDemo, onCaseStudy }: { project: 
       onMouseLeave={() => setHovered(false)}
     >
       <div className={cn("relative overflow-hidden", large ? "flex-1 min-h-64" : "flex-1 min-h-36")}>
-        <div className={cn("absolute inset-0 bg-gradient-to-br from-primary/20 to-accent/20 transition-all duration-700", hovered ? "scale-110 animate-morph" : "scale-100")} />
-        <div className="absolute inset-0 flex items-center justify-center">
-          <div className={cn("grid gap-2 opacity-20", large ? "grid-cols-4 p-10" : "grid-cols-3 p-6")}>
-            {[...Array(large ? 16 : 9)].map((_, i) => (
-              <div key={i} className={cn("rounded-lg bg-primary transition-all duration-500", large ? "w-8 h-8" : "w-6 h-6", hovered && "animate-pulse-3d")} style={{ animationDelay: `${i * 0.07}s` }} />
-            ))}
-          </div>
-        </div>
-        <div className={cn("absolute inset-0 bg-gradient-to-t from-card via-transparent to-transparent transition-opacity duration-500", hovered ? "opacity-100" : "opacity-60")} />
+        {hasMedia ? (
+          <>
+            {isVideoUrl(project.image!) ? (
+              <video src={project.image} autoPlay muted loop playsInline
+                className={cn("absolute inset-0 w-full h-full object-cover transition-transform duration-700", hovered ? "scale-110" : "scale-100")} />
+            ) : (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img src={project.image} alt={project.title}
+                className={cn("absolute inset-0 w-full h-full object-cover transition-transform duration-700", hovered ? "scale-110" : "scale-100")} />
+            )}
+            <div className="absolute inset-0 bg-gradient-to-t from-card via-card/40 to-transparent" />
+          </>
+        ) : (
+          <>
+            <div className={cn("absolute inset-0 bg-gradient-to-br from-primary/20 to-accent/20 transition-all duration-700", hovered ? "scale-110 animate-morph" : "scale-100")} />
+            <div className="absolute inset-0 flex items-center justify-center">
+              <div className={cn("grid gap-2 opacity-20", large ? "grid-cols-4 p-10" : "grid-cols-3 p-6")}>
+                {[...Array(large ? 16 : 9)].map((_, i) => (
+                  <div key={i} className={cn("rounded-lg bg-primary transition-all duration-500", large ? "w-8 h-8" : "w-6 h-6", hovered && "animate-pulse-3d")} style={{ animationDelay: `${i * 0.07}s` }} />
+                ))}
+              </div>
+            </div>
+            <div className={cn("absolute inset-0 bg-gradient-to-t from-card via-transparent to-transparent transition-opacity duration-500", hovered ? "opacity-100" : "opacity-60")} />
+          </>
+        )}
         <div className="absolute top-4 left-4 flex flex-wrap gap-1.5">
           {project.tags.slice(0, large ? 4 : 2).map(tag => (
             <span key={tag} className="px-2.5 py-1 text-xs font-medium bg-background/80 backdrop-blur-sm rounded-full text-muted-foreground">{tag}</span>
           ))}
         </div>
-        {large && (
-          <span className="absolute top-4 right-4 px-3 py-1 text-xs font-semibold bg-primary/15 border border-primary/30 text-primary rounded-full">Featured</span>
-        )}
+        {large && <span className="absolute top-4 right-4 px-3 py-1 text-xs font-semibold bg-primary/15 border border-primary/30 text-primary rounded-full backdrop-blur-sm">Featured</span>}
         <div className="absolute inset-0 bg-background/60 opacity-0 group-hover:opacity-100 transition-all duration-300 flex items-center justify-center gap-3">
           <button onClick={onDemo} className="flex items-center gap-1.5 px-4 py-2 bg-primary text-primary-foreground rounded-full text-sm font-medium hover:opacity-90 transition-all hover:scale-105">
-            <Monitor className="w-3.5 h-3.5" /> Live Preview
+            <Monitor className="w-3.5 h-3.5" /> Preview
           </button>
           {project.caseStudy && (
             <button onClick={onCaseStudy} className="flex items-center gap-1.5 px-4 py-2 bg-card border border-border text-foreground rounded-full text-sm font-medium hover:border-primary/50 transition-all hover:scale-105">
@@ -144,7 +219,6 @@ function ProjectCard({ project, index, large, onDemo, onCaseStudy }: { project: 
             </button>
           )}
         </div>
-        <div className={cn("absolute inset-0 transition-opacity duration-500 pointer-events-none", hovered ? "opacity-100" : "opacity-0")} style={{ background: "linear-gradient(135deg, transparent 40%, rgba(100,200,180,0.1) 50%, transparent 60%)", backgroundSize: "200% 200%", animation: hovered ? "gradientShift 3s ease infinite" : "none" }} />
       </div>
       <div className="p-5 flex flex-col">
         <h3 className={cn("font-bold text-card-foreground group-hover:text-primary transition-colors mb-2", large ? "text-xl md:text-2xl" : "text-base md:text-lg")}>{project.title}</h3>
@@ -168,11 +242,38 @@ function ProjectCard({ project, index, large, onDemo, onCaseStudy }: { project: 
     </article>
   )
 }
-
 export function FeaturedProjects() {
-  const [hero, ...rest] = featuredProjects
-  const [demoProject, setDemoProject] = useState<Project | null>(null)
-  const [caseStudyProject, setCaseStudyProject] = useState<Project | null>(null)
+  const [projects, setProjects] = useState<DBProject[]>([])
+  const [demoProject, setDemoProject] = useState<DBProject | null>(null)
+  const [caseStudyProject, setCaseStudyProject] = useState<DBProject | null>(null)
+
+  useEffect(() => {
+    fetch("/api/projects?featured=true")
+      .then(r => r.json())
+      .then((data: Record<string, unknown>[]) => {
+        setProjects(data.map(p => ({
+          ...(p as object),
+          github: p.githubUrl as string | undefined,
+          link: p.liveUrl as string | undefined,
+          screenshots: Array.isArray(p.screenshots) ? p.screenshots as string[] : [],
+          caseStudy: p.caseStudyProblem ? {
+            problem:  p.caseStudyProblem as string,
+            solution: p.caseStudySolution as string,
+            outcome:  p.caseStudyOutcome as string,
+          } : undefined,
+        })).sort((a: any, b: any) => (a.sortOrder ?? 0) - (b.sortOrder ?? 0)) as DBProject[])
+      })
+      .catch(() => {})
+  }, [])
+
+  const [hero, ...rest] = projects
+
+  // Split all projects into groups of 6
+  const groups: DBProject[][] = []
+  for (let i = 0; i < projects.length; i += 6) {
+    groups.push(projects.slice(i, i + 6))
+  }
+
   return (
     <section className="py-24 md:py-32 bg-background relative overflow-hidden">
       {demoProject && <DemoModal project={demoProject} onClose={() => setDemoProject(null)} />}
@@ -191,16 +292,41 @@ export function FeaturedProjects() {
             <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
           </Link>
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:items-stretch md:grid-rows-1">
-          <div className="md:col-span-2 flex self-stretch">
-            <ProjectCard project={hero} index={0} large onDemo={() => setDemoProject(hero)} onCaseStudy={() => setCaseStudyProject(hero)} />
-          </div>
-          <div className="flex flex-col gap-6 self-stretch">
-            {rest.map((project, i) => (
-              <ProjectCard key={project.id} project={project} index={i + 1} onDemo={() => setDemoProject(project)} onCaseStudy={() => setCaseStudyProject(project)} />
-            ))}
-          </div>
-        </div>
+
+        {groups.map((group, gi) => {
+          const [groupHero, ...groupRest] = group
+          const baseIndex = gi * 6
+          return (
+            <div key={groupHero.id} className={cn("space-y-6", gi > 0 && "mt-16 pt-16 border-t border-border")}>
+              {/* Hero row: 2-col hero + 2 stacked */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:items-stretch">
+                <div className="md:col-span-2 flex self-stretch" style={{ minHeight: 420 }}>
+                  <ProjectCard project={groupHero} index={baseIndex} large
+                    onDemo={() => setDemoProject(groupHero)}
+                    onCaseStudy={() => setCaseStudyProject(groupHero)} />
+                </div>
+                <div className="flex flex-col gap-6 self-stretch">
+                  {groupRest.slice(0, 2).map((project, i) => (
+                    <ProjectCard key={project.id} project={project} index={baseIndex + i + 1}
+                      onDemo={() => setDemoProject(project)}
+                      onCaseStudy={() => setCaseStudyProject(project)} />
+                  ))}
+                </div>
+              </div>
+
+              {/* Bottom row: remaining 3 side by side */}
+              {groupRest.length > 2 && (
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {groupRest.slice(2).map((project, i) => (
+                    <ProjectCard key={project.id} project={project} index={baseIndex + i + 3}
+                      onDemo={() => setDemoProject(project)}
+                      onCaseStudy={() => setCaseStudyProject(project)} />
+                  ))}
+                </div>
+              )}
+            </div>
+          )
+        })}
       </div>
     </section>
   )
