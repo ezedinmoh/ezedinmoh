@@ -317,11 +317,11 @@ function ProjectCard({ project, index, onDemo, onCaseStudy }: {
           <>
             {/\.(mp4|webm|mov)(\?|$)/i.test(project.image) || project.image.includes("/video/upload/") ? (
               <video src={project.image} autoPlay muted loop playsInline
-                className={cn("absolute inset-0 w-full h-full object-contain transition-transform duration-700", hovered ? "scale-105" : "scale-100")} />
+                className="absolute inset-0 w-full h-full object-cover" />
             ) : (
               // eslint-disable-next-line @next/next/no-img-element
               <img src={project.image} alt={project.title}
-                className={cn("absolute inset-0 w-full h-full object-contain transition-transform duration-700", hovered ? "scale-105" : "scale-100")} />
+                className="absolute inset-0 w-full h-full object-cover" />
             )}
             <div className="absolute inset-0 bg-gradient-to-t from-card/60 via-transparent to-transparent pointer-events-none" />
           </>
@@ -347,14 +347,6 @@ function ProjectCard({ project, index, onDemo, onCaseStudy }: {
             )} />
           </>
         )}
-        {/* Tags */}
-        <div className="absolute top-3 left-3 flex flex-wrap gap-1.5">
-          {project.tags.slice(0, 3).map(tag => (
-            <span key={tag} className="px-2 py-0.5 text-xs bg-background/80 backdrop-blur-sm rounded-full text-muted-foreground">{tag}</span>
-          ))}
-        </div>
-        {/* Year */}
-        <span className="absolute top-3 right-3 text-xs text-muted-foreground bg-background/80 backdrop-blur-sm px-2 py-0.5 rounded-full">{project.year}</span>
         {/* Hover overlay with actions */}
         <div className="absolute inset-0 bg-background/60 opacity-0 group-hover:opacity-100 transition-all duration-300 flex items-center justify-center gap-3">
           <button onClick={onDemo}
