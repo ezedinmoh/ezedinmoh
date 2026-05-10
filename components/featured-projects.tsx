@@ -13,84 +13,204 @@ function isVideoUrl(url: string) {
 type DBProject = Project & { screenshots?: string[] }
 
 function DemoModal({ project, onClose }: { project: DBProject; onClose: () => void }) {
+  const isIframeMode = project.previewMode === "iframe" && !!project.liveUrl
+
+  // Slideshow state
   const media: string[] = (project.screenshots?.length)
     ? project.screenshots!
     : project.image ? [project.image] : []
   const [idx, setIdx] = useState(0)
   const current = media[idx]
 
+  // Iframe state
+  const [iframeLoading, setIframeLoading] = useState(true)
+  const [iframeError, setIframeError] = useState(false)
+
+  // Subtitle line under the project title in the header
+  const subtitle = isIframeMode
+    ? project.liveUrl
+    : media.length > 1
+      ? `${idx + 1} / ${media.length}`
+      : project.liveUrl
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-background/80 backdrop-blur-sm" onClick={onClose}>
-      <div className="bg-card border border-border rounded-2xl shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-hidden animate-scale-in flex flex-col" onClick={e => e.stopPropagation()}>
+      <div
+        className="bg-card border border-border rounded-2xl shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-hidden animate-scale-in flex flex-col"
+        onClick={e => e.stopPropagation()}
+      >
+        {/* ── Header ── */}
         <div className="flex items-center justify-between p-4 border-b border-border shrink-0">
-          <div>
-            <h3 className="font-semibold text-foreground">{project.title}</h3>
-            <p className="text-xs text-muted-foreground">{media.length > 1 ? `${idx + 1} / ${media.length}` : project.liveUrl}</p>
+          <div className="min-w-0 flex-1 mr-3">
+            <div className="flex items-center gap-2">
+              <h3 className="font-semibold text-foreground truncate">{project.title}</h3>
+              {isIframeMode && (
+                <span className="shrink-0 px-2 py-0.5 text-xs font-medium bg-primary/10 text-primary border border-primary/20 rounded-full">
+                  Live Preview
+                </span>
+              )}
+            </div>
+            <p className="text-xs text-muted-foreground truncate mt-0.5">{subtitle}</p>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 shrink-0">
             {project.liveUrl && (
-              <a href={project.liveUrl} target="_blank" rel="noopener noreferrer"
-                className="flex items-center gap-1.5 px-3 py-1.5 bg-primary text-primary-foreground rounded-lg text-xs font-medium hover:opacity-90 transition-all">
+              <a
+                href={project.liveUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-1.5 px-3 py-1.5 bg-primary text-primary-foreground rounded-lg text-xs font-medium hover:opacity-90 transition-all"
+              >
                 <ExternalLink className="w-3 h-3" /> Open
               </a>
             )}
-            <button onClick={onClose} className="p-2 rounded-lg text-muted-foreground hover:text-foreground hover:bg-secondary transition-all">
+            <button
+              onClick={onClose}
+              className="p-2 rounded-lg text-muted-foreground hover:text-foreground hover:bg-secondary transition-all"
+            >
               <X className="w-4 h-4" />
             </button>
           </div>
         </div>
 
-        <div className="relative bg-secondary/30 flex-1 min-h-0 h-[55vh] flex items-center justify-center overflow-hidden">
-          {current ? (
-            <>
-              {isVideoUrl(current) ? (
-                <video key={current} src={current} autoPlay muted loop playsInline controls className="w-full h-full object-contain" />
-              ) : (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img key={current} src={current} alt={project.title} className="w-full h-full object-contain" />
+        {/* ── Body ── */}
+        <div className="relative flex-1 min-h-0 h-[55vh] overflow-hidden">
+
+          {/* ── OPTION 2: iframe mode ── */}
+          {isIframeMode ? (
+            <div className="w-full h-full relative bg-secondary/20">
+              {/* Loading spinner */}
+              {iframeLoading && !iframeError && (
+                <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 z-10 bg-secondary/20">
+                  <div className="w-10 h-10 rounded-full border-2 border-primary border-t-transparent animate-spin" />
+                  <p className="text-sm text-muted-foreground">Loading live preview…</p>
+                </div>
               )}
-              <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-4 pointer-events-none">
-                <p className="text-white font-bold text-base">{project.title}</p>
-                <p className="text-white/70 text-xs line-clamp-2 mt-0.5">{project.description}</p>
-                {project.liveUrl && (
-                  <a href={project.liveUrl} target="_blank" rel="noopener noreferrer"
-                    className="inline-flex items-center gap-2 mt-3 px-4 py-2 bg-primary text-primary-foreground rounded-full text-sm font-bold pointer-events-auto hover:opacity-90 transition-all hover:scale-105 shadow-lg">
-                    Visit Live Site <ArrowUpRight className="w-4 h-4" />
-                  </a>
-                )}
-              </div>
-            </>
+              {/* Error state */}
+              {iframeError && (
+                <div className="absolute inset-0 flex flex-col items-center justify-center gap-4 z-10 p-8 text-center">
+                  <div className="w-16 h-16 rounded-2xl bg-destructive/10 border border-destructive/20 flex items-center justify-center">
+                    <Monitor className="w-8 h-8 text-destructive" />
+                  </div>
+                  <div>
+                    <p className="font-semibold text-foreground mb-1">Preview unavailable</p>
+                    <p className="text-sm text-muted-foreground max-w-xs">
+                      This website cannot be embedded due to security restrictions (X-Frame-Options).
+                    </p>
+                  </div>
+                  {project.liveUrl && (
+                    <a
+                      href={project.liveUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-2 px-5 py-2.5 bg-primary text-primary-foreground rounded-full text-sm font-medium hover:opacity-90 transition-all hover:scale-105"
+                    >
+                      Open in New Tab <ArrowUpRight className="w-4 h-4" />
+                    </a>
+                  )}
+                </div>
+              )}
+              {/* The iframe itself */}
+              {!iframeError && (
+                <iframe
+                  key={project.liveUrl}
+                  src={project.liveUrl}
+                  title={`Live preview of ${project.title}`}
+                  className={cn(
+                    "w-full h-full border-0 transition-opacity duration-300",
+                    iframeLoading ? "opacity-0" : "opacity-100"
+                  )}
+                  sandbox="allow-scripts allow-same-origin allow-popups allow-forms allow-popups-to-escape-sandbox"
+                  loading="lazy"
+                  referrerPolicy="no-referrer"
+                  onLoad={() => setIframeLoading(false)}
+                  onError={() => { setIframeLoading(false); setIframeError(true) }}
+                />
+              )}
+            </div>
           ) : (
-            <div className="text-center p-8">
-              <div className="w-20 h-20 mx-auto mb-4 rounded-2xl bg-primary/10 border border-primary/20 flex items-center justify-center">
-                <Monitor className="w-10 h-10 text-primary" />
-              </div>
-              <p className="text-foreground font-semibold mb-1">{project.title}</p>
-              <p className="text-muted-foreground text-sm mb-4 max-w-xs">{project.description}</p>
-              {project.liveUrl && (
-                <a href={project.liveUrl} target="_blank" rel="noopener noreferrer"
-                  className="inline-flex items-center gap-2 px-5 py-2.5 bg-primary text-primary-foreground rounded-full text-sm font-bold hover:opacity-90 transition-all hover:scale-105">
-                  Visit Live Site <ArrowUpRight className="w-4 h-4" />
-                </a>
+            /* ── OPTION 1: slideshow mode ── */
+            <div className="relative bg-secondary/30 w-full h-full flex items-center justify-center">
+              {current ? (
+                <>
+                  {isVideoUrl(current) ? (
+                    <video
+                      key={current}
+                      src={current}
+                      autoPlay muted loop playsInline controls
+                      className="w-full h-full object-contain"
+                    />
+                  ) : (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img
+                      key={current}
+                      src={current}
+                      alt={project.title}
+                      className="w-full h-full object-contain"
+                    />
+                  )}
+                  <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-4 pointer-events-none">
+                    <p className="text-white font-bold text-base">{project.title}</p>
+                    <p className="text-white/70 text-xs line-clamp-2 mt-0.5">{project.description}</p>
+                    {project.liveUrl && (
+                      <a
+                        href={project.liveUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-2 mt-3 px-4 py-2 bg-primary text-primary-foreground rounded-full text-sm font-bold pointer-events-auto hover:opacity-90 transition-all hover:scale-105 shadow-lg"
+                      >
+                        Visit Live Site <ArrowUpRight className="w-4 h-4" />
+                      </a>
+                    )}
+                  </div>
+                </>
+              ) : (
+                <div className="text-center p-8">
+                  <div className="w-20 h-20 mx-auto mb-4 rounded-2xl bg-primary/10 border border-primary/20 flex items-center justify-center">
+                    <Monitor className="w-10 h-10 text-primary" />
+                  </div>
+                  <p className="text-foreground font-semibold mb-1">{project.title}</p>
+                  <p className="text-muted-foreground text-sm mb-4 max-w-xs">{project.description}</p>
+                  {project.liveUrl && (
+                    <a
+                      href={project.liveUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-2 px-5 py-2.5 bg-primary text-primary-foreground rounded-full text-sm font-bold hover:opacity-90 transition-all hover:scale-105"
+                    >
+                      Visit Live Site <ArrowUpRight className="w-4 h-4" />
+                    </a>
+                  )}
+                </div>
+              )}
+              {/* Prev / Next arrows */}
+              {media.length > 1 && (
+                <>
+                  <button
+                    onClick={() => setIdx(i => (i - 1 + media.length) % media.length)}
+                    className="absolute left-3 top-1/2 -translate-y-1/2 w-9 h-9 bg-background/80 backdrop-blur-sm rounded-full flex items-center justify-center text-foreground hover:bg-background transition-all text-lg font-bold"
+                  >&#8249;</button>
+                  <button
+                    onClick={() => setIdx(i => (i + 1) % media.length)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 w-9 h-9 bg-background/80 backdrop-blur-sm rounded-full flex items-center justify-center text-foreground hover:bg-background transition-all text-lg font-bold"
+                  >&#8250;</button>
+                </>
               )}
             </div>
           )}
-          {media.length > 1 && (
-            <>
-              <button onClick={() => setIdx(i => (i - 1 + media.length) % media.length)}
-                className="absolute left-3 top-1/2 -translate-y-1/2 w-9 h-9 bg-background/80 backdrop-blur-sm rounded-full flex items-center justify-center text-foreground hover:bg-background transition-all text-lg font-bold">&#8249;</button>
-              <button onClick={() => setIdx(i => (i + 1) % media.length)}
-                className="absolute right-3 top-1/2 -translate-y-1/2 w-9 h-9 bg-background/80 backdrop-blur-sm rounded-full flex items-center justify-center text-foreground hover:bg-background transition-all text-lg font-bold">&#8250;</button>
-            </>
-          )}
         </div>
 
-        {media.length > 1 && (
+        {/* ── Thumbnail strip (slideshow only) ── */}
+        {!isIframeMode && media.length > 1 && (
           <div className="flex gap-2 p-3 overflow-x-auto border-t border-border bg-background/50 shrink-0">
             {media.map((url, i) => (
-              <button key={i} onClick={() => setIdx(i)}
-                className={cn("shrink-0 w-16 h-10 rounded-lg overflow-hidden border-2 transition-all",
-                  i === idx ? "border-primary" : "border-transparent opacity-50 hover:opacity-100")}>
+              <button
+                key={i}
+                onClick={() => setIdx(i)}
+                className={cn(
+                  "shrink-0 w-16 h-10 rounded-lg overflow-hidden border-2 transition-all",
+                  i === idx ? "border-primary" : "border-transparent opacity-50 hover:opacity-100"
+                )}
+              >
                 {isVideoUrl(url)
                   ? <video src={url} muted className="w-full h-full object-cover" />
                   // eslint-disable-next-line @next/next/no-img-element
@@ -256,6 +376,7 @@ export function FeaturedProjects() {
           github: p.githubUrl as string | undefined,
           link: p.liveUrl as string | undefined,
           screenshots: Array.isArray(p.screenshots) ? p.screenshots as string[] : [],
+          previewMode: (p.previewMode as string | undefined) ?? "slideshow",
           caseStudy: p.caseStudyProblem ? {
             problem:  p.caseStudyProblem as string,
             solution: p.caseStudySolution as string,

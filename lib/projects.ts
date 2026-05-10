@@ -17,6 +17,7 @@ export interface Project {
   github?: string
   featured?: boolean
   liveUrl?: string
+  previewMode?: "slideshow" | "iframe"
   caseStudy?: CaseStudy
   year: string
 }

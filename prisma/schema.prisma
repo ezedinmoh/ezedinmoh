@@ -21,6 +21,7 @@ model Project {
   featured           Boolean  @default(false)
   year               String
   sortOrder          Int      @default(0)
+  previewMode        String   @default("slideshow")
   caseStudyProblem   String?
   caseStudySolution  String?
   caseStudyOutcome   String?

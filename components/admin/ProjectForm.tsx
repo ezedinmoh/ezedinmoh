@@ -29,6 +29,7 @@ export function ProjectForm({ initial, projectId }: ProjectFormProps) {
     githubUrl:         (initial?.githubUrl         as string) ?? "",
     featured:          (initial?.featured          as boolean) ?? false,
     year:              (initial?.year              as string) ?? new Date().getFullYear().toString(),
+    previewMode:       ((initial?.previewMode      as string) ?? "slideshow") as "slideshow" | "iframe",
     caseStudyProblem:  (initial?.caseStudyProblem  as string) ?? "",
     caseStudySolution: (initial?.caseStudySolution as string) ?? "",
     caseStudyOutcome:  (initial?.caseStudyOutcome  as string) ?? "",
@@ -92,6 +93,7 @@ export function ProjectForm({ initial, projectId }: ProjectFormProps) {
       stack:       form.stack.split(",").map(s => s.trim()).filter(Boolean),
       category:    form.category.split(",").map(s => s.trim()).filter(Boolean),
       screenshots: form.screenshots,
+      previewMode: form.previewMode,
     }
 
     const url    = projectId ? `/api/projects/${projectId}` : "/api/projects"
@@ -164,38 +166,95 @@ export function ProjectForm({ initial, projectId }: ProjectFormProps) {
         </div>
       </div>
 
-      {/* Screenshots / preview media */}
-      <div>
-        <label className="block text-sm font-medium text-foreground mb-2">
-          Preview Media <span className="text-xs text-muted-foreground">(images or video shown in the preview modal)</span>
+      {/* Preview Mode Selector */}
+      <div className="border border-border rounded-xl p-5 bg-secondary/20">
+        <label className="block text-sm font-semibold text-foreground mb-3">
+          Preview Display Mode
         </label>
-        <div className="flex flex-wrap gap-3 mb-3">
-          {form.screenshots.map((url, idx) => {
-            const isVid = /\.(mp4|webm|mov)(\?|$)/i.test(url) || url.includes("/video/upload/")
-            return (
-              <div key={idx} className="relative w-24 h-16 rounded-lg overflow-hidden border border-border group">
-                {isVid
-                  ? <video src={url} muted className="w-full h-full object-cover" />
-                  // eslint-disable-next-line @next/next/no-img-element
-                  : <img src={url} alt="" className="w-full h-full object-cover" />
-                }
-                <button
-                  type="button"
-                  onClick={() => removeScreenshot(idx)}
-                  className="absolute top-0.5 right-0.5 w-5 h-5 bg-red-500 text-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
-                >
-                  <X className="w-3 h-3" />
-                </button>
+        <div className="space-y-3">
+          <label className="flex items-start gap-3 cursor-pointer group">
+            <input
+              type="radio"
+              name="previewMode"
+              value="slideshow"
+              checked={form.previewMode === "slideshow"}
+              onChange={e => set("previewMode", e.target.value)}
+              className="mt-0.5 w-4 h-4 accent-primary"
+            />
+            <div className="flex-1">
+              <div className="font-medium text-foreground group-hover:text-primary transition-colors">
+                Slideshow (Images/Videos)
               </div>
-            )
-          })}
-          <label className="w-24 h-16 rounded-lg border border-dashed border-border flex flex-col items-center justify-center cursor-pointer hover:border-primary/50 transition-colors text-muted-foreground hover:text-primary">
-            {uploadingScreenshot ? <Loader2 className="w-4 h-4 animate-spin" /> : <Plus className="w-5 h-5" />}
-            <span className="text-xs mt-1">Add</span>
-            <input type="file" accept=".jpg,.jpeg,.png,.webp,.gif,.mp4,.webm,.mov" multiple className="hidden" onChange={handleScreenshotUpload} />
+              <p className="text-xs text-muted-foreground mt-0.5">
+                Display uploaded screenshots and videos as a slideshow in the preview modal
+              </p>
+            </div>
+          </label>
+          <label className="flex items-start gap-3 cursor-pointer group">
+            <input
+              type="radio"
+              name="previewMode"
+              value="iframe"
+              checked={form.previewMode === "iframe"}
+              onChange={e => set("previewMode", e.target.value)}
+              className="mt-0.5 w-4 h-4 accent-primary"
+            />
+            <div className="flex-1">
+              <div className="font-medium text-foreground group-hover:text-primary transition-colors">
+                Live Website (iframe)
+              </div>
+              <p className="text-xs text-muted-foreground mt-0.5">
+                Display the actual live website using an iframe in the preview modal
+              </p>
+            </div>
           </label>
         </div>
       </div>
+
+      {/* Screenshots / preview media - Only show if slideshow mode */}
+      {form.previewMode === "slideshow" && (
+        <div>
+          <label className="block text-sm font-medium text-foreground mb-2">
+            Preview Media <span className="text-xs text-muted-foreground">(images or video shown in the preview modal)</span>
+          </label>
+          <div className="flex flex-wrap gap-3 mb-3">
+            {form.screenshots.map((url, idx) => {
+              const isVid = /\.(mp4|webm|mov)(\?|$)/i.test(url) || url.includes("/video/upload/")
+              return (
+                <div key={idx} className="relative w-24 h-16 rounded-lg overflow-hidden border border-border group">
+                  {isVid
+                    ? <video src={url} muted className="w-full h-full object-cover" />
+                    // eslint-disable-next-line @next/next/no-img-element
+                    : <img src={url} alt="" className="w-full h-full object-cover" />
+                  }
+                  <button
+                    type="button"
+                    onClick={() => removeScreenshot(idx)}
+                    className="absolute top-0.5 right-0.5 w-5 h-5 bg-red-500 text-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                  >
+                    <X className="w-3 h-3" />
+                  </button>
+                </div>
+              )
+            })}
+            <label className="w-24 h-16 rounded-lg border border-dashed border-border flex flex-col items-center justify-center cursor-pointer hover:border-primary/50 transition-colors text-muted-foreground hover:text-primary">
+              {uploadingScreenshot ? <Loader2 className="w-4 h-4 animate-spin" /> : <Plus className="w-5 h-5" />}
+              <span className="text-xs mt-1">Add</span>
+              <input type="file" accept=".jpg,.jpeg,.png,.webp,.gif,.mp4,.webm,.mov" multiple className="hidden" onChange={handleScreenshotUpload} />
+            </label>
+          </div>
+        </div>
+      )}
+
+      {/* Live URL - Highlight when iframe mode is selected */}
+      {form.previewMode === "iframe" && (
+        <div className="bg-primary/5 border border-primary/20 rounded-xl p-4">
+          <p className="text-xs text-primary font-medium mb-2 flex items-center gap-2">
+            <span className="w-2 h-2 bg-primary rounded-full animate-pulse"></span>
+            iframe mode: The Live URL below will be displayed in the preview modal
+          </p>
+        </div>
+      )}
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         {field("Tags (comma-separated)",  "tags",  "text", "Next.js, React, Tailwind CSS")}

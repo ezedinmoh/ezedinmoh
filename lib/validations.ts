@@ -12,6 +12,7 @@ export const ProjectCreateSchema = z.object({
   githubUrl:          z.string().url().optional().or(z.literal("")),
   featured:           z.boolean().default(false),
   year:               z.string().regex(/^\d{4}$/),
+  previewMode:        z.enum(["slideshow", "iframe"]).default("slideshow"),
   caseStudyProblem:   z.string().max(2000).optional(),
   caseStudySolution:  z.string().max(2000).optional(),
   caseStudyOutcome:   z.string().max(2000).optional(),

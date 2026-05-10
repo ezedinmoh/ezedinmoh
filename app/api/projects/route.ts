@@ -34,6 +34,7 @@ export async function POST(req: Request) {
         stack:       Array.isArray(clean.stack)       ? (clean.stack as string[])       : [],
         category:    Array.isArray(clean.category)    ? (clean.category as string[])    : [],
         screenshots: Array.isArray(clean.screenshots) ? (clean.screenshots as string[]) : [],
+        previewMode: (clean.previewMode as string) || "slideshow",
       } as unknown as Parameters<typeof prisma.project.create>[0]["data"],
     })
 
