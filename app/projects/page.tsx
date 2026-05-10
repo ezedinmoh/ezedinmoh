@@ -185,19 +185,19 @@ function ProjectCard({ project, index, onDemo, onCaseStudy }: {
       onMouseLeave={() => setHovered(false)}
     >
       {/* Image / preview area */}
-      <div className="relative aspect-video overflow-hidden">
+      <div className="relative aspect-video overflow-hidden bg-secondary/20">
         {/* Image/video if available, otherwise gradient */}
         {project.image ? (
           <>
             {/\.(mp4|webm|mov)(\?|$)/i.test(project.image) || project.image.includes("/video/upload/") ? (
               <video src={project.image} autoPlay muted loop playsInline
-                className={cn("absolute inset-0 w-full h-full object-cover transition-transform duration-700", hovered ? "scale-110" : "scale-100")} />
+                className={cn("absolute inset-0 w-full h-full object-contain transition-transform duration-700", hovered ? "scale-105" : "scale-100")} />
             ) : (
               // eslint-disable-next-line @next/next/no-img-element
               <img src={project.image} alt={project.title}
-                className={cn("absolute inset-0 w-full h-full object-cover transition-transform duration-700", hovered ? "scale-110" : "scale-100")} />
+                className={cn("absolute inset-0 w-full h-full object-contain transition-transform duration-700", hovered ? "scale-105" : "scale-100")} />
             )}
-            <div className="absolute inset-0 bg-gradient-to-t from-card via-card/30 to-transparent" />
+            <div className="absolute inset-0 bg-gradient-to-t from-card/60 via-transparent to-transparent pointer-events-none" />
           </>
         ) : (
           <>
