@@ -45,7 +45,7 @@ function DemoModal({ project, onClose }: { project: Project; onClose: () => void
       <div
         className={cn(
           "bg-card border border-border rounded-2xl shadow-2xl w-full overflow-hidden animate-scale-in flex flex-col",
-          isIframeMode ? "max-w-6xl max-h-[92vh]" : "max-w-4xl max-h-[90vh]"
+          isIframeMode ? "max-w-6xl h-[92vh]" : "max-w-4xl max-h-[90vh]"
         )}
         onClick={e => e.stopPropagation()}
       >
@@ -83,7 +83,10 @@ function DemoModal({ project, onClose }: { project: Project; onClose: () => void
         </div>
 
         {/* ── Body ── */}
-        <div className={cn("relative flex-1 min-h-0 overflow-hidden", isIframeMode ? "h-[78vh]" : "h-[55vh]")}>
+        <div className={cn(
+          "relative overflow-hidden",
+          isIframeMode ? "flex-1 min-h-0" : "h-[55vh]"
+        )}>
 
           {/* ── OPTION 2: iframe mode ── */}
           {isIframeMode ? (
