@@ -36,7 +36,10 @@ function DemoModal({ project, onClose }: { project: DBProject; onClose: () => vo
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-background/80 backdrop-blur-sm" onClick={onClose}>
       <div
-        className="bg-card border border-border rounded-2xl shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-hidden animate-scale-in flex flex-col"
+        className={cn(
+          "bg-card border border-border rounded-2xl shadow-2xl w-full overflow-hidden animate-scale-in flex flex-col",
+          isIframeMode ? "max-w-6xl max-h-[92vh]" : "max-w-4xl max-h-[90vh]"
+        )}
         onClick={e => e.stopPropagation()}
       >
         {/* ── Header ── */}
@@ -73,7 +76,7 @@ function DemoModal({ project, onClose }: { project: DBProject; onClose: () => vo
         </div>
 
         {/* ── Body ── */}
-        <div className="relative flex-1 min-h-0 h-[55vh] overflow-hidden">
+        <div className={cn("relative flex-1 min-h-0 overflow-hidden", isIframeMode ? "h-[78vh]" : "h-[55vh]")}>
 
           {/* ── OPTION 2: iframe mode ── */}
           {isIframeMode ? (
