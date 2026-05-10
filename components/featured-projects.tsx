@@ -308,11 +308,11 @@ function ProjectCard({ project, index, large, onDemo, onCaseStudy }: {
           <>
             {isVideoUrl(project.image!) ? (
               <video src={project.image} autoPlay muted loop playsInline
-                className={cn("absolute inset-0 w-full h-full object-cover transition-transform duration-700", hovered ? "scale-105" : "scale-100")} />
+                className="absolute inset-0 w-full h-full object-cover" />
             ) : (
               // eslint-disable-next-line @next/next/no-img-element
               <img src={project.image} alt={project.title}
-                className={cn("absolute inset-0 w-full h-full object-cover transition-transform duration-700", hovered ? "scale-105" : "scale-100")} />
+                className="absolute inset-0 w-full h-full object-cover" />
             )}
             <div className="absolute inset-0 bg-gradient-to-t from-card/60 via-transparent to-transparent pointer-events-none" />
           </>
