@@ -25,10 +25,10 @@ export const GuestbookCreateSchema = z.object({
 })
 
 export const ContactCreateSchema = z.object({
-  name:    z.string().min(2).max(80),
+  name:    z.string().min(1).max(80),
   email:   z.string().email(),
-  subject: z.string().min(2).max(120),
-  message: z.string().min(10).max(2000),
+  subject: z.string().min(1).max(120),
+  message: z.string().min(1).max(2000),
 })
 
 export const AnalyticsEventSchema = z.object({

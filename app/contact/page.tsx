@@ -59,7 +59,13 @@ export default function ContactPage() {
         setTimeout(() => setIsSubmitted(false), 6000)
       } else {
         const data = await res.json().catch(() => ({}))
-        setError(data.message ?? `Error ${res.status}: Please try again.`)
+        if (res.status === 422 && data.errors?.length) {
+          // Show the first field-level validation error
+          const first = data.errors[0]
+          setError(`${first.field}: ${first.message}`)
+        } else {
+          setError(data.message ?? `Error ${res.status}: Please try again.`)
+        }
       }
     } catch {
       setIsSubmitting(false)
