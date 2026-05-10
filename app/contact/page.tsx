@@ -38,22 +38,32 @@ export default function ContactPage() {
   })
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [isSubmitted, setIsSubmitted] = useState(false)
+  const [error, setError] = useState("")
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setIsSubmitting(true)
+    setError("")
 
-    const res = await fetch("/api/contact", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(formState),
-    })
+    try {
+      const res = await fetch("/api/contact", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(formState),
+      })
 
-    setIsSubmitting(false)
-    if (res.ok) {
-      setIsSubmitted(true)
-      setFormState({ name: "", email: "", subject: "", message: "" })
-      setTimeout(() => setIsSubmitted(false), 5000)
+      setIsSubmitting(false)
+      if (res.ok) {
+        setIsSubmitted(true)
+        setFormState({ name: "", email: "", subject: "", message: "" })
+        setTimeout(() => setIsSubmitted(false), 6000)
+      } else {
+        const data = await res.json().catch(() => ({}))
+        setError(data.message ?? "Something went wrong. Please try again.")
+      }
+    } catch {
+      setIsSubmitting(false)
+      setError("Network error. Please check your connection and try again.")
     }
   }
 
@@ -250,6 +260,13 @@ export default function ContactPage() {
                         placeholder="Tell me about your project..."
                       />
                     </div>
+
+                    {error && (
+                      <div className="flex items-start gap-3 p-4 bg-destructive/10 border border-destructive/20 rounded-xl text-sm text-destructive">
+                        <span className="mt-0.5">⚠</span>
+                        <span>{error}</span>
+                      </div>
+                    )}
 
                     <button
                       type="submit"
