@@ -59,7 +59,7 @@ export default function ContactPage() {
         setTimeout(() => setIsSubmitted(false), 6000)
       } else {
         const data = await res.json().catch(() => ({}))
-        setError(data.message ?? "Something went wrong. Please try again.")
+        setError(data.message ?? `Error ${res.status}: Please try again.`)
       }
     } catch {
       setIsSubmitting(false)

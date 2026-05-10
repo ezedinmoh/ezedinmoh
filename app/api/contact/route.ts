@@ -11,7 +11,7 @@ const resend = new Resend(process.env.RESEND_API_KEY)
 export async function POST(req: Request) {
   const ip = req.headers.get("x-forwarded-for") ?? "unknown"
   const { success } = await rateLimit(ip, "contact", 2, 3600)
-  if (!success) return NextResponse.json({ message: "Too many requests" }, { status: 429 })
+  if (!success) return NextResponse.json({ message: "Too many requests. Please wait an hour before trying again." }, { status: 429 })
 
   try {
     const body = await validateBody(req, ContactCreateSchema)
@@ -50,6 +50,8 @@ export async function POST(req: Request) {
     return NextResponse.json(message, { status: 201 })
   } catch (e) {
     if (e instanceof Response || (e as { status?: number })?.status) return e as Response
-    return NextResponse.json({ message: "Internal server error" }, { status: 500 })
+    const msg = e instanceof Error ? e.message : String(e)
+    console.error("POST /api/contact error:", msg)
+    return NextResponse.json({ message: `Server error: ${msg}` }, { status: 500 })
   }
 }
