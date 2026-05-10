@@ -3,14 +3,17 @@
 import { useState } from "react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
-import { Pencil, Trash2, Star } from "lucide-react"
+import { Pencil, Trash2, Star, ChevronUp, ChevronDown } from "lucide-react"
 import type { Project } from "@prisma/client"
 
 export function ProjectsTable({ projects: initial }: { projects: Project[] }) {
   const router = useRouter()
-  const [projects, setProjects] = useState(initial)
-  const [deleting, setDeleting] = useState<string | null>(null)
+  const [projects, setProjects] = useState(
+    [...initial].sort((a, b) => a.sortOrder - b.sortOrder)
+  )
+  const [deleting, setDeleting]     = useState<string | null>(null)
   const [settingHero, setSettingHero] = useState<string | null>(null)
+  const [moving, setMoving]         = useState<string | null>(null)
 
   async function handleDelete(id: string) {
     if (!confirm("Delete this project?")) return
@@ -23,8 +26,6 @@ export function ProjectsTable({ projects: initial }: { projects: Project[] }) {
 
   async function handleSetHero(id: string) {
     setSettingHero(id)
-    // Give this project sortOrder -1 so it sorts first among featured
-    // Give all other featured projects sortOrder >= 0
     const items = projects
       .filter(p => p.featured)
       .map((p, i) => ({ id: p.id, sortOrder: p.id === id ? -1 : i }))
@@ -44,7 +45,33 @@ export function ProjectsTable({ projects: initial }: { projects: Project[] }) {
     router.refresh()
   }
 
-  // Hero = lowest sortOrder per group of 6 (sorted by sortOrder)
+  async function handleMove(id: string, direction: "up" | "down") {
+    const idx = projects.findIndex(p => p.id === id)
+    if (direction === "up"   && idx === 0) return
+    if (direction === "down" && idx === projects.length - 1) return
+
+    setMoving(id)
+    const swapIdx = direction === "up" ? idx - 1 : idx + 1
+    const updated = [...projects]
+    // Swap positions
+    ;[updated[idx], updated[swapIdx]] = [updated[swapIdx], updated[idx]]
+    // Reassign sortOrder based on new positions
+    const reordered = updated.map((p, i) => ({ ...p, sortOrder: i }))
+    setProjects(reordered)
+
+    await fetch("/api/projects/reorder", {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        items: reordered.map(p => ({ id: p.id, sortOrder: p.sortOrder })),
+      }),
+    })
+
+    setMoving(null)
+    router.refresh()
+  }
+
+  // Hero = lowest sortOrder per group of 6
   const featuredSorted = [...projects]
     .filter(p => p.featured)
     .sort((a, b) => a.sortOrder - b.sortOrder)
@@ -61,6 +88,7 @@ export function ProjectsTable({ projects: initial }: { projects: Project[] }) {
         <table className="w-full text-sm">
           <thead className="border-b border-border bg-secondary/30">
             <tr>
+              <th className="text-left px-4 py-3 text-muted-foreground font-medium w-10">Order</th>
               <th className="text-left px-4 py-3 text-muted-foreground font-medium">Title</th>
               <th className="text-left px-4 py-3 text-muted-foreground font-medium">Category</th>
               <th className="text-left px-4 py-3 text-muted-foreground font-medium">Year</th>
@@ -69,8 +97,30 @@ export function ProjectsTable({ projects: initial }: { projects: Project[] }) {
             </tr>
           </thead>
           <tbody>
-            {projects.map(p => (
+            {projects.map((p, idx) => (
               <tr key={p.id} className="border-b border-border last:border-0 hover:bg-secondary/20 transition-colors">
+                {/* Order controls */}
+                <td className="px-2 py-3">
+                  <div className="flex flex-col items-center gap-0.5">
+                    <button
+                      onClick={() => handleMove(p.id, "up")}
+                      disabled={idx === 0 || moving === p.id}
+                      title="Move up"
+                      className="p-0.5 text-muted-foreground hover:text-primary transition-colors disabled:opacity-20 disabled:cursor-not-allowed"
+                    >
+                      <ChevronUp className="w-4 h-4" />
+                    </button>
+                    <span className="text-xs text-muted-foreground/50 tabular-nums">{idx + 1}</span>
+                    <button
+                      onClick={() => handleMove(p.id, "down")}
+                      disabled={idx === projects.length - 1 || moving === p.id}
+                      title="Move down"
+                      className="p-0.5 text-muted-foreground hover:text-primary transition-colors disabled:opacity-20 disabled:cursor-not-allowed"
+                    >
+                      <ChevronDown className="w-4 h-4" />
+                    </button>
+                  </div>
+                </td>
                 <td className="px-4 py-3 font-medium text-foreground">
                   <div className="flex items-center gap-2">
                     {heroIds.has(p.id) && (
@@ -104,7 +154,7 @@ export function ProjectsTable({ projects: initial }: { projects: Project[] }) {
               </tr>
             ))}
             {projects.length === 0 && (
-              <tr><td colSpan={5} className="px-4 py-8 text-center text-muted-foreground">No projects yet</td></tr>
+              <tr><td colSpan={6} className="px-4 py-8 text-center text-muted-foreground">No projects yet</td></tr>
             )}
           </tbody>
         </table>
@@ -115,7 +165,7 @@ export function ProjectsTable({ projects: initial }: { projects: Project[] }) {
         {projects.length === 0 && (
           <p className="px-4 py-8 text-center text-muted-foreground text-sm">No projects yet</p>
         )}
-        {projects.map(p => (
+        {projects.map((p, idx) => (
           <div key={p.id} className="p-4 space-y-2">
             <div className="flex items-start justify-between gap-2">
               <div className="flex-1 min-w-0">
@@ -129,6 +179,23 @@ export function ProjectsTable({ projects: initial }: { projects: Project[] }) {
                 <p className="text-xs text-muted-foreground mt-0.5">{p.category.join(", ")} · {p.year}</p>
               </div>
               <div className="flex items-center gap-1 shrink-0">
+                {/* Up/Down on mobile */}
+                <div className="flex flex-col gap-0.5 mr-1">
+                  <button
+                    onClick={() => handleMove(p.id, "up")}
+                    disabled={idx === 0 || moving === p.id}
+                    className="p-1 text-muted-foreground hover:text-primary transition-colors disabled:opacity-20"
+                  >
+                    <ChevronUp className="w-3.5 h-3.5" />
+                  </button>
+                  <button
+                    onClick={() => handleMove(p.id, "down")}
+                    disabled={idx === projects.length - 1 || moving === p.id}
+                    className="p-1 text-muted-foreground hover:text-primary transition-colors disabled:opacity-20"
+                  >
+                    <ChevronDown className="w-3.5 h-3.5" />
+                  </button>
+                </div>
                 {p.featured && !heroIds.has(p.id) && (
                   <button onClick={() => handleSetHero(p.id)} disabled={settingHero === p.id} title="Set as hero"
                     className="p-2 text-muted-foreground hover:text-yellow-400 transition-colors disabled:opacity-40">
