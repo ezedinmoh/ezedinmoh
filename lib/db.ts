@@ -1,17 +1,33 @@
 import { PrismaClient } from "@prisma/client"
 import { PrismaNeonHttp } from "@prisma/adapter-neon"
+import fs from "fs"
+import path from "path"
 
-function getConnectionString(): string {
-  const url = process.env.DATABASE_URL
-  if (url && url.trim().length > 0) {
-    return url.trim().replace(/^["']|["']$/g, "")
+function getDatabaseUrl(): string {
+  let url = process.env.DATABASE_URL || ""
+  if (!url) {
+    try {
+      const envPath = path.resolve(process.cwd(), ".env.local")
+      if (fs.existsSync(envPath)) {
+        const content = fs.readFileSync(envPath, "utf8")
+        const match = content.match(/DATABASE_URL=["']?([^"'\r\n]+)["']?/)
+        if (match) url = match[1]
+      }
+    } catch {
+      // ignore
+    }
   }
-  return "postgresql://neondb_owner:dummy@localhost:5432/neondb"
+
+  url = url.trim().replace(/^["']|["']$/g, "")
+  if (url.includes("channel_binding=")) {
+    url = url.replace(/([?&])channel_binding=[^&]*&?/g, "$1").replace(/[?&]$/, "")
+  }
+  return url
 }
 
 function createPrismaClient() {
-  const connectionString = getConnectionString()
-  const adapter = new PrismaNeonHttp(connectionString, {})
+  const url = getDatabaseUrl()
+  const adapter = new PrismaNeonHttp(url, {})
   return new PrismaClient({ adapter })
 }
 
