@@ -1,12 +1,36 @@
 import Link from "next/link"
 import { prisma } from "@/lib/db"
+import { allProjects } from "@/lib/projects"
 import { Plus } from "lucide-react"
 import { ProjectsTable } from "@/components/admin/ProjectsTable"
 
 export const dynamic = "force-dynamic"
 
 export default async function AdminProjects() {
-  const projects = await prisma.project.findMany({ orderBy: { sortOrder: "asc" } })
+  let projects: any[] = []
+  try {
+    projects = await prisma.project.findMany({ orderBy: { sortOrder: "asc" } })
+  } catch (err) {
+    console.error("Admin Projects DB error:", err)
+  }
+
+  if (!projects || projects.length === 0) {
+    projects = allProjects.map((p, idx) => ({
+      id: p.id,
+      slug: p.id,
+      title: p.title,
+      description: p.description,
+      image: p.image ?? "",
+      tags: p.tags,
+      stack: p.stack,
+      category: p.category,
+      liveUrl: p.liveUrl ?? p.link ?? null,
+      githubUrl: p.github ?? null,
+      featured: p.featured ?? false,
+      year: p.year,
+      sortOrder: idx,
+    }))
+  }
 
   return (
     <div className="space-y-6">

@@ -4,7 +4,7 @@ import { useState } from "react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { signOut } from "next-auth/react"
-import { LayoutDashboard, FolderKanban, MessageSquare, Mail, BarChart2, LogOut, Menu, X, FileText } from "lucide-react"
+import { LayoutDashboard, FolderKanban, MessageSquare, Mail, BarChart2, LogOut, Menu, X, FileText, Home } from "lucide-react"
 import { cn } from "@/lib/utils"
 
 const links = [
@@ -47,14 +47,21 @@ export function AdminSidebar() {
     <>
       {/* Desktop sidebar — only on lg+ */}
       <aside className="hidden lg:flex w-56 min-h-screen bg-card border-r border-border flex-col shrink-0">
-        <div className="p-6 border-b border-border">
+        <div className="p-6 border-b border-border flex items-center justify-between">
           <span className="font-bold text-foreground text-lg">Admin Panel</span>
         </div>
         <NavLinks />
-        <div className="p-4 border-t border-border">
-          <button
-            onClick={() => signOut({ callbackUrl: "/admin/login" })}
+        <div className="p-4 border-t border-border space-y-1">
+          <Link
+            href="/"
             className="flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors w-full"
+          >
+            <Home className="w-4 h-4" />
+            Back to Website
+          </Link>
+          <button
+            onClick={() => signOut({ callbackUrl: "/" })}
+            className="flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-red-500 hover:bg-red-500/10 transition-colors w-full"
           >
             <LogOut className="w-4 h-4" />
             Sign Out
@@ -64,7 +71,12 @@ export function AdminSidebar() {
 
       {/* Mobile/tablet top bar — hidden on lg+ */}
       <div className="lg:hidden fixed top-0 left-0 right-0 z-40 flex items-center justify-between px-4 py-3 bg-card border-b border-border">
-        <span className="font-bold text-foreground">Admin Panel</span>
+        <div className="flex items-center gap-3">
+          <Link href="/" className="p-1 text-muted-foreground hover:text-foreground transition-colors" title="Back to Website">
+            <Home className="w-5 h-5" />
+          </Link>
+          <span className="font-bold text-foreground">Admin Panel</span>
+        </div>
         <button onClick={() => setOpen(true)} className="p-2 text-muted-foreground hover:text-foreground transition-colors">
           <Menu className="w-5 h-5" />
         </button>
@@ -82,10 +94,18 @@ export function AdminSidebar() {
               </button>
             </div>
             <NavLinks onNav={() => setOpen(false)} />
-            <div className="p-4 border-t border-border">
-              <button
-                onClick={() => signOut({ callbackUrl: "/admin/login" })}
+            <div className="p-4 border-t border-border space-y-1">
+              <Link
+                href="/"
+                onClick={() => setOpen(false)}
                 className="flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors w-full"
+              >
+                <Home className="w-4 h-4" />
+                Back to Website
+              </Link>
+              <button
+                onClick={() => signOut({ callbackUrl: "/" })}
+                className="flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-red-500 hover:bg-red-500/10 transition-colors w-full"
               >
                 <LogOut className="w-4 h-4" />
                 Sign Out

@@ -42,12 +42,12 @@ const DEFAULT_RESUME = {
 
 export async function GET() {
   try {
-    const rows = await prisma.$queryRaw<{ data: unknown }[]>`
-      SELECT data FROM resume WHERE id = 'singleton' LIMIT 1
-    `
-    if (rows.length > 0 && rows[0].data) {
-      const saved = rows[0].data as Record<string, unknown>
-      // Merge with defaults so missing fields are filled in
+    const record = await prisma.resume.findUnique({
+      where: { id: "singleton" },
+    })
+
+    if (record && record.data) {
+      const saved = record.data as Record<string, unknown>
       const merged = {
         ...DEFAULT_RESUME,
         ...saved,
@@ -58,10 +58,11 @@ export async function GET() {
       }
       return NextResponse.json(merged)
     }
-    return NextResponse.json(DEFAULT_RESUME)
-  } catch {
-    return NextResponse.json(DEFAULT_RESUME)
+  } catch (err) {
+    console.error("GET /api/resume DB error:", err)
   }
+
+  return NextResponse.json(DEFAULT_RESUME)
 }
 
 export async function PUT(req: Request) {
@@ -69,14 +70,14 @@ export async function PUT(req: Request) {
 
   try {
     const data = await req.json()
-    await prisma.$executeRaw`
-      INSERT INTO resume (id, data, "updatedAt")
-      VALUES ('singleton', ${JSON.stringify(data)}::jsonb, NOW())
-      ON CONFLICT (id) DO UPDATE SET data = ${JSON.stringify(data)}::jsonb, "updatedAt" = NOW()
-    `
+    await prisma.resume.upsert({
+      where: { id: "singleton" },
+      update: { data },
+      create: { id: "singleton", data },
+    })
     return NextResponse.json(data)
   } catch (e) {
-    console.error(e)
+    console.error("PUT /api/resume error:", e)
     return NextResponse.json({ message: "Failed to save resume" }, { status: 500 })
   }
 }

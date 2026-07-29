@@ -3,7 +3,8 @@
 import { useState, Suspense } from "react"
 import { signIn } from "next-auth/react"
 import { useRouter, useSearchParams } from "next/navigation"
-import { Loader2 } from "lucide-react"
+import Link from "next/link"
+import { Loader2, ArrowLeft, Home } from "lucide-react"
 
 function LoginForm() {
   const router = useRouter()
@@ -33,9 +34,25 @@ function LoginForm() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-background px-4">
+    <div className="min-h-screen flex flex-col items-center justify-center bg-background px-4 relative">
+      {/* Top navigation back button */}
+      <div className="absolute top-6 left-6">
+        <Link
+          href="/"
+          className="flex items-center gap-2 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors px-3 py-2 rounded-lg bg-card border border-border"
+        >
+          <ArrowLeft className="w-4 h-4" />
+          Back to Website
+        </Link>
+      </div>
+
       <div className="w-full max-w-sm bg-card border border-border rounded-2xl p-6 sm:p-8 shadow-xl">
-        <h1 className="text-2xl font-bold text-foreground mb-2">Admin Login</h1>
+        <div className="flex items-center justify-between mb-4">
+          <h1 className="text-2xl font-bold text-foreground">Admin Login</h1>
+          <div className="p-2 rounded-lg bg-primary/10 text-primary">
+            <Home className="w-5 h-5" />
+          </div>
+        </div>
         <p className="text-sm text-muted-foreground mb-6">Sign in to manage your portfolio</p>
 
         <form onSubmit={handleSubmit} className="space-y-4">
@@ -71,6 +88,16 @@ function LoginForm() {
             Sign In
           </button>
         </form>
+
+        <div className="mt-6 pt-6 border-t border-border text-center">
+          <Link
+            href="/"
+            className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
+          >
+            <ArrowLeft className="w-4 h-4" />
+            Return to Portfolio Home
+          </Link>
+        </div>
       </div>
     </div>
   )
