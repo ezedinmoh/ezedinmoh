@@ -11,11 +11,13 @@ export async function PATCH(req: Request) {
   try {
     const { items } = await validateBody(req, ReorderSchema)
 
-    await prisma.$transaction(
-      items.map(({ id, sortOrder }) =>
-        prisma.project.update({ where: { id }, data: { sortOrder } })
-      )
-    )
+    // Execute sequential updates instead of $transaction for Neon HTTP driver compatibility
+    for (const item of items) {
+      await prisma.project.update({
+        where: { id: item.id },
+        data: { sortOrder: item.sortOrder },
+      })
+    }
 
     revalidatePath("/")
     revalidatePath("/projects")
