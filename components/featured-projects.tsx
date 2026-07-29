@@ -285,8 +285,8 @@ function CaseStudyModal({ project, onClose }: { project: DBProject; onClose: () 
   )
 }
 
-function ProjectCard({ project, index, large, onDemo, onCaseStudy }: {
-  project: DBProject; index: number; large?: boolean; onDemo: () => void; onCaseStudy: () => void
+function ProjectCard({ project, index, large, compact, onDemo, onCaseStudy }: {
+  project: DBProject; index: number; large?: boolean; compact?: boolean; onDemo: () => void; onCaseStudy: () => void
 }) {
   const [hovered, setHovered] = useState(false)
   const hasMedia = !!project.image
@@ -297,24 +297,63 @@ function ProjectCard({ project, index, large, onDemo, onCaseStudy }: {
         "group relative overflow-hidden rounded-2xl bg-card border border-border",
         "hover:border-primary/50 hover:shadow-xl hover:shadow-primary/5 transition-all duration-500",
         "animate-slide-up opacity-0 flex flex-col w-full",
-        large ? "h-full" : "flex-1"
+        (large || compact) && "h-full"
       )}
       style={{ animationDelay: `${index * 0.1}s`, animationFillMode: "forwards" }}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
     >
-      <div className={cn("relative overflow-hidden bg-secondary/20", large ? "flex-1 min-h-64" : "flex-1 min-h-36")}>
+      <div className={cn(
+        "relative overflow-hidden bg-gradient-to-br from-secondary/40 via-background to-secondary/20",
+        compact ? "h-44 md:h-48 lg:h-52 xl:h-56" : "aspect-video"
+      )}>
         {hasMedia ? (
           <>
+            <div className="absolute inset-0 pointer-events-none">
+              {isVideoUrl(project.image!) ? (
+                <video
+                  src={project.image}
+                  autoPlay
+                  muted
+                  loop
+                  playsInline
+                  aria-hidden="true"
+                  className="absolute inset-0 w-full h-full object-cover scale-110 blur-2xl opacity-40"
+                />
+              ) : (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
+                  src={project.image}
+                  alt=""
+                  aria-hidden="true"
+                  className="absolute inset-0 w-full h-full object-cover scale-110 blur-2xl opacity-40"
+                />
+              )}
+            </div>
             {isVideoUrl(project.image!) ? (
-              <video src={project.image} autoPlay muted loop playsInline
-                className="absolute inset-0 w-full h-full object-cover" />
+              <video
+                src={project.image}
+                autoPlay
+                muted
+                loop
+                playsInline
+                className={cn(
+                  "absolute inset-0 w-full h-full",
+                  "object-fill"
+                )}
+              />
             ) : (
               // eslint-disable-next-line @next/next/no-img-element
-              <img src={project.image} alt={project.title}
-                className="absolute inset-0 w-full h-full object-cover" />
+              <img
+                src={project.image}
+                alt={project.title}
+                className={cn(
+                  "absolute inset-0 w-full h-full",
+                  "object-fill"
+                )}
+              />
             )}
-            <div className="absolute inset-0 bg-gradient-to-t from-card/60 via-transparent to-transparent pointer-events-none" />
+            <div className="absolute inset-0 bg-gradient-to-t from-card/50 via-transparent to-transparent pointer-events-none" />
           </>
         ) : (
           <>
@@ -340,9 +379,9 @@ function ProjectCard({ project, index, large, onDemo, onCaseStudy }: {
           )}
         </div>
       </div>
-      <div className="p-5 flex flex-col">
-        <h3 className={cn("font-bold text-card-foreground group-hover:text-primary transition-colors mb-2", large ? "text-xl md:text-2xl" : "text-base md:text-lg")}>{project.title}</h3>
-        <p className={cn("text-muted-foreground leading-relaxed", large ? "text-sm mb-5" : "text-xs mb-4 line-clamp-2")}>{project.description}</p>
+      <div className={cn("flex flex-col", compact ? "p-4" : "p-5")}>
+        <h3 className={cn("font-bold text-card-foreground group-hover:text-primary transition-colors mb-2", large ? "text-xl md:text-2xl" : compact ? "text-sm md:text-base line-clamp-1" : "text-base md:text-lg")}>{project.title}</h3>
+        <p className={cn("text-muted-foreground leading-relaxed", large ? "text-sm mb-5" : compact ? "text-xs mb-3 line-clamp-1" : "text-xs mb-4 line-clamp-2")}>{project.description}</p>
         <div className="flex items-center gap-3 mt-auto">
           <button onClick={onDemo} className="inline-flex items-center gap-1 text-sm font-medium text-primary hover:underline">
             Preview <ArrowUpRight className="w-3.5 h-3.5" />
@@ -402,7 +441,7 @@ export function FeaturedProjects() {
       <div className="absolute inset-0">
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[400px] bg-primary/5 rounded-full blur-3xl" />
       </div>
-      <div className="container mx-auto px-6 relative">
+      <div className="w-full max-w-[1480px] mx-auto px-4 sm:px-6 lg:px-8 relative">
         <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-4 mb-12">
           <div>
             <span className="text-primary text-sm font-medium uppercase tracking-wider mb-2 block">Selected Work</span>
@@ -421,14 +460,15 @@ export function FeaturedProjects() {
             <div key={groupHero.id} className={cn("space-y-6", gi > 0 && "mt-16 pt-16 border-t border-border")}>
               {/* Hero row: 2-col hero + 2 stacked */}
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:items-stretch">
-                <div className="md:col-span-2 flex self-stretch" style={{ minHeight: 420 }}>
+                <div className="md:col-span-2">
                   <ProjectCard project={groupHero} index={baseIndex} large
                     onDemo={() => setDemoProject(groupHero)}
                     onCaseStudy={() => setCaseStudyProject(groupHero)} />
                 </div>
-                <div className="flex flex-col gap-6 self-stretch">
+                <div className="grid grid-rows-2 gap-6 self-stretch">
                   {groupRest.slice(0, 2).map((project, i) => (
                     <ProjectCard key={project.id} project={project} index={baseIndex + i + 1}
+                      compact
                       onDemo={() => setDemoProject(project)}
                       onCaseStudy={() => setCaseStudyProject(project)} />
                   ))}

@@ -311,19 +311,49 @@ function ProjectCard({ project, index, onDemo, onCaseStudy }: {
       onMouseLeave={() => setHovered(false)}
     >
       {/* Image / preview area */}
-      <div className="relative aspect-video overflow-hidden bg-secondary/20">
+      <div className="relative aspect-video overflow-hidden bg-gradient-to-br from-secondary/40 via-background to-secondary/20">
         {/* Image/video if available, otherwise gradient */}
         {project.image ? (
           <>
+            <div className="absolute inset-0 pointer-events-none">
+              {/\.(mp4|webm|mov)(\?|$)/i.test(project.image) || project.image.includes("/video/upload/") ? (
+                <video
+                  src={project.image}
+                  autoPlay
+                  muted
+                  loop
+                  playsInline
+                  aria-hidden="true"
+                  className="absolute inset-0 w-full h-full object-cover scale-110 blur-2xl opacity-40"
+                />
+              ) : (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
+                  src={project.image}
+                  alt=""
+                  aria-hidden="true"
+                  className="absolute inset-0 w-full h-full object-cover scale-110 blur-2xl opacity-40"
+                />
+              )}
+            </div>
             {/\.(mp4|webm|mov)(\?|$)/i.test(project.image) || project.image.includes("/video/upload/") ? (
-              <video src={project.image} autoPlay muted loop playsInline
-                className="absolute inset-0 w-full h-full object-cover" />
+              <video
+                src={project.image}
+                autoPlay
+                muted
+                loop
+                playsInline
+                className="absolute inset-0 w-full h-full object-contain object-center"
+              />
             ) : (
               // eslint-disable-next-line @next/next/no-img-element
-              <img src={project.image} alt={project.title}
-                className="absolute inset-0 w-full h-full object-cover" />
+              <img
+                src={project.image}
+                alt={project.title}
+                className="absolute inset-0 w-full h-full object-contain object-center"
+              />
             )}
-            <div className="absolute inset-0 bg-gradient-to-t from-card/60 via-transparent to-transparent pointer-events-none" />
+            <div className="absolute inset-0 bg-gradient-to-t from-card/50 via-transparent to-transparent pointer-events-none" />
           </>
         ) : (
           <>

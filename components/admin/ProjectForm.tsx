@@ -286,11 +286,19 @@ export function ProjectForm({ initial, projectId }: ProjectFormProps) {
             {form.screenshots.map((url, idx) => {
               const isVid = /\.(mp4|webm|mov)(\?|$)/i.test(url) || url.includes("/video/upload/")
               return (
-                <div key={idx} className="relative w-24 h-16 rounded-lg overflow-hidden border border-border group">
+                <div key={idx} className="relative w-24 h-16 rounded-lg overflow-hidden border border-border group bg-gradient-to-br from-secondary/40 via-background to-secondary/20">
+                  <div className="absolute inset-0 pointer-events-none">
+                    {isVid ? (
+                      <video src={url} muted aria-hidden="true" className="w-full h-full object-cover scale-110 blur-md opacity-40" />
+                    ) : (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img src={url} alt="" aria-hidden="true" className="w-full h-full object-cover scale-110 blur-md opacity-40" />
+                    )}
+                  </div>
                   {isVid
-                    ? <video src={url} muted className="w-full h-full object-cover" />
+                    ? <video src={url} muted className="w-full h-full object-contain object-center" />
                     // eslint-disable-next-line @next/next/no-img-element
-                    : <img src={url} alt="" className="w-full h-full object-cover" />
+                    : <img src={url} alt="" className="w-full h-full object-contain object-center" />
                   }
                   <button
                     type="button"
