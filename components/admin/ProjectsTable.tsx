@@ -258,14 +258,18 @@ export function ProjectsTable({ projects: initial }: { projects: Project[] }) {
                     </td>
 
                     <td className="px-4 py-3 font-medium text-foreground">
-                      <div className="flex items-center gap-2">
+                      <Link
+                        href={`/admin/projects/${p.id}`}
+                        className="inline-flex items-center gap-2 group/title hover:text-primary transition-colors cursor-pointer"
+                        title="Click to edit project"
+                      >
                         {isHero && (
-                          <span className="px-2 py-0.5 bg-yellow-400/15 text-yellow-400 text-xs rounded-full border border-yellow-400/30 font-semibold shadow-sm">
+                          <span className="px-2 py-0.5 bg-yellow-400/15 text-yellow-400 text-xs rounded-full border border-yellow-400/30 font-semibold shadow-sm shrink-0">
                             Hero Card
                           </span>
                         )}
-                        <span className="truncate max-w-xs">{p.title}</span>
-                      </div>
+                        <span className="truncate max-w-xs font-semibold group-hover/title:underline">{p.title}</span>
+                      </Link>
                     </td>
 
                     <td className="px-4 py-3 text-muted-foreground">{p.category.join(", ")}</td>
@@ -345,7 +349,11 @@ export function ProjectsTable({ projects: initial }: { projects: Project[] }) {
                     <span className="text-xs font-bold text-muted-foreground tabular-nums">{idx + 1}</span>
                   </div>
 
-                  <div className="flex-1 min-w-0">
+                  <Link
+                    href={`/admin/projects/${p.id}`}
+                    className="flex-1 min-w-0 group/card block cursor-pointer"
+                    title="Click to edit project"
+                  >
                     <div className="flex flex-wrap items-center gap-1.5 mb-1">
                       {isHero && (
                         <span className="px-2 py-0.5 bg-yellow-400/15 text-yellow-400 text-xs rounded-full border border-yellow-400/30 font-semibold">
@@ -358,11 +366,13 @@ export function ProjectsTable({ projects: initial }: { projects: Project[] }) {
                         </span>
                       )}
                     </div>
-                    <p className="font-medium text-foreground text-sm truncate">{p.title}</p>
+                    <p className="font-semibold text-foreground group-hover/card:text-primary group-hover/card:underline text-sm truncate">
+                      {p.title}
+                    </p>
                     <p className="text-xs text-muted-foreground mt-0.5">
                       {p.category.join(", ")} · {p.year}
                     </p>
-                  </div>
+                  </Link>
 
                   <div className="flex items-center gap-1 shrink-0">
                     <div className="flex flex-col gap-0.5 mr-1">
