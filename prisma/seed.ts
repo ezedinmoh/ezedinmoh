@@ -7,7 +7,7 @@ import { prisma } from "../lib/db"
 import { allProjects } from "../lib/projects"
 
 async function main() {
-  console.log("Syncing database with the 9 real projects...")
+  console.log("Syncing database with the 9 real projects and Cloudinary cover media...")
 
   const validIds = new Set(allProjects.map(p => p.id))
 
@@ -20,13 +20,13 @@ async function main() {
     }
   }
 
-  // Upsert the 9 real projects, preserving user uploaded cover images in DB
+  // Upsert the 9 real projects with Cloudinary cover media
   for (let i = 0; i < allProjects.length; i++) {
     const p = allProjects[i]
     const slug = p.id
 
     const existingRecord = await prisma.project.findUnique({ where: { slug } })
-    const imageToUse = (existingRecord?.image && existingRecord.image !== "/placeholder.jpg")
+    const imageToUse = (existingRecord?.image && existingRecord.image.startsWith("http") && !existingRecord.image.includes("placeholder"))
       ? existingRecord.image
       : (p.image || "")
 
@@ -53,7 +53,7 @@ async function main() {
         slug,
         title:             p.title,
         description:       p.description,
-        image:             p.image || "",
+        image:             imageToUse,
         tags:              p.tags,
         stack:             p.stack,
         category:          p.category,
@@ -67,10 +67,10 @@ async function main() {
         caseStudyOutcome:  p.caseStudy?.outcome  ?? null,
       },
     })
-    console.log(`  ✓ Real Project ${i + 1}/${allProjects.length}: ${p.title}`)
+    console.log(`  ✓ Real Project ${i + 1}/${allProjects.length}: ${p.title} -> ${imageToUse}`)
   }
 
-  console.log("Database sync complete!")
+  console.log("Database Cloudinary media sync complete!")
   await prisma.$disconnect()
 }
 
