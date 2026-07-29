@@ -20,17 +20,22 @@ async function main() {
     }
   }
 
-  // Upsert the 9 real projects
+  // Upsert the 9 real projects, preserving user uploaded cover images in DB
   for (let i = 0; i < allProjects.length; i++) {
     const p = allProjects[i]
     const slug = p.id
+
+    const existingRecord = await prisma.project.findUnique({ where: { slug } })
+    const imageToUse = (existingRecord?.image && existingRecord.image !== "/placeholder.jpg")
+      ? existingRecord.image
+      : (p.image || "")
 
     await prisma.project.upsert({
       where:  { slug },
       update: {
         title:             p.title,
         description:       p.description,
-        image:             p.image ?? "",
+        image:             imageToUse,
         tags:              p.tags,
         stack:             p.stack,
         category:          p.category,
@@ -48,7 +53,7 @@ async function main() {
         slug,
         title:             p.title,
         description:       p.description,
-        image:             p.image ?? "",
+        image:             p.image || "",
         tags:              p.tags,
         stack:             p.stack,
         category:          p.category,
