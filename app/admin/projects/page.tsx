@@ -10,8 +10,8 @@ export default async function AdminProjects() {
   let projects: any[] = []
   try {
     projects = await prisma.project.findMany({ orderBy: { sortOrder: "asc" } })
-  } catch (err) {
-    console.error("Admin Projects DB error:", err)
+  } catch {
+    console.warn("[DB Offline] Admin Projects using static fallback")
   }
 
   if (!projects || projects.length === 0) {

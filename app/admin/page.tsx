@@ -10,7 +10,7 @@ export default async function AdminOverview() {
   const d30 = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000)
 
   let projectCount = allProjects.length
-  let guestbookCount = 3
+  let guestbookCount = 4
   let totalMessages = 2
   let unreadCount = 1
   let pageViews = 248
@@ -18,6 +18,7 @@ export default async function AdminOverview() {
     { id: "g1", name: "Alex Johnson", message: "Amazing portfolio! The animations are so smooth." },
     { id: "g2", name: "Sarah Chen", message: "Love the design. Really clean and professional." },
     { id: "g3", name: "Marcus Rivera", message: "The projects section is impressive. Great work!" },
+    { id: "g4", name: "David Kim", message: "Inspiring work on WEARIFY and Smart Library!" },
   ]
   let recentMessages: any[] = [
     { id: "m1", name: "Hassan Ali", subject: "Full-Stack Opportunity", read: false },
@@ -41,8 +42,8 @@ export default async function AdminOverview() {
     if (res[4] > 0) pageViews = res[4]
     if (res[5].length > 0) recentGuests = res[5]
     if (res[6].length > 0) recentMessages = res[6]
-  } catch (err) {
-    console.warn("Admin Overview using static fallbacks due to DB connection timeout:", err)
+  } catch {
+    console.warn("[DB Offline] Admin Overview using static fallbacks")
   }
 
   return (

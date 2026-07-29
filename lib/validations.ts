@@ -1,21 +1,21 @@
 import { z } from "zod"
 
 export const ProjectCreateSchema = z.object({
-  title:              z.string().min(1).max(120),
-  description:        z.string().min(1).max(1000),
-  image:              z.string().url().optional().or(z.literal("")),
+  title:              z.string().min(1, "Title is required").max(120, "Title is too long"),
+  description:        z.string().min(1, "Description is required").max(2000, "Description is too long"),
+  image:              z.string().optional().nullable().or(z.literal("")),
   screenshots:        z.array(z.string()).default([]),
   tags:               z.array(z.string()).default([]),
   stack:              z.array(z.string()).default([]),
   category:           z.array(z.string()).default([]),
-  liveUrl:            z.string().url().optional().or(z.literal("")),
-  githubUrl:          z.string().url().optional().or(z.literal("")),
+  liveUrl:            z.string().optional().nullable().or(z.literal("")),
+  githubUrl:          z.string().optional().nullable().or(z.literal("")),
   featured:           z.boolean().default(false),
-  year:               z.string().regex(/^\d{4}$/),
-  previewMode:        z.enum(["slideshow", "iframe"]).default("slideshow"),
-  caseStudyProblem:   z.string().max(2000).optional(),
-  caseStudySolution:  z.string().max(2000).optional(),
-  caseStudyOutcome:   z.string().max(2000).optional(),
+  year:               z.string().default("2026"),
+  previewMode:        z.enum(["slideshow", "iframe"]).default("iframe"),
+  caseStudyProblem:   z.string().optional().nullable().or(z.literal("")),
+  caseStudySolution:  z.string().optional().nullable().or(z.literal("")),
+  caseStudyOutcome:   z.string().optional().nullable().or(z.literal("")),
 })
 
 export const GuestbookCreateSchema = z.object({

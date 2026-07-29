@@ -30,7 +30,7 @@ export function ProjectForm({ initial, projectId }: ProjectFormProps) {
     githubUrl:         (initial?.githubUrl         as string) ?? "",
     featured:          (initial?.featured          as boolean) ?? false,
     year:              (initial?.year              as string) ?? new Date().getFullYear().toString(),
-    previewMode:       ((initial?.previewMode      as string) ?? "slideshow") as "slideshow" | "iframe",
+    previewMode:       ((initial?.previewMode      as string) ?? "iframe") as "slideshow" | "iframe",
     caseStudyProblem:  (initial?.caseStudyProblem  as string) ?? "",
     caseStudySolution: (initial?.caseStudySolution as string) ?? "",
     caseStudyOutcome:  (initial?.caseStudyOutcome  as string) ?? "",
@@ -56,7 +56,7 @@ export function ProjectForm({ initial, projectId }: ProjectFormProps) {
       setUploading(false)
       if (res.ok) set("image", data.url)
       else setError(data.message ?? "Upload failed")
-    } catch (err) {
+    } catch {
       setUploading(false)
       setError("Failed to upload image")
     }
@@ -123,49 +123,64 @@ export function ProjectForm({ initial, projectId }: ProjectFormProps) {
         }, 1200)
       } else if (res.status === 422 && data.errors) {
         const errs: Record<string, string> = {}
-        for (const err of data.errors) errs[err.field] = err.message
+        for (const err of data.errors) {
+          errs[err.field] = err.message
+        }
         setFieldErrors(errs)
-        setError("Please fix the errors in the form below")
+        setError("Please fix the validation errors listed below.")
+        window.scrollTo({ top: 0, behavior: "smooth" })
       } else {
         setError(data.message ?? "Failed to save project. Please try again.")
+        window.scrollTo({ top: 0, behavior: "smooth" })
       }
-    } catch (err) {
+    } catch {
       setLoading(false)
       setError("Network error while saving project. Please check your connection.")
+      window.scrollTo({ top: 0, behavior: "smooth" })
     }
   }
 
-  const field = (label: string, key: string, type = "text", placeholder = "") => (
-    <div>
-      <label className="block text-sm font-medium text-foreground mb-1">{label}</label>
-      <input
-        type={type}
-        value={form[key as keyof typeof form] as string}
-        onChange={e => set(key, e.target.value)}
-        placeholder={placeholder}
-        className="w-full px-3 py-2 bg-background border border-border rounded-lg text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-primary placeholder:text-muted-foreground/40"
-      />
-      {fieldErrors[key] && <p className="text-xs text-red-500 mt-1">{fieldErrors[key]}</p>}
-    </div>
-  )
+  const field = (label: string, key: string, type = "text", placeholder = "") => {
+    const hasErr = Boolean(fieldErrors[key])
+    return (
+      <div>
+        <label className="block text-sm font-medium text-foreground mb-1">{label}</label>
+        <input
+          type={type}
+          value={form[key as keyof typeof form] as string}
+          onChange={e => set(key, e.target.value)}
+          placeholder={placeholder}
+          className={`w-full px-3 py-2 bg-background border ${
+            hasErr ? "border-red-500 focus:ring-red-500" : "border-border focus:ring-primary"
+          } rounded-lg text-foreground text-sm focus:outline-none focus:ring-2 placeholder:text-muted-foreground/40`}
+        />
+        {hasErr && <p className="text-xs text-red-500 mt-1 font-medium">{fieldErrors[key]}</p>}
+      </div>
+    )
+  }
 
-  const textarea = (label: string, key: string, rows = 3, placeholder = "") => (
-    <div>
-      <label className="block text-sm font-medium text-foreground mb-1">{label}</label>
-      <textarea
-        value={form[key as keyof typeof form] as string}
-        onChange={e => set(key, e.target.value)}
-        rows={rows}
-        placeholder={placeholder}
-        className="w-full px-3 py-2 bg-background border border-border rounded-lg text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-primary resize-none placeholder:text-muted-foreground/40"
-      />
-      {fieldErrors[key] && <p className="text-xs text-red-500 mt-1">{fieldErrors[key]}</p>}
-    </div>
-  )
+  const textarea = (label: string, key: string, rows = 3, placeholder = "") => {
+    const hasErr = Boolean(fieldErrors[key])
+    return (
+      <div>
+        <label className="block text-sm font-medium text-foreground mb-1">{label}</label>
+        <textarea
+          value={form[key as keyof typeof form] as string}
+          onChange={e => set(key, e.target.value)}
+          rows={rows}
+          placeholder={placeholder}
+          className={`w-full px-3 py-2 bg-background border ${
+            hasErr ? "border-red-500 focus:ring-red-500" : "border-border focus:ring-primary"
+          } rounded-lg text-foreground text-sm focus:outline-none focus:ring-2 resize-none placeholder:text-muted-foreground/40`}
+        />
+        {hasErr && <p className="text-xs text-red-500 mt-1 font-medium">{fieldErrors[key]}</p>}
+      </div>
+    )
+  }
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6 max-w-2xl">
-      {/* Top Notification Banners */}
+      {/* Success Notification Banner */}
       {success && (
         <div className="flex items-center gap-3 p-4 bg-emerald-500/10 border border-emerald-500/30 rounded-xl text-emerald-500 text-sm font-medium animate-in fade-in slide-in-from-top-2">
           <CheckCircle className="w-5 h-5 shrink-0" />
@@ -173,10 +188,22 @@ export function ProjectForm({ initial, projectId }: ProjectFormProps) {
         </div>
       )}
 
+      {/* Error Notification Banner with Detailed Field List */}
       {error && (
-        <div className="flex items-center gap-3 p-4 bg-red-500/10 border border-red-500/30 rounded-xl text-red-500 text-sm font-medium animate-in fade-in slide-in-from-top-2">
-          <AlertCircle className="w-5 h-5 shrink-0" />
-          <span>{error}</span>
+        <div className="p-4 bg-red-500/10 border border-red-500/30 rounded-xl text-red-500 text-sm animate-in fade-in slide-in-from-top-2 space-y-2">
+          <div className="flex items-center gap-2 font-semibold">
+            <AlertCircle className="w-5 h-5 shrink-0" />
+            <span>{error}</span>
+          </div>
+          {Object.keys(fieldErrors).length > 0 && (
+            <ul className="list-disc list-inside space-y-1 text-xs pl-2 text-red-400">
+              {Object.entries(fieldErrors).map(([f, msg]) => (
+                <li key={f}>
+                  <strong className="capitalize">{f}</strong>: {msg}
+                </li>
+              ))}
+            </ul>
+          )}
         </div>
       )}
 
@@ -191,7 +218,9 @@ export function ProjectForm({ initial, projectId }: ProjectFormProps) {
             value={form.image}
             onChange={e => set("image", e.target.value)}
             placeholder="https://... or upload below"
-            className="flex-1 px-3 py-2 bg-background border border-border rounded-lg text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+            className={`flex-1 px-3 py-2 bg-background border ${
+              fieldErrors.image ? "border-red-500" : "border-border"
+            } rounded-lg text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-primary`}
           />
           <label className="flex items-center gap-2 px-3 py-2 bg-secondary text-secondary-foreground rounded-lg text-sm cursor-pointer hover:bg-secondary/80 transition-colors">
             {uploading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Upload className="w-4 h-4" />}
@@ -199,6 +228,7 @@ export function ProjectForm({ initial, projectId }: ProjectFormProps) {
             <input type="file" accept=".jpg,.jpeg,.png,.webp,.gif,.mp4,.webm,.mov" className="hidden" onChange={handleImageUpload} />
           </label>
         </div>
+        {fieldErrors.image && <p className="text-xs text-red-500 mt-1 font-medium">{fieldErrors.image}</p>}
       </div>
 
       {/* Preview Mode Selector */}
@@ -297,11 +327,11 @@ export function ProjectForm({ initial, projectId }: ProjectFormProps) {
       </div>
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         {field("Category (comma-separated)", "category", "text", "Full-Stack, Frontend")}
-        {field("Year", "year", "text", "2025")}
+        {field("Year", "year", "text", "2026")}
       </div>
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        {field("Live URL",   "liveUrl",   "url", "https://yourproject.vercel.app")}
-        {field("GitHub URL", "githubUrl", "url", "https://github.com/ezedinmoh/project-name")}
+        {field("Live URL",   "liveUrl",   "text", "https://yourproject.vercel.app")}
+        {field("GitHub URL", "githubUrl", "text", "https://github.com/ezedinmoh/project-name")}
       </div>
 
       <div className="flex items-center gap-3">
@@ -321,21 +351,6 @@ export function ProjectForm({ initial, projectId }: ProjectFormProps) {
         {textarea("Solution", "caseStudySolution", 3, "How did you solve it? What approach, architecture, or technology did you use?")}
         {textarea("Outcome",  "caseStudyOutcome",  3, "What was the result? Metrics, impact, or key achievements.")}
       </div>
-
-      {/* Bottom Notification Banners */}
-      {success && (
-        <div className="flex items-center gap-3 p-4 bg-emerald-500/10 border border-emerald-500/30 rounded-xl text-emerald-500 text-sm font-medium">
-          <CheckCircle className="w-5 h-5 shrink-0" />
-          <span>{success}</span>
-        </div>
-      )}
-
-      {error && (
-        <div className="flex items-center gap-3 p-4 bg-red-500/10 border border-red-500/30 rounded-xl text-red-500 text-sm font-medium">
-          <AlertCircle className="w-5 h-5 shrink-0" />
-          <span>{error}</span>
-        </div>
-      )}
 
       <div className="flex gap-3 pt-2">
         <button

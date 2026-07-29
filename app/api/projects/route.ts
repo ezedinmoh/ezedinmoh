@@ -20,8 +20,8 @@ export async function GET(req: Request) {
     if (projects && projects.length > 0) {
       return NextResponse.json(projects)
     }
-  } catch (err) {
-    console.error("GET /api/projects DB query error:", err)
+  } catch {
+    console.warn("[DB Offline] GET /api/projects using static fallback")
   }
 
   // Fallback to static allProjects if DB query fails or returns 0 records
@@ -56,7 +56,7 @@ export async function POST(req: Request) {
   } catch (e) {
     if (e instanceof Response || (e as { status?: number })?.status) return e as Response
     const msg = e instanceof Error ? e.message : String(e)
-    console.error("POST /api/projects error:", msg)
+    console.warn("POST /api/projects error:", msg)
     return NextResponse.json({ message: `Internal server error: ${msg}` }, { status: 500 })
   }
 }
