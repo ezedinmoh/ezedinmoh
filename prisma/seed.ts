@@ -7,7 +7,7 @@ import { prisma } from "../lib/db"
 import { allProjects } from "../lib/projects"
 
 async function main() {
-  console.log("Syncing database with the 9 real projects and Cloudinary cover media...")
+  console.log("Syncing database with the 9 real projects and exact Cloudinary media...")
 
   const validIds = new Set(allProjects.map(p => p.id))
 
@@ -24,11 +24,7 @@ async function main() {
   for (let i = 0; i < allProjects.length; i++) {
     const p = allProjects[i]
     const slug = p.id
-
-    const existingRecord = await prisma.project.findUnique({ where: { slug } })
-    const imageToUse = (existingRecord?.image && existingRecord.image.startsWith("http") && !existingRecord.image.includes("placeholder"))
-      ? existingRecord.image
-      : (p.image || "")
+    const imageToUse = p.image || ""
 
     await prisma.project.upsert({
       where:  { slug },
@@ -67,10 +63,10 @@ async function main() {
         caseStudyOutcome:  p.caseStudy?.outcome  ?? null,
       },
     })
-    console.log(`  ✓ Real Project ${i + 1}/${allProjects.length}: ${p.title} -> ${imageToUse}`)
+    console.log(`  ✓ Project ${i + 1}/${allProjects.length}: ${p.title} -> ${imageToUse}`)
   }
 
-  console.log("Database Cloudinary media sync complete!")
+  console.log("Database media sync complete!")
   await prisma.$disconnect()
 }
 
