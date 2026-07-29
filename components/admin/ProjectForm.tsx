@@ -2,7 +2,7 @@
 
 import { useState } from "react"
 import { useRouter } from "next/navigation"
-import { Loader2, Upload, X, Plus } from "lucide-react"
+import { Loader2, Upload, X, Plus, CheckCircle, AlertCircle } from "lucide-react"
 
 interface ProjectFormProps {
   initial?: Record<string, unknown>
@@ -15,6 +15,7 @@ export function ProjectForm({ initial, projectId }: ProjectFormProps) {
   const [uploading, setUploading] = useState(false)
   const [uploadingScreenshot, setUploadingScreenshot] = useState(false)
   const [error, setError]         = useState("")
+  const [success, setSuccess]     = useState("")
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({})
 
   const [form, setForm] = useState({
@@ -38,25 +39,34 @@ export function ProjectForm({ initial, projectId }: ProjectFormProps) {
   function set(field: string, value: string | boolean | string[]) {
     setForm(f => ({ ...f, [field]: value }))
     setFieldErrors(e => ({ ...e, [field]: "" }))
+    setError("")
+    setSuccess("")
   }
 
   async function handleImageUpload(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0]
     if (!file) return
     setUploading(true)
+    setError("")
     const fd = new FormData()
     fd.append("file", file)
-    const res = await fetch("/api/upload", { method: "POST", body: fd })
-    const data = await res.json()
-    setUploading(false)
-    if (res.ok) set("image", data.url)
-    else setError(data.message ?? "Upload failed")
+    try {
+      const res = await fetch("/api/upload", { method: "POST", body: fd })
+      const data = await res.json()
+      setUploading(false)
+      if (res.ok) set("image", data.url)
+      else setError(data.message ?? "Upload failed")
+    } catch (err) {
+      setUploading(false)
+      setError("Failed to upload image")
+    }
   }
 
   async function handleScreenshotUpload(e: React.ChangeEvent<HTMLInputElement>) {
     const files = Array.from(e.target.files ?? [])
     if (!files.length) return
     setUploadingScreenshot(true)
+    setError("")
     const urls: string[] = []
 
     for (const file of files) {
@@ -85,6 +95,7 @@ export function ProjectForm({ initial, projectId }: ProjectFormProps) {
     e.preventDefault()
     setLoading(true)
     setError("")
+    setSuccess("")
     setFieldErrors({})
 
     const payload = {
@@ -96,22 +107,31 @@ export function ProjectForm({ initial, projectId }: ProjectFormProps) {
       previewMode: form.previewMode,
     }
 
-    const url    = projectId ? `/api/projects/${projectId}` : "/api/projects"
+    const url    = projectId ? `/api/projects/${encodeURIComponent(projectId)}` : "/api/projects"
     const method = projectId ? "PUT" : "POST"
 
-    const res  = await fetch(url, { method, headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) })
-    const data = await res.json()
-    setLoading(false)
+    try {
+      const res  = await fetch(url, { method, headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) })
+      const data = await res.json()
+      setLoading(false)
 
-    if (res.ok) {
-      router.push("/admin/projects")
-      router.refresh()
-    } else if (res.status === 422 && data.errors) {
-      const errs: Record<string, string> = {}
-      for (const err of data.errors) errs[err.field] = err.message
-      setFieldErrors(errs)
-    } else {
-      setError(data.message ?? "Something went wrong")
+      if (res.ok) {
+        setSuccess(projectId ? "✓ Project updated successfully! Redirecting..." : "✓ Project created successfully! Redirecting...")
+        setTimeout(() => {
+          router.push("/admin/projects")
+          router.refresh()
+        }, 1200)
+      } else if (res.status === 422 && data.errors) {
+        const errs: Record<string, string> = {}
+        for (const err of data.errors) errs[err.field] = err.message
+        setFieldErrors(errs)
+        setError("Please fix the errors in the form below")
+      } else {
+        setError(data.message ?? "Failed to save project. Please try again.")
+      }
+    } catch (err) {
+      setLoading(false)
+      setError("Network error while saving project. Please check your connection.")
     }
   }
 
@@ -145,6 +165,21 @@ export function ProjectForm({ initial, projectId }: ProjectFormProps) {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6 max-w-2xl">
+      {/* Top Notification Banners */}
+      {success && (
+        <div className="flex items-center gap-3 p-4 bg-emerald-500/10 border border-emerald-500/30 rounded-xl text-emerald-500 text-sm font-medium animate-in fade-in slide-in-from-top-2">
+          <CheckCircle className="w-5 h-5 shrink-0" />
+          <span>{success}</span>
+        </div>
+      )}
+
+      {error && (
+        <div className="flex items-center gap-3 p-4 bg-red-500/10 border border-red-500/30 rounded-xl text-red-500 text-sm font-medium animate-in fade-in slide-in-from-top-2">
+          <AlertCircle className="w-5 h-5 shrink-0" />
+          <span>{error}</span>
+        </div>
+      )}
+
       {field("Title", "title", "text", "e.g. AR Soap & Detergent")}
       {textarea("Description", "description", 4, "Brief description of what the project does and its key features...")}
 
@@ -287,13 +322,26 @@ export function ProjectForm({ initial, projectId }: ProjectFormProps) {
         {textarea("Outcome",  "caseStudyOutcome",  3, "What was the result? Metrics, impact, or key achievements.")}
       </div>
 
-      {error && <p className="text-sm text-red-500">{error}</p>}
+      {/* Bottom Notification Banners */}
+      {success && (
+        <div className="flex items-center gap-3 p-4 bg-emerald-500/10 border border-emerald-500/30 rounded-xl text-emerald-500 text-sm font-medium">
+          <CheckCircle className="w-5 h-5 shrink-0" />
+          <span>{success}</span>
+        </div>
+      )}
 
-      <div className="flex gap-3">
+      {error && (
+        <div className="flex items-center gap-3 p-4 bg-red-500/10 border border-red-500/30 rounded-xl text-red-500 text-sm font-medium">
+          <AlertCircle className="w-5 h-5 shrink-0" />
+          <span>{error}</span>
+        </div>
+      )}
+
+      <div className="flex gap-3 pt-2">
         <button
           type="submit"
           disabled={loading}
-          className="flex items-center gap-2 px-6 py-2.5 bg-primary text-primary-foreground rounded-lg font-medium text-sm hover:opacity-90 transition-all disabled:opacity-60"
+          className="flex items-center gap-2 px-6 py-2.5 bg-primary text-primary-foreground rounded-lg font-medium text-sm hover:opacity-90 transition-all disabled:opacity-60 shadow-md hover:shadow-lg"
         >
           {loading && <Loader2 className="w-4 h-4 animate-spin" />}
           {projectId ? "Save Changes" : "Create Project"}
