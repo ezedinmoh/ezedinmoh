@@ -257,25 +257,42 @@ export function ProjectsTable({ projects: initial }: { projects: Project[] }) {
                       </div>
                     </td>
 
-                    <td className="px-4 py-3 font-medium text-foreground">
-                      <Link
-                        href={`/admin/projects/${p.id}`}
-                        className="inline-flex items-center gap-2 group/title hover:text-primary transition-colors cursor-pointer"
-                        title="Click to edit project"
-                      >
+                    <td
+                      className="px-4 py-3 font-medium text-foreground cursor-pointer group/title"
+                      onClick={() => router.push(`/admin/projects/${p.id}`)}
+                      title="Click to edit project"
+                    >
+                      <div className="flex items-center gap-2">
                         {isHero && (
                           <span className="px-2 py-0.5 bg-yellow-400/15 text-yellow-400 text-xs rounded-full border border-yellow-400/30 font-semibold shadow-sm shrink-0">
                             Hero Card
                           </span>
                         )}
-                        <span className="truncate max-w-xs font-semibold group-hover/title:underline">{p.title}</span>
-                      </Link>
+                        <span className="truncate max-w-xs font-semibold group-hover/title:text-primary group-hover/title:underline">{p.title}</span>
+                      </div>
                     </td>
 
-                    <td className="px-4 py-3 text-muted-foreground">{p.category.join(", ")}</td>
-                    <td className="px-4 py-3 text-muted-foreground tabular-nums">{p.year}</td>
+                    <td
+                      className="px-4 py-3 text-muted-foreground cursor-pointer hover:text-foreground"
+                      onClick={() => router.push(`/admin/projects/${p.id}`)}
+                      title="Click to edit project"
+                    >
+                      {p.category.join(", ")}
+                    </td>
 
-                    <td className="px-4 py-3">
+                    <td
+                      className="px-4 py-3 text-muted-foreground tabular-nums cursor-pointer hover:text-foreground"
+                      onClick={() => router.push(`/admin/projects/${p.id}`)}
+                      title="Click to edit project"
+                    >
+                      {p.year}
+                    </td>
+
+                    <td
+                      className="px-4 py-3 cursor-pointer"
+                      onClick={() => router.push(`/admin/projects/${p.id}`)}
+                      title="Click to edit project"
+                    >
                       {p.featured && (
                         <span className="px-2.5 py-0.5 bg-primary/10 text-primary text-xs rounded-full font-medium">
                           Featured
@@ -349,9 +366,9 @@ export function ProjectsTable({ projects: initial }: { projects: Project[] }) {
                     <span className="text-xs font-bold text-muted-foreground tabular-nums">{idx + 1}</span>
                   </div>
 
-                  <Link
-                    href={`/admin/projects/${p.id}`}
-                    className="flex-1 min-w-0 group/card block cursor-pointer"
+                  <div
+                    onClick={() => router.push(`/admin/projects/${p.id}`)}
+                    className="flex-1 min-w-0 group/card cursor-pointer"
                     title="Click to edit project"
                   >
                     <div className="flex flex-wrap items-center gap-1.5 mb-1">
@@ -372,7 +389,7 @@ export function ProjectsTable({ projects: initial }: { projects: Project[] }) {
                     <p className="text-xs text-muted-foreground mt-0.5">
                       {p.category.join(", ")} · {p.year}
                     </p>
-                  </Link>
+                  </div>
 
                   <div className="flex items-center gap-1 shrink-0">
                     <div className="flex flex-col gap-0.5 mr-1">
