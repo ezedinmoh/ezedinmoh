@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server"
 import { prisma } from "@/lib/db"
+import { allProjects } from "@/lib/projects"
 import { requireAuth } from "@/lib/api/auth"
 import { validateBody } from "@/lib/api/validate"
 import { sanitize } from "@/lib/api/sanitize"
@@ -10,12 +11,25 @@ export async function GET(req: Request) {
   const { searchParams } = new URL(req.url)
   const featured = searchParams.get("featured")
 
-  const projects = await prisma.project.findMany({
-    where: featured === "true" ? { featured: true } : undefined,
-    orderBy: { sortOrder: "asc" },
-  })
+  try {
+    const projects = await prisma.project.findMany({
+      where: featured === "true" ? { featured: true } : undefined,
+      orderBy: { sortOrder: "asc" },
+    })
 
-  return NextResponse.json(projects)
+    if (projects && projects.length > 0) {
+      return NextResponse.json(projects)
+    }
+  } catch (err) {
+    console.error("GET /api/projects DB query error:", err)
+  }
+
+  // Fallback to static allProjects if DB query fails or returns 0 records
+  const fallback = featured === "true"
+    ? allProjects.filter((p) => p.featured)
+    : allProjects
+
+  return NextResponse.json(fallback)
 }
 
 export async function POST(req: Request) {

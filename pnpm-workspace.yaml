@@ -1,0 +1,5 @@
+allowBuilds:
+  '@prisma/engines': true
+  core-js: true
+  prisma: true
+  sharp: true
