@@ -6,11 +6,15 @@ function getConnectionString(): string {
   if (url && url.trim().length > 0) {
     return url.trim().replace(/^["']|["']$/g, "")
   }
-  return "postgresql://neondb_owner:npg_Jc6BmuQFNfO0@ep-twilight-butterfly-anxet41t-pooler.c-6.us-east-1.aws.neon.tech/neondb?sslmode=require&channel_binding=require"
+  return ""
 }
 
 function createPrismaClient() {
   const connectionString = getConnectionString()
+  if (!connectionString) {
+    // Return standard client without adapter if DATABASE_URL is not set
+    return new PrismaClient()
+  }
   const adapter = new PrismaNeonHttp(connectionString, {})
   return new PrismaClient({ adapter })
 }
