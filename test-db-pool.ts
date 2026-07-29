@@ -1,0 +1,18 @@
+import { prisma } from "./lib/db"
+
+async function main() {
+  console.log("Testing Neon DB Pool Connection...")
+  const start = Date.now()
+  const projects = await prisma.project.findMany({ orderBy: { sortOrder: "asc" } })
+  const elapsed = Date.now() - start
+  console.log(`CONNECTED IN ${elapsed}ms! Total projects: ${projects.length}`)
+  projects.forEach((p, i) => {
+    console.log(`${i + 1}. [${p.id}] ${p.title}`)
+    console.log(`   Live: ${p.liveUrl}`)
+    console.log(`   Github: ${p.githubUrl}`)
+    console.log(`   Image: ${p.image}`)
+  })
+  await prisma.$disconnect()
+}
+
+main().catch(console.error)

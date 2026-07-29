@@ -7,7 +7,7 @@ import { prisma } from "../lib/db"
 import { allProjects } from "../lib/projects"
 
 async function main() {
-  console.log("Syncing database with the 9 real projects and exact Cloudinary media...")
+  console.log("Syncing database with the 9 real projects, preserving DB fields...")
 
   const validIds = new Set(allProjects.map(p => p.id))
 
@@ -20,11 +20,15 @@ async function main() {
     }
   }
 
-  // Upsert the 9 real projects with Cloudinary cover media
+  // Upsert the 9 real projects preserving any DB user edits
   for (let i = 0; i < allProjects.length; i++) {
     const p = allProjects[i]
     const slug = p.id
-    const imageToUse = p.image || ""
+
+    const existingRecord = await prisma.project.findUnique({ where: { slug } })
+    const imageToUse = existingRecord?.image || p.image || ""
+    const liveUrlToUse = existingRecord?.liveUrl || p.liveUrl || p.link || null
+    const githubUrlToUse = existingRecord?.githubUrl || p.github || null
 
     await prisma.project.upsert({
       where:  { slug },
@@ -35,8 +39,8 @@ async function main() {
         tags:              p.tags,
         stack:             p.stack,
         category:          p.category,
-        liveUrl:           p.liveUrl ?? p.link ?? null,
-        githubUrl:         p.github ?? null,
+        liveUrl:           liveUrlToUse,
+        githubUrl:         githubUrlToUse,
         featured:          p.featured ?? false,
         year:              p.year,
         sortOrder:         i,
@@ -53,8 +57,8 @@ async function main() {
         tags:              p.tags,
         stack:             p.stack,
         category:          p.category,
-        liveUrl:           p.liveUrl ?? p.link ?? null,
-        githubUrl:         p.github ?? null,
+        liveUrl:           liveUrlToUse,
+        githubUrl:         githubUrlToUse,
         featured:          p.featured ?? false,
         year:              p.year,
         sortOrder:         i,
@@ -63,10 +67,10 @@ async function main() {
         caseStudyOutcome:  p.caseStudy?.outcome  ?? null,
       },
     })
-    console.log(`  ✓ Project ${i + 1}/${allProjects.length}: ${p.title} -> ${imageToUse}`)
+    console.log(`  ✓ Project ${i + 1}/${allProjects.length}: ${p.title}`)
   }
 
-  console.log("Database media sync complete!")
+  console.log("Database sync complete!")
   await prisma.$disconnect()
 }
 
