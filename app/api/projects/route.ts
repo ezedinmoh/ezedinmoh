@@ -14,7 +14,9 @@ export async function GET(req: Request) {
   try {
     const projects = await prisma.project.findMany({
       where: featured === "true" ? { featured: true } : undefined,
-      orderBy: { sortOrder: "asc" },
+      orderBy: featured === "true"
+        ? [{ featuredSortOrder: "asc" }, { sortOrder: "asc" }, { createdAt: "asc" }]
+        : [{ sortOrder: "asc" }, { createdAt: "asc" }],
     })
 
     if (projects && projects.length > 0) {
@@ -44,9 +46,9 @@ export async function POST(req: Request) {
       data: {
         ...clean,
         slug,
-        tags:        Array.isArray(clean.tags)        ? (clean.tags as string[])        : [],
-        stack:       Array.isArray(clean.stack)       ? (clean.stack as string[])       : [],
-        category:    Array.isArray(clean.category)    ? (clean.category as string[])    : [],
+        tags: Array.isArray(clean.tags) ? (clean.tags as string[]) : [],
+        stack: Array.isArray(clean.stack) ? (clean.stack as string[]) : [],
+        category: Array.isArray(clean.category) ? (clean.category as string[]) : [],
         screenshots: Array.isArray(clean.screenshots) ? (clean.screenshots as string[]) : [],
         previewMode: (clean.previewMode as string) || "slideshow",
       } as unknown as Parameters<typeof prisma.project.create>[0]["data"],

@@ -11,20 +11,20 @@ import { cn } from "@/lib/utils"
 import { ThemeToggle } from "./theme-toggle"
 
 const navLinks = [
-  { href: "/",           label: "Home",       icon: Home },
-  { href: "/about",      label: "About",      icon: User },
-  { href: "/projects",   label: "Projects",   icon: FolderOpen },
-  { href: "/blog",       label: "Blog",       icon: BookOpen },
-  { href: "/resume",     label: "Resume",     icon: FileText },
-  { href: "/guestbook",  label: "Guestbook",  icon: MessageSquareHeart },
-  { href: "/contact",    label: "Contact",    icon: Mail },
+  { href: "/", label: "Home", icon: Home },
+  { href: "/about", label: "About", icon: User },
+  { href: "/projects", label: "Projects", icon: FolderOpen },
+  { href: "/blog", label: "Blog", icon: BookOpen },
+  { href: "/resume", label: "Resume", icon: FileText },
+  { href: "/guestbook", label: "Guestbook", icon: MessageSquareHeart },
+  { href: "/contact", label: "Contact", icon: Mail },
 ]
 
 export function Navigation() {
   const [isOpen, setIsOpen] = useState(false)
-  const [atTop, setAtTop]   = useState(true)
-  const pathname            = usePathname()
-  const menuRef             = useRef<HTMLDivElement>(null)
+  const [atTop, setAtTop] = useState(true)
+  const pathname = usePathname()
+  const menuRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     const onScroll = () => setAtTop(window.scrollY < 10)
@@ -48,6 +48,7 @@ export function Navigation() {
 
   return (
     <header
+      suppressHydrationWarning
       className={cn(
         "fixed top-0 left-0 right-0 z-50 transition-all duration-300",
         atTop ? "py-5 bg-transparent" : "py-3 bg-background/95 backdrop-blur-md border-b border-border/40"
@@ -178,18 +179,6 @@ export function Navigation() {
               </li>
             ))}
           </ul>
-
-          {/* Bottom CTA */}
-          <div className="p-3 border-t border-border">
-            <Link
-              href="/contact"
-              onClick={() => setIsOpen(false)}
-              className="flex items-center justify-center gap-2 w-full py-2.5 bg-primary text-primary-foreground rounded-xl text-sm font-medium hover:opacity-90 transition-all"
-            >
-              Let's Talk
-              <ArrowRight className="w-3.5 h-3.5" />
-            </Link>
-          </div>
         </div>
       </div>
     </header>

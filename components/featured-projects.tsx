@@ -417,13 +417,13 @@ export function FeaturedProjects() {
           screenshots: Array.isArray(p.screenshots) ? p.screenshots as string[] : [],
           previewMode: (p.previewMode as string | undefined) ?? "slideshow",
           caseStudy: p.caseStudyProblem ? {
-            problem:  p.caseStudyProblem as string,
+            problem: p.caseStudyProblem as string,
             solution: p.caseStudySolution as string,
-            outcome:  p.caseStudyOutcome as string,
+            outcome: p.caseStudyOutcome as string,
           } : undefined,
-        })).sort((a: any, b: any) => (a.sortOrder ?? 0) - (b.sortOrder ?? 0)) as DBProject[])
+        })).sort((a: any, b: any) => (a.featuredSortOrder ?? a.sortOrder ?? 0) - (b.featuredSortOrder ?? b.sortOrder ?? 0)) as DBProject[])
       })
-      .catch(() => {})
+      .catch(() => { })
   }, [])
 
   const [hero, ...rest] = projects
@@ -435,7 +435,7 @@ export function FeaturedProjects() {
   }
 
   return (
-    <section className="py-24 md:py-32 bg-background relative overflow-hidden">
+    <section id="featured-projects" className="py-24 md:py-32 bg-background relative overflow-hidden">
       {demoProject && <DemoModal project={demoProject} onClose={() => setDemoProject(null)} />}
       {caseStudyProject && <CaseStudyModal project={caseStudyProject} onClose={() => setCaseStudyProject(null)} />}
       <div className="absolute inset-0">

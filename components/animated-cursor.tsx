@@ -6,14 +6,23 @@ import { cn } from "@/lib/utils"
 export function AnimatedCursor() {
   const [position, setPosition] = useState({ x: 0, y: 0 })
   const [isPointer, setIsPointer] = useState(false)
+  // Start hidden — only reveal after the first real mousemove on the client
   const [isHidden, setIsHidden] = useState(true)
   const [isClicking, setIsClicking] = useState(false)
+  // Whether we should render at all — determined entirely on the client
+  const [shouldRender, setShouldRender] = useState(false)
 
   useEffect(() => {
+    // Only show the custom cursor on non-touch, pointer-capable devices.
+    // Checking inside useEffect ensures this runs only on the client,
+    // so both server and client initially render nothing (no hydration mismatch).
+    if (window.matchMedia("(pointer: fine)").matches && !("ontouchstart" in window)) {
+      setShouldRender(true)
+    }
+
     const handleMouseMove = (e: MouseEvent) => {
       setPosition({ x: e.clientX, y: e.clientY })
       setIsHidden(false)
-      
       const target = e.target as HTMLElement
       setIsPointer(
         window.getComputedStyle(target).cursor === "pointer" ||
@@ -21,7 +30,6 @@ export function AnimatedCursor() {
         target.tagName === "BUTTON"
       )
     }
-
     const handleMouseDown = () => setIsClicking(true)
     const handleMouseUp = () => setIsClicking(false)
     const handleMouseLeave = () => setIsHidden(true)
@@ -42,10 +50,8 @@ export function AnimatedCursor() {
     }
   }, [])
 
-  // Don't render on touch devices
-  if (typeof window !== "undefined" && "ontouchstart" in window) {
-    return null
-  }
+  // Return null on SSR and on touch-only devices — same output on both passes
+  if (!shouldRender) return null
 
   return (
     <>
@@ -56,11 +62,8 @@ export function AnimatedCursor() {
           isHidden && "opacity-0",
           isClicking && "scale-75"
         )}
-        style={{
-          transform: `translate(${position.x - 6}px, ${position.y - 6}px)`,
-        }}
+        style={{ transform: `translate(${position.x - 6}px, ${position.y - 6}px)` }}
       />
-
       {/* Follower ring */}
       <div
         className={cn(
