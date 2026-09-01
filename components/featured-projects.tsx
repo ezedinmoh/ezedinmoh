@@ -106,10 +106,10 @@ function ProjectCard({
       onMouseLeave={() => setHovered(false)}
       className={cn(
         "group relative rounded-2xl bg-card border border-border/60 overflow-hidden transition-all duration-500 flex flex-col hover:border-primary/40 hover:shadow-2xl hover:-translate-y-1",
-        large ? "h-full min-h-[460px]" : compact ? "h-full min-h-[210px]" : "h-full min-h-[360px]"
+        large ? "h-full min-h-[520px]" : compact ? "h-full min-h-[220px]" : "h-full min-h-[380px]"
       )}
     >
-      <div className={cn("relative overflow-hidden shrink-0", large ? "h-64 sm:h-72" : compact ? "h-32" : "h-48")}>
+      <div className={cn("relative overflow-hidden shrink-0", large ? "h-72 sm:h-96 md:h-[380px]" : compact ? "h-36" : "h-52")}>
         {project.image ? (
           <>
             {isVideo ? (
