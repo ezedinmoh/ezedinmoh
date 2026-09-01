@@ -4,17 +4,17 @@ import { useState, Suspense } from "react"
 import { signIn } from "next-auth/react"
 import { useRouter, useSearchParams } from "next/navigation"
 import Link from "next/link"
-import { Loader2, ArrowLeft, Home } from "lucide-react"
+import { Loader2, ArrowLeft, Home, UserCheck } from "lucide-react"
 
 function LoginForm() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const callbackUrl = searchParams.get("callbackUrl") ?? "/admin"
 
-  const [email, setEmail]       = useState("")
-  const [password, setPassword] = useState("")
-  const [error, setError]       = useState("")
-  const [loading, setLoading]   = useState(false)
+  const [identifier, setIdentifier] = useState("")
+  const [password, setPassword]     = useState("")
+  const [error, setError]           = useState("")
+  const [loading, setLoading]       = useState(false)
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
@@ -22,14 +22,17 @@ function LoginForm() {
     setError("")
 
     const res = await signIn("credentials", {
-      email, password, redirect: false,
+      identifier,
+      email: identifier, // Backwards compatibility if provider expects email
+      password,
+      redirect: false,
     })
 
     setLoading(false)
     if (res?.ok) {
       router.push(callbackUrl)
     } else {
-      setError("Invalid email or password")
+      setError("Invalid username/email or password")
     }
   }
 
@@ -50,19 +53,22 @@ function LoginForm() {
         <div className="flex items-center justify-between mb-4">
           <h1 className="text-2xl font-bold text-foreground">Admin Login</h1>
           <div className="p-2 rounded-lg bg-primary/10 text-primary">
-            <Home className="w-5 h-5" />
+            <UserCheck className="w-5 h-5" />
           </div>
         </div>
         <p className="text-sm text-muted-foreground mb-6">Sign in to manage your portfolio</p>
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="block text-sm font-medium text-foreground mb-1">Email</label>
+            <label className="block text-sm font-medium text-foreground mb-1">Username or Email</label>
             <input
-              type="email"
-              value={email}
-              onChange={e => setEmail(e.target.value)}
+              type="text"
+              value={identifier}
+              onChange={(e) => setIdentifier(e.target.value)}
               required
+              autoCapitalize="none"
+              autoCorrect="off"
+              placeholder="Username or email"
               className="w-full px-3 py-2 bg-background border border-border rounded-lg text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-primary"
             />
           </div>
@@ -71,8 +77,9 @@ function LoginForm() {
             <input
               type="password"
               value={password}
-              onChange={e => setPassword(e.target.value)}
+              onChange={(e) => setPassword(e.target.value)}
               required
+              placeholder="••••••••"
               className="w-full px-3 py-2 bg-background border border-border rounded-lg text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-primary"
             />
           </div>
@@ -82,7 +89,7 @@ function LoginForm() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full flex items-center justify-center gap-2 py-2.5 bg-primary text-primary-foreground rounded-lg font-medium text-sm hover:opacity-90 transition-all disabled:opacity-60"
+            className="w-full flex items-center justify-center gap-2 py-2.5 bg-primary text-primary-foreground rounded-lg font-medium text-sm hover:opacity-90 transition-all disabled:opacity-60 shadow-md"
           >
             {loading && <Loader2 className="w-4 h-4 animate-spin" />}
             Sign In
