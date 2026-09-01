@@ -1,4 +1,21 @@
+"use client"
+
+import { useState, useEffect } from "react"
+
 export default function Loading() {
+  const [avatarUrl, setAvatarUrl] = useState<string | null>(null)
+  const [name, setName]           = useState<string>("Ezedin Mohammed")
+
+  useEffect(() => {
+    fetch("/api/profile")
+      .then((r) => r.json())
+      .then((data) => {
+        if (data?.avatarUrl) setAvatarUrl(data.avatarUrl)
+        if (data?.title) setName(data.title)
+      })
+      .catch(() => {})
+  }, [])
+
   return (
     <div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-background overflow-hidden">
 
@@ -26,7 +43,7 @@ export default function Loading() {
       {/* Center content */}
       <div className="relative flex flex-col items-center gap-8">
 
-        {/* Logo mark */}
+        {/* Logo / Profile Avatar mark */}
         <div className="relative">
           {/* Outer ring — slow spin */}
           <div
@@ -41,32 +58,37 @@ export default function Loading() {
           {/* Glow ring */}
           <div className="absolute inset-0 rounded-full animate-glow" style={{ margin: "-2px" }} />
 
-          {/* Logo box */}
+          {/* Logo / Avatar Box */}
           <div
-            className="relative w-20 h-20 rounded-2xl flex items-center justify-center animate-scale-in"
+            className="relative w-20 h-20 rounded-2xl overflow-hidden flex items-center justify-center animate-scale-in border border-primary/30 shadow-xl"
             style={{
               background: "linear-gradient(135deg, oklch(0.44 0.20 185), oklch(0.52 0.18 200))",
               boxShadow: "0 0 40px oklch(0.7 0.15 180 / 0.4), 0 0 80px oklch(0.7 0.15 180 / 0.15)",
             }}
           >
-            <span
-              className="text-2xl font-black tracking-tight text-white select-none"
-              style={{ fontFamily: "var(--font-sans)" }}
-            >
-              EM
-            </span>
+            {avatarUrl ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img src={avatarUrl} alt={name} className="w-full h-full object-cover" />
+            ) : (
+              <span
+                className="text-2xl font-black tracking-tight text-white select-none"
+                style={{ fontFamily: "var(--font-sans)" }}
+              >
+                EM
+              </span>
+            )}
           </div>
         </div>
 
         {/* Name + tagline */}
         <div className="text-center space-y-2 animate-slide-up opacity-0" style={{ animationDelay: "0.2s", animationFillMode: "forwards" }}>
-          <p className="text-lg font-semibold text-foreground tracking-wide">Ezedin Mohammed</p>
-          <p className="text-sm text-muted-foreground">Full-Stack Developer</p>
+          <p className="text-lg font-semibold text-foreground tracking-wide">{name}</p>
+          <p className="text-sm text-muted-foreground">Software Engineer & Full-Stack Developer</p>
         </div>
 
         {/* Animated dots loader */}
         <div className="flex items-center gap-2 animate-slide-up opacity-0" style={{ animationDelay: "0.35s", animationFillMode: "forwards" }}>
-          {[0, 1, 2, 3].map(i => (
+          {[0, 1, 2, 3].map((i) => (
             <div
               key={i}
               className="w-1.5 h-1.5 rounded-full bg-primary"
