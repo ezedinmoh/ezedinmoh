@@ -5,6 +5,7 @@ import Link from "next/link"
 import { ArrowRight, ArrowUpRight, Github, ExternalLink, X, Monitor, Layers, ChevronRight, Target, Lightbulb, TrendingUp } from "lucide-react"
 import { cn } from "@/lib/utils"
 import type { Project } from "@/lib/projects"
+import { StarRating } from "@/components/star-rating"
 
 function isVideoUrl(url: string) {
   return /\.(mp4|webm|mov)(\?|$)/i.test(url) || url.includes("/video/upload/")
@@ -55,7 +56,13 @@ function DemoModal({ project, onClose }: { project: DBProject; onClose: () => vo
             </div>
             <p className="text-xs text-muted-foreground truncate mt-0.5">{subtitle}</p>
           </div>
-          <div className="flex items-center gap-2 shrink-0">
+          <div className="flex items-center gap-3 shrink-0">
+            <StarRating
+              projectId={project.id}
+              initialSum={project.ratingSum}
+              initialCount={project.ratingCount}
+              compact
+            />
             {project.liveUrl && (
               <a
                 href={project.liveUrl}
@@ -380,7 +387,15 @@ function ProjectCard({ project, index, large, compact, onDemo, onCaseStudy }: {
         </div>
       </div>
       <div className={cn("flex flex-col", compact ? "p-4" : "p-5")}>
-        <h3 className={cn("font-bold text-card-foreground group-hover:text-primary transition-colors mb-2", large ? "text-xl md:text-2xl" : compact ? "text-sm md:text-base line-clamp-1" : "text-base md:text-lg")}>{project.title}</h3>
+        <div className="flex items-start justify-between gap-2 mb-2">
+          <h3 className={cn("font-bold text-card-foreground group-hover:text-primary transition-colors", large ? "text-xl md:text-2xl" : compact ? "text-sm md:text-base line-clamp-1" : "text-base md:text-lg")}>{project.title}</h3>
+          <StarRating
+            projectId={project.id}
+            initialSum={project.ratingSum}
+            initialCount={project.ratingCount}
+            compact
+          />
+        </div>
         <p className={cn("text-muted-foreground leading-relaxed", large ? "text-sm mb-5" : compact ? "text-xs mb-3 line-clamp-1" : "text-xs mb-4 line-clamp-2")}>{project.description}</p>
         <div className="flex items-center gap-3 mt-auto">
           <button onClick={onDemo} className="inline-flex items-center gap-1 text-sm font-medium text-primary hover:underline">
@@ -416,6 +431,8 @@ export function FeaturedProjects() {
           link: p.liveUrl as string | undefined,
           screenshots: Array.isArray(p.screenshots) ? p.screenshots as string[] : [],
           previewMode: (p.previewMode as string | undefined) ?? "slideshow",
+          ratingSum: typeof p.ratingSum === "number" ? p.ratingSum : 0,
+          ratingCount: typeof p.ratingCount === "number" ? p.ratingCount : 0,
           caseStudy: p.caseStudyProblem ? {
             problem: p.caseStudyProblem as string,
             solution: p.caseStudySolution as string,
