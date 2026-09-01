@@ -2,352 +2,121 @@
 
 import { useState, useEffect } from "react"
 import Link from "next/link"
-import { ArrowRight, ArrowUpRight, Github, ExternalLink, X, Monitor, Layers, ChevronRight, Target, Lightbulb, TrendingUp } from "lucide-react"
+import { ExternalLink, ArrowUpRight, Github, X, ChevronRight, Monitor, Layers, ArrowRight } from "lucide-react"
 import { cn } from "@/lib/utils"
-import type { Project } from "@/lib/projects"
 import { StarRating } from "@/components/star-rating"
+import { ProjectPreviewModal } from "@/components/project-preview-modal"
 
-function isVideoUrl(url: string) {
-  return /\.(mp4|webm|mov)(\?|$)/i.test(url) || url.includes("/video/upload/")
+interface CaseStudy {
+  problem: string
+  solution: string
+  outcome: string
 }
 
-type DBProject = Project & { screenshots?: string[] }
-
-function DemoModal({ project, onClose }: { project: DBProject; onClose: () => void }) {
-  const isIframeMode = project.previewMode === "iframe" && !!project.liveUrl
-
-  // Slideshow state
-  const media: string[] = (project.screenshots?.length)
-    ? project.screenshots!
-    : project.image ? [project.image] : []
-  const [idx, setIdx] = useState(0)
-  const current = media[idx]
-
-  // Iframe state
-  const [iframeLoading, setIframeLoading] = useState(true)
-  const [iframeError, setIframeError] = useState(false)
-
-  // Subtitle line under the project title in the header
-  const subtitle = isIframeMode
-    ? project.liveUrl
-    : media.length > 1
-      ? `${idx + 1} / ${media.length}`
-      : project.liveUrl
-
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-background/80 backdrop-blur-sm" onClick={onClose}>
-      <div
-        className={cn(
-          "bg-card border border-border rounded-2xl shadow-2xl w-full overflow-hidden animate-scale-in flex flex-col",
-          isIframeMode ? "max-w-6xl h-[92vh]" : "max-w-4xl max-h-[90vh]"
-        )}
-        onClick={e => e.stopPropagation()}
-      >
-        {/* ── Header ── */}
-        <div className="flex items-center justify-between p-4 border-b border-border shrink-0">
-          <div className="min-w-0 flex-1 mr-3">
-            <div className="flex items-center gap-2">
-              <h3 className="font-semibold text-foreground truncate">{project.title}</h3>
-              {isIframeMode && (
-                <span className="shrink-0 px-2 py-0.5 text-xs font-medium bg-primary/10 text-primary border border-primary/20 rounded-full">
-                  Live Preview
-                </span>
-              )}
-            </div>
-            <p className="text-xs text-muted-foreground truncate mt-0.5">{subtitle}</p>
-          </div>
-          <div className="flex items-center gap-3 shrink-0">
-            <StarRating
-              projectId={project.id}
-              initialSum={project.ratingSum}
-              initialCount={project.ratingCount}
-              compact
-            />
-            {project.liveUrl && (
-              <a
-                href={project.liveUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex items-center gap-1.5 px-3 py-1.5 bg-primary text-primary-foreground rounded-lg text-xs font-medium hover:opacity-90 transition-all"
-              >
-                <ExternalLink className="w-3 h-3" /> Open
-              </a>
-            )}
-            <button
-              onClick={onClose}
-              className="p-2 rounded-lg text-muted-foreground hover:text-foreground hover:bg-secondary transition-all"
-            >
-              <X className="w-4 h-4" />
-            </button>
-          </div>
-        </div>
-
-        {/* ── Body ── */}
-        <div className={cn(
-          "relative overflow-hidden",
-          isIframeMode ? "flex-1 min-h-0" : "h-[55vh]"
-        )}>
-
-          {/* ── OPTION 2: iframe mode ── */}
-          {isIframeMode ? (
-            <div className="w-full h-full relative bg-secondary/20">
-              {/* Loading spinner */}
-              {iframeLoading && !iframeError && (
-                <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 z-10 bg-secondary/20">
-                  <div className="w-10 h-10 rounded-full border-2 border-primary border-t-transparent animate-spin" />
-                  <p className="text-sm text-muted-foreground">Loading live preview…</p>
-                </div>
-              )}
-              {/* Error state */}
-              {iframeError && (
-                <div className="absolute inset-0 flex flex-col items-center justify-center gap-4 z-10 p-8 text-center">
-                  <div className="w-16 h-16 rounded-2xl bg-destructive/10 border border-destructive/20 flex items-center justify-center">
-                    <Monitor className="w-8 h-8 text-destructive" />
-                  </div>
-                  <div>
-                    <p className="font-semibold text-foreground mb-1">Preview unavailable</p>
-                    <p className="text-sm text-muted-foreground max-w-xs">
-                      This website cannot be embedded due to security restrictions (X-Frame-Options).
-                    </p>
-                  </div>
-                  {project.liveUrl && (
-                    <a
-                      href={project.liveUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="inline-flex items-center gap-2 px-5 py-2.5 bg-primary text-primary-foreground rounded-full text-sm font-medium hover:opacity-90 transition-all hover:scale-105"
-                    >
-                      Open in New Tab <ArrowUpRight className="w-4 h-4" />
-                    </a>
-                  )}
-                </div>
-              )}
-              {/* The iframe itself */}
-              {!iframeError && (
-                <iframe
-                  key={project.liveUrl}
-                  src={project.liveUrl}
-                  title={`Live preview of ${project.title}`}
-                  className={cn(
-                    "w-full h-full border-0 transition-opacity duration-300",
-                    iframeLoading ? "opacity-0" : "opacity-100"
-                  )}
-                  sandbox="allow-scripts allow-same-origin allow-popups allow-forms allow-popups-to-escape-sandbox"
-                  loading="lazy"
-                  referrerPolicy="no-referrer"
-                  onLoad={() => setIframeLoading(false)}
-                  onError={() => { setIframeLoading(false); setIframeError(true) }}
-                />
-              )}
-            </div>
-          ) : (
-            /* ── OPTION 1: slideshow mode ── */
-            <div className="relative bg-secondary/30 w-full h-full flex items-center justify-center">
-              {current ? (
-                <>
-                  {isVideoUrl(current) ? (
-                    <video
-                      key={current}
-                      src={current}
-                      autoPlay muted loop playsInline controls
-                      className="w-full h-full object-contain"
-                    />
-                  ) : (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img
-                      key={current}
-                      src={current}
-                      alt={project.title}
-                      className="w-full h-full object-contain"
-                    />
-                  )}
-                  <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-4 pointer-events-none">
-                    <p className="text-white font-bold text-base">{project.title}</p>
-                    <p className="text-white/70 text-xs line-clamp-2 mt-0.5">{project.description}</p>
-                    {project.liveUrl && (
-                      <a
-                        href={project.liveUrl}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="inline-flex items-center gap-2 mt-3 px-4 py-2 bg-primary text-primary-foreground rounded-full text-sm font-bold pointer-events-auto hover:opacity-90 transition-all hover:scale-105 shadow-lg"
-                      >
-                        Visit Live Site <ArrowUpRight className="w-4 h-4" />
-                      </a>
-                    )}
-                  </div>
-                </>
-              ) : (
-                <div className="text-center p-8">
-                  <div className="w-20 h-20 mx-auto mb-4 rounded-2xl bg-primary/10 border border-primary/20 flex items-center justify-center">
-                    <Monitor className="w-10 h-10 text-primary" />
-                  </div>
-                  <p className="text-foreground font-semibold mb-1">{project.title}</p>
-                  <p className="text-muted-foreground text-sm mb-4 max-w-xs">{project.description}</p>
-                  {project.liveUrl && (
-                    <a
-                      href={project.liveUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="inline-flex items-center gap-2 px-5 py-2.5 bg-primary text-primary-foreground rounded-full text-sm font-bold hover:opacity-90 transition-all hover:scale-105"
-                    >
-                      Visit Live Site <ArrowUpRight className="w-4 h-4" />
-                    </a>
-                  )}
-                </div>
-              )}
-              {/* Prev / Next arrows */}
-              {media.length > 1 && (
-                <>
-                  <button
-                    onClick={() => setIdx(i => (i - 1 + media.length) % media.length)}
-                    className="absolute left-3 top-1/2 -translate-y-1/2 w-9 h-9 bg-background/80 backdrop-blur-sm rounded-full flex items-center justify-center text-foreground hover:bg-background transition-all text-lg font-bold"
-                  >&#8249;</button>
-                  <button
-                    onClick={() => setIdx(i => (i + 1) % media.length)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 w-9 h-9 bg-background/80 backdrop-blur-sm rounded-full flex items-center justify-center text-foreground hover:bg-background transition-all text-lg font-bold"
-                  >&#8250;</button>
-                </>
-              )}
-            </div>
-          )}
-        </div>
-
-        {/* ── Thumbnail strip (slideshow only) ── */}
-        {!isIframeMode && media.length > 1 && (
-          <div className="flex gap-2 p-3 overflow-x-auto border-t border-border bg-background/50 shrink-0">
-            {media.map((url, i) => (
-              <button
-                key={i}
-                onClick={() => setIdx(i)}
-                className={cn(
-                  "shrink-0 w-16 h-10 rounded-lg overflow-hidden border-2 transition-all",
-                  i === idx ? "border-primary" : "border-transparent opacity-50 hover:opacity-100"
-                )}
-              >
-                {isVideoUrl(url)
-                  ? <video src={url} muted className="w-full h-full object-cover" />
-                  // eslint-disable-next-line @next/next/no-img-element
-                  : <img src={url} alt="" className="w-full h-full object-cover" />}
-              </button>
-            ))}
-          </div>
-        )}
-      </div>
-    </div>
-  )
+interface DBProject {
+  id: string
+  title: string
+  description: string
+  image: string
+  screenshots: string[]
+  tags: string[]
+  stack: string[]
+  category: string[]
+  github?: string
+  link?: string
+  liveUrl?: string
+  githubUrl?: string
+  featured: boolean
+  featuredSortOrder?: number
+  sortOrder?: number
+  previewMode?: "slideshow" | "iframe"
+  ratingSum?: number
+  ratingCount?: number
+  caseStudy?: CaseStudy
 }
 
 function CaseStudyModal({ project, onClose }: { project: DBProject; onClose: () => void }) {
   if (!project.caseStudy) return null
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-background/80 backdrop-blur-sm overflow-y-auto" onClick={onClose}>
-      <div className="bg-card border border-border rounded-2xl shadow-2xl w-full max-w-2xl my-auto animate-scale-in" onClick={e => e.stopPropagation()}>
-        <div className="flex items-center justify-between p-6 border-b border-border">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-background/80 backdrop-blur-md animate-fade-in">
+      <div className="relative w-full max-w-2xl bg-card border border-border rounded-2xl p-6 sm:p-8 shadow-2xl space-y-6 max-h-[90vh] overflow-y-auto">
+        <div className="flex items-start justify-between">
           <div>
-            <span className="text-xs text-primary font-medium uppercase tracking-wider">Case Study</span>
-            <h3 className="text-xl font-bold text-foreground mt-0.5">{project.title}</h3>
+            <span className="text-primary text-xs font-semibold uppercase tracking-wider block mb-1">Case Study</span>
+            <h2 className="text-2xl font-bold text-foreground">{project.title}</h2>
           </div>
           <button onClick={onClose} className="p-2 rounded-lg text-muted-foreground hover:text-foreground hover:bg-secondary transition-all">
             <X className="w-4 h-4" />
           </button>
         </div>
-        <div className="p-6 space-y-6">
-          {[
-            { icon: Target, label: "Problem", color: "text-red-400", bg: "bg-red-400/10 border-red-400/20", text: project.caseStudy.problem },
-            { icon: Lightbulb, label: "Solution", color: "text-yellow-400", bg: "bg-yellow-400/10 border-yellow-400/20", text: project.caseStudy.solution },
-            { icon: TrendingUp, label: "Outcome", color: "text-emerald-400", bg: "bg-emerald-400/10 border-emerald-400/20", text: project.caseStudy.outcome },
-          ].map(({ icon: Icon, label, color, bg, text }) => (
-            <div key={label} className={cn("p-5 rounded-xl border", bg)}>
-              <div className={cn("flex items-center gap-2 mb-2 font-semibold", color)}>
-                <Icon className="w-4 h-4" />{label}
-              </div>
-              <p className="text-muted-foreground text-sm leading-relaxed">{text}</p>
-            </div>
-          ))}
-          <div>
-            <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3">Tech Stack</p>
-            <div className="flex flex-wrap gap-2">
-              {project.stack.map(t => (
-                <span key={t} className="px-2.5 py-1 text-xs bg-secondary text-muted-foreground rounded-full border border-border">{t}</span>
-              ))}
-            </div>
+
+        <div className="space-y-4">
+          <div className="p-4 rounded-xl bg-secondary/50 border border-border/50 space-y-1">
+            <h3 className="text-xs font-bold uppercase tracking-wider text-red-500/90">The Challenge</h3>
+            <p className="text-sm text-foreground leading-relaxed">{project.caseStudy.problem}</p>
           </div>
-          <div className="flex gap-3 pt-2">
-            {project.liveUrl && (
-              <a href={project.liveUrl} target="_blank" rel="noopener noreferrer"
-                className="flex-1 flex items-center justify-center gap-2 py-2.5 bg-primary text-primary-foreground rounded-xl text-sm font-medium hover:opacity-90 transition-all">
-                <ExternalLink className="w-4 h-4" /> Live Demo
-              </a>
-            )}
-            {project.github && (
-              <a href={project.github} target="_blank" rel="noopener noreferrer"
-                className="flex-1 flex items-center justify-center gap-2 py-2.5 bg-secondary text-secondary-foreground rounded-xl text-sm font-medium hover:bg-secondary/80 transition-all">
-                <Github className="w-4 h-4" /> Source Code
-              </a>
-            )}
+          <div className="p-4 rounded-xl bg-secondary/50 border border-border/50 space-y-1">
+            <h3 className="text-xs font-bold uppercase tracking-wider text-primary">The Solution</h3>
+            <p className="text-sm text-foreground leading-relaxed">{project.caseStudy.solution}</p>
           </div>
+          <div className="p-4 rounded-xl bg-secondary/50 border border-border/50 space-y-1">
+            <h3 className="text-xs font-bold uppercase tracking-wider text-emerald-500">The Impact</h3>
+            <p className="text-sm text-foreground leading-relaxed">{project.caseStudy.outcome}</p>
+          </div>
+        </div>
+
+        <div className="flex justify-end gap-3 pt-2">
+          {project.github && (
+            <a href={project.github} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 px-4 py-2 bg-secondary text-foreground text-xs font-medium rounded-xl hover:bg-secondary/80 transition-all">
+              <Github className="w-3.5 h-3.5" /> Source Code
+            </a>
+          )}
+          {project.link && (
+            <a href={project.link} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 px-4 py-2 bg-primary text-primary-foreground text-xs font-medium rounded-xl hover:opacity-90 transition-all">
+              <ArrowUpRight className="w-3.5 h-3.5" /> Live Demo
+            </a>
+          )}
         </div>
       </div>
     </div>
   )
 }
 
-function ProjectCard({ project, index, large, compact, onDemo, onCaseStudy }: {
-  project: DBProject; index: number; large?: boolean; compact?: boolean; onDemo: () => void; onCaseStudy: () => void
+function ProjectCard({
+  project, index, large = false, compact = false, onDemo, onCaseStudy
+}: {
+  project: DBProject
+  index: number
+  large?: boolean
+  compact?: boolean
+  onDemo: () => void
+  onCaseStudy: () => void
 }) {
   const [hovered, setHovered] = useState(false)
-  const hasMedia = !!project.image
+  const isVideo = project.image ? (
+    project.image.endsWith(".mp4") ||
+    project.image.endsWith(".webm") ||
+    project.image.endsWith(".mov") ||
+    (project.image.includes("cloudinary.com") && project.image.includes("/video/upload/"))
+  ) : false
 
   return (
     <article
-      className={cn(
-        "group relative overflow-hidden rounded-2xl bg-card border border-border",
-        "hover:border-primary/50 hover:shadow-xl hover:shadow-primary/5 transition-all duration-500",
-        "animate-slide-up opacity-0 flex flex-col w-full",
-        (large || compact) && "h-full"
-      )}
-      style={{ animationDelay: `${index * 0.1}s`, animationFillMode: "forwards" }}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
+      className={cn(
+        "group relative rounded-2xl bg-card border border-border/60 overflow-hidden transition-all duration-500 flex flex-col hover:border-primary/40 hover:shadow-2xl hover:-translate-y-1",
+        large ? "h-full min-h-[460px]" : compact ? "h-full min-h-[210px]" : "h-full min-h-[360px]"
+      )}
     >
-      <div className={cn(
-        "relative overflow-hidden bg-gradient-to-br from-secondary/40 via-background to-secondary/20",
-        compact ? "h-44 md:h-48 lg:h-52 xl:h-56" : "aspect-video"
-      )}>
-        {hasMedia ? (
+      <div className={cn("relative overflow-hidden shrink-0", large ? "h-64 sm:h-72" : compact ? "h-32" : "h-48")}>
+        {project.image ? (
           <>
-            <div className="absolute inset-0 pointer-events-none">
-              {isVideoUrl(project.image!) ? (
-                <video
-                  src={project.image}
-                  autoPlay
-                  muted
-                  loop
-                  playsInline
-                  aria-hidden="true"
-                  className="absolute inset-0 w-full h-full object-cover scale-110 blur-2xl opacity-40"
-                />
-              ) : (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img
-                  src={project.image}
-                  alt=""
-                  aria-hidden="true"
-                  className="absolute inset-0 w-full h-full object-cover scale-110 blur-2xl opacity-40"
-                />
-              )}
-            </div>
-            {isVideoUrl(project.image!) ? (
+            {isVideo ? (
               <video
                 src={project.image}
-                autoPlay
-                muted
-                loop
-                playsInline
-                className={cn(
-                  "absolute inset-0 w-full h-full",
-                  "object-fill"
-                )}
+                autoPlay muted loop playsInline
+                className={cn("absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105")}
               />
             ) : (
               // eslint-disable-next-line @next/next/no-img-element
@@ -355,8 +124,8 @@ function ProjectCard({ project, index, large, compact, onDemo, onCaseStudy }: {
                 src={project.image}
                 alt={project.title}
                 className={cn(
-                  "absolute inset-0 w-full h-full",
-                  "object-fill"
+                  "absolute inset-0 w-full h-full transition-transform duration-700 group-hover:scale-105",
+                  project.image.includes("cloudinary.com") ? "object-cover object-top" : "object-fill"
                 )}
               />
             )}
@@ -386,7 +155,7 @@ function ProjectCard({ project, index, large, compact, onDemo, onCaseStudy }: {
           )}
         </div>
       </div>
-      <div className={cn("flex flex-col", compact ? "p-4" : "p-5")}>
+      <div className={cn("flex flex-col flex-1", compact ? "p-4" : "p-5")}>
         <div className="flex items-start justify-between gap-2 mb-2">
           <h3 className={cn("font-bold text-card-foreground group-hover:text-primary transition-colors", large ? "text-xl md:text-2xl" : compact ? "text-sm md:text-base line-clamp-1" : "text-base md:text-lg")}>{project.title}</h3>
           <StarRating
@@ -416,6 +185,7 @@ function ProjectCard({ project, index, large, compact, onDemo, onCaseStudy }: {
     </article>
   )
 }
+
 export function FeaturedProjects() {
   const [projects, setProjects] = useState<DBProject[]>([])
   const [demoProject, setDemoProject] = useState<DBProject | null>(null)
@@ -429,6 +199,8 @@ export function FeaturedProjects() {
           ...(p as object),
           github: p.githubUrl as string | undefined,
           link: p.liveUrl as string | undefined,
+          liveUrl: p.liveUrl as string | undefined,
+          githubUrl: p.githubUrl as string | undefined,
           screenshots: Array.isArray(p.screenshots) ? p.screenshots as string[] : [],
           previewMode: (p.previewMode as string | undefined) ?? "slideshow",
           ratingSum: typeof p.ratingSum === "number" ? p.ratingSum : 0,
@@ -443,8 +215,6 @@ export function FeaturedProjects() {
       .catch(() => { })
   }, [])
 
-  const [hero, ...rest] = projects
-
   // Split all projects into groups of 6
   const groups: DBProject[][] = []
   for (let i = 0; i < projects.length; i += 6) {
@@ -453,7 +223,7 @@ export function FeaturedProjects() {
 
   return (
     <section id="featured-projects" className="py-24 md:py-32 bg-background relative overflow-hidden">
-      {demoProject && <DemoModal project={demoProject} onClose={() => setDemoProject(null)} />}
+      <ProjectPreviewModal project={demoProject} onClose={() => setDemoProject(null)} />
       {caseStudyProject && <CaseStudyModal project={caseStudyProject} onClose={() => setCaseStudyProject(null)} />}
       <div className="absolute inset-0">
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[400px] bg-primary/5 rounded-full blur-3xl" />
