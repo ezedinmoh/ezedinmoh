@@ -1,7 +1,11 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { Upload, Loader2, Save, Image as ImageIcon, User, MapPin, Calendar, CheckCircle, AlertCircle, BarChart3, Briefcase, Plus, Trash2, ArrowUp, ArrowDown } from "lucide-react"
+import {
+  Upload, Loader2, Save, Image as ImageIcon, User, MapPin, Calendar,
+  CheckCircle, AlertCircle, BarChart3, Briefcase, Plus, Trash2,
+  ArrowUp, ArrowDown, Sparkles, Smile, Heart, Zap
+} from "lucide-react"
 
 interface StatItem {
   value: number
@@ -16,6 +20,30 @@ interface ExperienceItem {
   period: string
   description: string
   technologies: string[]
+}
+
+interface TimelineItem {
+  year: string
+  event: string
+  description: string
+  emoji: string
+}
+
+interface FunFactItem {
+  emoji: string
+  fact: string
+}
+
+interface WorkStyleItem {
+  icon: string
+  title: string
+  desc: string
+}
+
+interface InterestItem {
+  icon: string
+  label: string
+  description: string
 }
 
 const DEFAULT_STATS: StatItem[] = [
@@ -60,6 +88,38 @@ const DEFAULT_EXPERIENCES: ExperienceItem[] = [
   },
 ]
 
+const DEFAULT_TIMELINE: TimelineItem[] = [
+  { year: "2019", event: "First Line of Code", description: "Wrote my first HTML page and got completely hooked on building things for the web.", emoji: "🌱" },
+  { year: "2020", event: "Started Coding Journey", description: "Fell deep into JavaScript, built 10+ side projects, and discovered React.", emoji: "🚀" },
+  { year: "2021", event: "First Developer Job", description: "Landed a junior developer role at a local agency. Shipped real products for real clients.", emoji: "💼" },
+  { year: "2022", event: "Full-Stack Developer", description: "Expanded into backend with Node.js and PostgreSQL. Started contributing to open source.", emoji: "⚡" },
+  { year: "2023", event: "Senior Engineer", description: "Led frontend architecture for enterprise apps. Mentored junior devs.", emoji: "🏆" },
+  { year: "2024", event: "Software Engineer", description: "Working on cutting-edge products, exploring AI integrations, and building this portfolio.", emoji: "🌟" },
+]
+
+const DEFAULT_FUN_FACTS: FunFactItem[] = [
+  { emoji: "☕", fact: "I've tried 40+ Ethiopian coffee varieties and can tell them apart by taste" },
+  { emoji: "⌨️", fact: "I type at 95 WPM and have strong opinions about mechanical keyboards" },
+  { emoji: "🌍", fact: "I've worked with clients from 8 different countries without leaving Ethiopia" },
+  { emoji: "📚", fact: "I read at least one tech book per month — currently on 'Designing Data-Intensive Applications'" },
+  { emoji: "🎯", fact: "I once fixed a production bug in under 3 minutes during a live demo" },
+  { emoji: "🌙", fact: "My most productive hours are between 10pm and 2am" },
+]
+
+const DEFAULT_WORK_STYLE: WorkStyleItem[] = [
+  { icon: "Zap", title: "Fast Learner", desc: "I pick up new technologies quickly and love diving into unfamiliar codebases." },
+  { icon: "Heart", title: "Detail-Oriented", desc: "I care deeply about pixel-perfect UI, clean code, and thoughtful UX." },
+  { icon: "Users", title: "Collaborative", desc: "I communicate clearly, give honest feedback, and love pair programming." },
+  { icon: "Smile", title: "Low Ego", desc: "I'm always open to better ideas, regardless of where they come from." },
+]
+
+const DEFAULT_INTERESTS: InterestItem[] = [
+  { icon: "Code2", label: "Open Source", description: "Contributing to the community" },
+  { icon: "Coffee", label: "Ethiopian Coffee", description: "The best coffee in the world" },
+  { icon: "Book", label: "Continuous Learning", description: "Always exploring new tech" },
+  { icon: "Gamepad2", label: "Gaming", description: "Strategy games and RPGs" },
+]
+
 export default function AdminProfilePage() {
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
@@ -76,6 +136,10 @@ export default function AdminProfilePage() {
     bio: "",
     stats: DEFAULT_STATS,
     experiences: DEFAULT_EXPERIENCES,
+    timeline: DEFAULT_TIMELINE,
+    funFacts: DEFAULT_FUN_FACTS,
+    workStyle: DEFAULT_WORK_STYLE,
+    interests: DEFAULT_INTERESTS,
   })
 
   useEffect(() => {
@@ -92,6 +156,10 @@ export default function AdminProfilePage() {
             bio: data.bio || "",
             stats: Array.isArray(data.stats) && data.stats.length > 0 ? data.stats : DEFAULT_STATS,
             experiences: Array.isArray(data.experiences) && data.experiences.length > 0 ? data.experiences : DEFAULT_EXPERIENCES,
+            timeline: Array.isArray(data.timeline) && data.timeline.length > 0 ? data.timeline : DEFAULT_TIMELINE,
+            funFacts: Array.isArray(data.funFacts) && data.funFacts.length > 0 ? data.funFacts : DEFAULT_FUN_FACTS,
+            workStyle: Array.isArray(data.workStyle) && data.workStyle.length > 0 ? data.workStyle : DEFAULT_WORK_STYLE,
+            interests: Array.isArray(data.interests) && data.interests.length > 0 ? data.interests : DEFAULT_INTERESTS,
           })
         }
         setLoading(false)
@@ -155,6 +223,39 @@ export default function AdminProfilePage() {
     })
   }
 
+  const handleTimelineChange = (index: number, key: keyof TimelineItem, val: string) => {
+    setForm((prev) => {
+      const newItems = [...prev.timeline]
+      newItems[index] = { ...newItems[index], [key]: val }
+      return { ...prev, timeline: newItems }
+    })
+  }
+
+  const handleFunFactChange = (index: number, key: keyof FunFactItem, val: string) => {
+    setForm((prev) => {
+      const newFacts = [...prev.funFacts]
+      newFacts[index] = { ...newFacts[index], [key]: val }
+      return { ...prev, funFacts: newFacts }
+    })
+  }
+
+  const handleWorkStyleChange = (index: number, key: keyof WorkStyleItem, val: string) => {
+    setForm((prev) => {
+      const newItems = [...prev.workStyle]
+      newItems[index] = { ...newItems[index], [key]: val }
+      return { ...prev, workStyle: newItems }
+    })
+  }
+
+  const handleInterestChange = (index: number, key: keyof InterestItem, val: string) => {
+    setForm((prev) => {
+      const newItems = [...prev.interests]
+      newItems[index] = { ...newItems[index], [key]: val }
+      return { ...prev, interests: newItems }
+    })
+  }
+
+  // Array Handlers
   const addExperience = () => {
     setForm((prev) => ({
       ...prev,
@@ -172,23 +273,35 @@ export default function AdminProfilePage() {
     }))
   }
 
-  const removeExperience = (index: number) => {
+  const addTimeline = () => {
     setForm((prev) => ({
       ...prev,
-      experiences: prev.experiences.filter((_, i) => i !== index),
+      timeline: [
+        ...prev.timeline,
+        { year: "2025", event: "Milestone Event", description: "Description of milestone...", emoji: "🚀" },
+      ],
     }))
   }
 
-  const moveExperience = (index: number, direction: "up" | "down") => {
-    const targetIndex = direction === "up" ? index - 1 : index + 1
-    if (targetIndex < 0 || targetIndex >= form.experiences.length) return
-    setForm((prev) => {
-      const newExps = [...prev.experiences]
-      const temp = newExps[index]
-      newExps[index] = newExps[targetIndex]
-      newExps[targetIndex] = temp
-      return { ...prev, experiences: newExps }
-    })
+  const addFunFact = () => {
+    setForm((prev) => ({
+      ...prev,
+      funFacts: [...prev.funFacts, { emoji: "⚡", fact: "New fun fact about me..." }],
+    }))
+  }
+
+  const addWorkStyle = () => {
+    setForm((prev) => ({
+      ...prev,
+      workStyle: [...prev.workStyle, { icon: "Zap", title: "New Quality", desc: "Description of work style..." }],
+    }))
+  }
+
+  const addInterest = () => {
+    setForm((prev) => ({
+      ...prev,
+      interests: [...prev.interests, { icon: "Code2", label: "New Interest", description: "Description of interest..." }],
+    }))
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -205,7 +318,7 @@ export default function AdminProfilePage() {
 
       if (!res.ok) throw new Error("Failed to save profile settings")
 
-      setMessage({ type: "success", text: "✓ Profile, Stats & Career Path saved successfully!" })
+      setMessage({ type: "success", text: "✓ All Profile, Journey, Fun Facts & Interests saved successfully to database!" })
     } catch (err) {
       setMessage({ type: "error", text: err instanceof Error ? err.message : "Failed to save settings" })
     } finally {
@@ -216,9 +329,9 @@ export default function AdminProfilePage() {
   return (
     <div className="space-y-8 max-w-5xl">
       <div>
-        <h1 className="text-2xl md:text-3xl font-bold text-foreground">Profile & Career Management</h1>
+        <h1 className="text-2xl md:text-3xl font-bold text-foreground">Profile & About Page Management</h1>
         <p className="text-muted-foreground text-sm mt-1">
-          Manage your headshot, cover image, stats counters, and work experience timeline saved in your database.
+          Manage your profile picture, cover image, timeline journey, fun facts, work style, and interests saved in your database.
         </p>
       </div>
 
@@ -241,71 +354,43 @@ export default function AdminProfilePage() {
         </div>
       ) : (
         <form onSubmit={handleSubmit} className="space-y-8">
+
           {/* ── Cover Image Section ── */}
           <div className="bg-card border border-border rounded-2xl overflow-hidden p-6 space-y-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <h2 className="text-lg font-semibold text-foreground flex items-center gap-2">
-                  <ImageIcon className="w-5 h-5 text-primary" /> Cover Image
-                </h2>
-                <p className="text-xs text-muted-foreground mt-0.5">
-                  Background banner photo for your profile card
-                </p>
-              </div>
-            </div>
-
-            {/* Cover Image Preview */}
-            <div className="relative h-44 w-full rounded-xl overflow-hidden bg-secondary/30 border border-border/60 flex items-center justify-center group">
+            <h2 className="text-lg font-semibold text-foreground flex items-center gap-2">
+              <ImageIcon className="w-5 h-5 text-primary" /> Cover Image
+            </h2>
+            <div className="relative h-44 w-full rounded-xl overflow-hidden bg-secondary/30 border border-border/60 flex items-center justify-center">
               {form.coverImageUrl ? (
                 // eslint-disable-next-line @next/next/no-img-element
                 <img src={form.coverImageUrl} alt="Cover preview" className="w-full h-full object-cover" />
               ) : (
-                <div className="text-center p-4 text-muted-foreground">
-                  <ImageIcon className="w-8 h-8 mx-auto mb-2 opacity-40" />
-                  <p className="text-xs">No cover image uploaded yet</p>
-                </div>
+                <p className="text-xs text-muted-foreground">No cover image uploaded yet</p>
               )}
             </div>
-
-            {/* Upload Input */}
             <div className="flex items-center gap-3">
               <input
                 type="text"
                 value={form.coverImageUrl}
                 onChange={(e) => setForm((p) => ({ ...p, coverImageUrl: e.target.value }))}
-                placeholder="Cloudinary Cover Image URL (or upload file)"
+                placeholder="Cloudinary Cover Image URL"
                 className="flex-1 px-4 py-2.5 bg-background border border-border rounded-xl text-sm text-foreground focus:outline-none focus:border-primary"
               />
-              <label className="cursor-pointer inline-flex items-center gap-2 px-4 py-2.5 bg-secondary hover:bg-secondary/80 text-foreground text-sm font-medium rounded-xl border border-border transition-all">
+              <label className="cursor-pointer inline-flex items-center gap-2 px-4 py-2.5 bg-secondary text-foreground text-sm font-medium rounded-xl border border-border">
                 {uploadingCover ? <Loader2 className="w-4 h-4 animate-spin text-primary" /> : <Upload className="w-4 h-4 text-primary" />}
-                <span>Upload Cover</span>
-                <input
-                  type="file"
-                  accept="image/*"
-                  className="hidden"
-                  disabled={uploadingCover}
-                  onChange={(e) => {
-                    if (e.target.files?.[0]) handleUpload(e.target.files[0], "cover")
-                  }}
-                />
+                <span>Upload</span>
+                <input type="file" accept="image/*" className="hidden" disabled={uploadingCover} onChange={(e) => e.target.files?.[0] && handleUpload(e.target.files[0], "cover")} />
               </label>
             </div>
           </div>
 
           {/* ── Profile Picture Section ── */}
           <div className="bg-card border border-border rounded-2xl p-6 space-y-6">
-            <div>
-              <h2 className="text-lg font-semibold text-foreground flex items-center gap-2">
-                <User className="w-5 h-5 text-primary" /> Profile Picture (Avatar)
-              </h2>
-              <p className="text-xs text-muted-foreground mt-0.5">
-                Your main headshot photo shown on the website and loading screen
-              </p>
-            </div>
-
+            <h2 className="text-lg font-semibold text-foreground flex items-center gap-2">
+              <User className="w-5 h-5 text-primary" /> Profile Picture (Avatar)
+            </h2>
             <div className="flex flex-col sm:flex-row items-center gap-6">
-              {/* Avatar Preview */}
-              <div className="relative w-36 h-36 rounded-full overflow-hidden bg-primary/10 border-2 border-primary/40 flex items-center justify-center shrink-0 shadow-lg">
+              <div className="relative w-36 h-36 rounded-full overflow-hidden bg-primary/10 border-2 border-primary/40 flex items-center justify-center shrink-0">
                 {form.avatarUrl ? (
                   // eslint-disable-next-line @next/next/no-img-element
                   <img src={form.avatarUrl} alt="Avatar preview" className="w-full h-full object-cover" />
@@ -313,11 +398,7 @@ export default function AdminProfilePage() {
                   <span className="text-4xl font-bold text-primary">EM</span>
                 )}
               </div>
-
               <div className="flex-1 space-y-3 w-full">
-                <label className="block text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-                  Profile Picture URL
-                </label>
                 <div className="flex items-center gap-3">
                   <input
                     type="text"
@@ -326,279 +407,147 @@ export default function AdminProfilePage() {
                     placeholder="https://res.cloudinary.com/.../profile.jpg"
                     className="flex-1 px-4 py-2.5 bg-background border border-border rounded-xl text-sm text-foreground focus:outline-none focus:border-primary"
                   />
-                  <label className="cursor-pointer inline-flex items-center gap-2 px-4 py-2.5 bg-primary text-primary-foreground text-sm font-medium rounded-xl hover:opacity-90 transition-all shrink-0">
+                  <label className="cursor-pointer inline-flex items-center gap-2 px-4 py-2.5 bg-primary text-primary-foreground text-sm font-medium rounded-xl">
                     {uploadingAvatar ? <Loader2 className="w-4 h-4 animate-spin" /> : <Upload className="w-4 h-4" />}
                     <span>Upload Avatar</span>
-                    <input
-                      type="file"
-                      accept="image/*"
-                      className="hidden"
-                      disabled={uploadingAvatar}
-                      onChange={(e) => {
-                        if (e.target.files?.[0]) handleUpload(e.target.files[0], "avatar")
-                      }}
-                    />
+                    <input type="file" accept="image/*" className="hidden" disabled={uploadingAvatar} onChange={(e) => e.target.files?.[0] && handleUpload(e.target.files[0], "avatar")} />
                   </label>
                 </div>
-                <p className="text-xs text-muted-foreground">
-                  Recommended: Square aspect ratio (500x500px). Uploads automatically to your Cloudinary storage.
-                </p>
               </div>
             </div>
           </div>
 
-          {/* ── Stats Bar Section ── */}
+          {/* ── Stats Bar Counters ── */}
           <div className="bg-card border border-border rounded-2xl p-6 space-y-6">
-            <div>
-              <h2 className="text-lg font-semibold text-foreground flex items-center gap-2">
-                <BarChart3 className="w-5 h-5 text-primary" /> Stats Bar Counters
-              </h2>
-              <p className="text-xs text-muted-foreground mt-0.5">
-                Manage the 4 key stat counter metrics displayed on the home page
-              </p>
-            </div>
-
+            <h2 className="text-lg font-semibold text-foreground flex items-center gap-2">
+              <BarChart3 className="w-5 h-5 text-primary" /> Stats Bar Counters
+            </h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
               {form.stats.map((stat, idx) => (
                 <div key={idx} className="bg-background border border-border p-4 rounded-xl space-y-3">
-                  <span className="text-xs font-semibold text-primary uppercase tracking-wider">Stat Card #{idx + 1}</span>
-                  <div>
-                    <label className="block text-xs text-muted-foreground mb-1">Number Value</label>
-                    <input
-                      type="number"
-                      value={stat.value}
-                      onChange={(e) => handleStatChange(idx, "value", e.target.value)}
-                      className="w-full px-3 py-2 bg-card border border-border rounded-lg text-sm text-foreground focus:outline-none focus:border-primary font-mono"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-xs text-muted-foreground mb-1">Suffix (e.g. +)</label>
-                    <input
-                      type="text"
-                      value={stat.suffix}
-                      onChange={(e) => handleStatChange(idx, "suffix", e.target.value)}
-                      placeholder="+"
-                      className="w-full px-3 py-2 bg-card border border-border rounded-lg text-sm text-foreground focus:outline-none focus:border-primary font-mono"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-xs text-muted-foreground mb-1">Stat Label</label>
-                    <input
-                      type="text"
-                      value={stat.label}
-                      onChange={(e) => handleStatChange(idx, "label", e.target.value)}
-                      placeholder="Label"
-                      className="w-full px-3 py-2 bg-card border border-border rounded-lg text-sm text-foreground focus:outline-none focus:border-primary"
-                    />
-                  </div>
+                  <span className="text-xs font-semibold text-primary">Card #{idx + 1}</span>
+                  <input type="number" value={stat.value} onChange={(e) => handleStatChange(idx, "value", e.target.value)} className="w-full px-3 py-2 bg-card border border-border rounded-lg text-sm" />
+                  <input type="text" value={stat.suffix} onChange={(e) => handleStatChange(idx, "suffix", e.target.value)} placeholder="Suffix (+)" className="w-full px-3 py-2 bg-card border border-border rounded-lg text-sm" />
+                  <input type="text" value={stat.label} onChange={(e) => handleStatChange(idx, "label", e.target.value)} placeholder="Label" className="w-full px-3 py-2 bg-card border border-border rounded-lg text-sm" />
                 </div>
               ))}
             </div>
           </div>
 
-          {/* ── Work Experience / Career Path Section ── */}
+          {/* ── My Journey / Timeline Section ── */}
           <div className="bg-card border border-border rounded-2xl p-6 space-y-6">
             <div className="flex items-center justify-between">
-              <div>
-                <h2 className="text-lg font-semibold text-foreground flex items-center gap-2">
-                  <Briefcase className="w-5 h-5 text-primary" /> Career Path & Work Experience
-                </h2>
-                <p className="text-xs text-muted-foreground mt-0.5">
-                  Manage your professional journey timeline items displayed on your site
-                </p>
-              </div>
-              <button
-                type="button"
-                onClick={addExperience}
-                className="inline-flex items-center gap-2 px-3.5 py-2 bg-primary/10 text-primary border border-primary/30 rounded-xl text-xs font-semibold hover:bg-primary/20 transition-all"
-              >
-                <Plus className="w-4 h-4" /> Add Experience
+              <h2 className="text-lg font-semibold text-foreground flex items-center gap-2">
+                <Sparkles className="w-5 h-5 text-primary" /> My Journey / Timeline
+              </h2>
+              <button type="button" onClick={addTimeline} className="inline-flex items-center gap-2 px-3 py-1.5 bg-primary/10 text-primary border border-primary/30 rounded-xl text-xs font-semibold">
+                <Plus className="w-4 h-4" /> Add Timeline Item
               </button>
             </div>
-
-            <div className="space-y-6">
-              {form.experiences.map((exp, idx) => (
-                <div key={idx} className="bg-background border border-border rounded-xl p-5 space-y-4 relative">
-                  <div className="flex items-center justify-between border-b border-border pb-3">
-                    <span className="text-sm font-semibold text-primary">Experience #{idx + 1}</span>
-                    <div className="flex items-center gap-1">
-                      <button
-                        type="button"
-                        onClick={() => moveExperience(idx, "up")}
-                        disabled={idx === 0}
-                        className="p-1.5 text-muted-foreground hover:text-foreground disabled:opacity-30"
-                        title="Move Up"
-                      >
-                        <ArrowUp className="w-4 h-4" />
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => moveExperience(idx, "down")}
-                        disabled={idx === form.experiences.length - 1}
-                        className="p-1.5 text-muted-foreground hover:text-foreground disabled:opacity-30"
-                        title="Move Down"
-                      >
-                        <ArrowDown className="w-4 h-4" />
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => removeExperience(idx)}
-                        className="p-1.5 text-red-500 hover:bg-red-500/10 rounded-lg transition-colors ml-2"
-                        title="Delete Experience"
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </button>
-                    </div>
+            <div className="space-y-4">
+              {form.timeline.map((item, idx) => (
+                <div key={idx} className="bg-background border border-border rounded-xl p-4 space-y-3">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-bold text-primary">Milestone #{idx + 1}</span>
+                    <button type="button" onClick={() => setForm((p) => ({ ...p, timeline: p.timeline.filter((_, i) => i !== idx) }))} className="p-1 text-red-500">
+                      <Trash2 className="w-4 h-4" />
+                    </button>
                   </div>
-
-                  <div className="grid sm:grid-cols-2 gap-4">
-                    <div>
-                      <label className="block text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1">
-                        Job Title
-                      </label>
-                      <input
-                        type="text"
-                        value={exp.title}
-                        onChange={(e) => handleExpChange(idx, "title", e.target.value)}
-                        placeholder="e.g. Senior Frontend Engineer"
-                        className="w-full px-3 py-2 bg-card border border-border rounded-lg text-sm text-foreground focus:outline-none focus:border-primary"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1">
-                        Company Name
-                      </label>
-                      <input
-                        type="text"
-                        value={exp.company}
-                        onChange={(e) => handleExpChange(idx, "company", e.target.value)}
-                        placeholder="e.g. TechCorp"
-                        className="w-full px-3 py-2 bg-card border border-border rounded-lg text-sm text-foreground focus:outline-none focus:border-primary"
-                      />
-                    </div>
+                  <div className="grid sm:grid-cols-3 gap-3">
+                    <input type="text" value={item.emoji} onChange={(e) => handleTimelineChange(idx, "emoji", e.target.value)} placeholder="Emoji (e.g. 🌱)" className="px-3 py-2 bg-card border border-border rounded-lg text-sm" />
+                    <input type="text" value={item.year} onChange={(e) => handleTimelineChange(idx, "year", e.target.value)} placeholder="Year (2024)" className="px-3 py-2 bg-card border border-border rounded-lg text-sm" />
+                    <input type="text" value={item.event} onChange={(e) => handleTimelineChange(idx, "event", e.target.value)} placeholder="Title / Event" className="px-3 py-2 bg-card border border-border rounded-lg text-sm" />
                   </div>
-
-                  <div className="grid sm:grid-cols-2 gap-4">
-                    <div>
-                      <label className="block text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1">
-                        Company URL
-                      </label>
-                      <input
-                        type="text"
-                        value={exp.companyUrl}
-                        onChange={(e) => handleExpChange(idx, "companyUrl", e.target.value)}
-                        placeholder="https://example.com"
-                        className="w-full px-3 py-2 bg-card border border-border rounded-lg text-sm text-foreground focus:outline-none focus:border-primary"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1">
-                        Period / Timeline
-                      </label>
-                      <input
-                        type="text"
-                        value={exp.period}
-                        onChange={(e) => handleExpChange(idx, "period", e.target.value)}
-                        placeholder="2024 - Present"
-                        className="w-full px-3 py-2 bg-card border border-border rounded-lg text-sm text-foreground focus:outline-none focus:border-primary"
-                      />
-                    </div>
-                  </div>
-
-                  <div>
-                    <label className="block text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1">
-                      Description
-                    </label>
-                    <textarea
-                      rows={2}
-                      value={exp.description}
-                      onChange={(e) => handleExpChange(idx, "description", e.target.value)}
-                      placeholder="Key achievements and role summary..."
-                      className="w-full px-3 py-2 bg-card border border-border rounded-lg text-sm text-foreground focus:outline-none focus:border-primary"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1">
-                      Technologies (comma separated)
-                    </label>
-                    <input
-                      type="text"
-                      value={Array.isArray(exp.technologies) ? exp.technologies.join(", ") : exp.technologies}
-                      onChange={(e) =>
-                        handleExpChange(
-                          idx,
-                          "technologies",
-                          e.target.value.split(",").map((t) => t.trim()).filter(Boolean)
-                        )
-                      }
-                      placeholder="React, TypeScript, GraphQL, Storybook"
-                      className="w-full px-3 py-2 bg-card border border-border rounded-lg text-sm text-foreground focus:outline-none focus:border-primary"
-                    />
-                  </div>
+                  <textarea rows={2} value={item.description} onChange={(e) => handleTimelineChange(idx, "description", e.target.value)} placeholder="Description..." className="w-full px-3 py-2 bg-card border border-border rounded-lg text-sm" />
                 </div>
               ))}
             </div>
           </div>
 
-          {/* ── Personal Info Section ── */}
-          <div className="bg-card border border-border rounded-2xl p-6 space-y-4">
-            <h2 className="text-lg font-semibold text-foreground">Personal Information</h2>
-
-            <div className="grid sm:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">
-                  Full Name / Title
-                </label>
-                <input
-                  type="text"
-                  value={form.title}
-                  onChange={(e) => setForm((p) => ({ ...p, title: e.target.value }))}
-                  className="w-full px-4 py-2.5 bg-background border border-border rounded-xl text-sm text-foreground focus:outline-none focus:border-primary"
-                />
-              </div>
-
-              <div>
-                <label className="block text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">
-                  Location
-                </label>
-                <div className="relative">
-                  <MapPin className="w-4 h-4 text-muted-foreground absolute left-3.5 top-3" />
-                  <input
-                    type="text"
-                    value={form.location}
-                    onChange={(e) => setForm((p) => ({ ...p, location: e.target.value }))}
-                    className="w-full pl-10 pr-4 py-2.5 bg-background border border-border rounded-xl text-sm text-foreground focus:outline-none focus:border-primary"
-                  />
-                </div>
-              </div>
+          {/* ── Fun Facts Section ── */}
+          <div className="bg-card border border-border rounded-2xl p-6 space-y-6">
+            <div className="flex items-center justify-between">
+              <h2 className="text-lg font-semibold text-foreground flex items-center gap-2">
+                <Smile className="w-5 h-5 text-primary" /> Fun Facts
+              </h2>
+              <button type="button" onClick={addFunFact} className="inline-flex items-center gap-2 px-3 py-1.5 bg-primary/10 text-primary border border-primary/30 rounded-xl text-xs font-semibold">
+                <Plus className="w-4 h-4" /> Add Fun Fact
+              </button>
             </div>
+            <div className="grid sm:grid-cols-2 gap-4">
+              {form.funFacts.map((item, idx) => (
+                <div key={idx} className="bg-background border border-border rounded-xl p-4 space-y-2 flex items-start gap-3">
+                  <input type="text" value={item.emoji} onChange={(e) => handleFunFactChange(idx, "emoji", e.target.value)} placeholder="☕" className="w-12 text-center px-2 py-2 bg-card border border-border rounded-lg text-sm shrink-0" />
+                  <input type="text" value={item.fact} onChange={(e) => handleFunFactChange(idx, "fact", e.target.value)} placeholder="Fun fact..." className="flex-1 px-3 py-2 bg-card border border-border rounded-lg text-sm" />
+                  <button type="button" onClick={() => setForm((p) => ({ ...p, funFacts: p.funFacts.filter((_, i) => i !== idx) }))} className="p-1.5 text-red-500">
+                    <Trash2 className="w-4 h-4" />
+                  </button>
+                </div>
+              ))}
+            </div>
+          </div>
 
-            <div>
-              <label className="block text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">
-                Experience Badge Text
-              </label>
-              <div className="relative">
-                <Calendar className="w-4 h-4 text-muted-foreground absolute left-3.5 top-3" />
-                <input
-                  type="text"
-                  value={form.yearsExperience}
-                  onChange={(e) => setForm((p) => ({ ...p, yearsExperience: e.target.value }))}
-                  className="w-full pl-10 pr-4 py-2.5 bg-background border border-border rounded-xl text-sm text-foreground focus:outline-none focus:border-primary"
-                />
-              </div>
+          {/* ── Collaboration / Work Style Section ── */}
+          <div className="bg-card border border-border rounded-2xl p-6 space-y-6">
+            <div className="flex items-center justify-between">
+              <h2 className="text-lg font-semibold text-foreground flex items-center gap-2">
+                <Zap className="w-5 h-5 text-primary" /> Collaboration / Work Style
+              </h2>
+              <button type="button" onClick={addWorkStyle} className="inline-flex items-center gap-2 px-3 py-1.5 bg-primary/10 text-primary border border-primary/30 rounded-xl text-xs font-semibold">
+                <Plus className="w-4 h-4" /> Add Work Style
+              </button>
+            </div>
+            <div className="grid sm:grid-cols-2 gap-4">
+              {form.workStyle.map((item, idx) => (
+                <div key={idx} className="bg-background border border-border rounded-xl p-4 space-y-2">
+                  <div className="flex items-center justify-between">
+                    <input type="text" value={item.icon} onChange={(e) => handleWorkStyleChange(idx, "icon", e.target.value)} placeholder="Icon (Zap, Heart, Users, Smile)" className="px-3 py-1.5 bg-card border border-border rounded-lg text-xs" />
+                    <button type="button" onClick={() => setForm((p) => ({ ...p, workStyle: p.workStyle.filter((_, i) => i !== idx) }))} className="p-1 text-red-500">
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                  </div>
+                  <input type="text" value={item.title} onChange={(e) => handleWorkStyleChange(idx, "title", e.target.value)} placeholder="Title (Fast Learner)" className="w-full px-3 py-2 bg-card border border-border rounded-lg text-sm font-semibold" />
+                  <textarea rows={2} value={item.desc} onChange={(e) => handleWorkStyleChange(idx, "desc", e.target.value)} placeholder="Description..." className="w-full px-3 py-2 bg-card border border-border rounded-lg text-sm" />
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* ── Beyond Code / Interests Section ── */}
+          <div className="bg-card border border-border rounded-2xl p-6 space-y-6">
+            <div className="flex items-center justify-between">
+              <h2 className="text-lg font-semibold text-foreground flex items-center gap-2">
+                <Heart className="w-5 h-5 text-primary" /> Beyond Code / Interests
+              </h2>
+              <button type="button" onClick={addInterest} className="inline-flex items-center gap-2 px-3 py-1.5 bg-primary/10 text-primary border border-primary/30 rounded-xl text-xs font-semibold">
+                <Plus className="w-4 h-4" /> Add Interest
+              </button>
+            </div>
+            <div className="grid sm:grid-cols-2 gap-4">
+              {form.interests.map((item, idx) => (
+                <div key={idx} className="bg-background border border-border rounded-xl p-4 space-y-2">
+                  <div className="flex items-center justify-between">
+                    <input type="text" value={item.icon} onChange={(e) => handleInterestChange(idx, "icon", e.target.value)} placeholder="Icon (Code2, Coffee, Book, Gamepad2)" className="px-3 py-1.5 bg-card border border-border rounded-lg text-xs" />
+                    <button type="button" onClick={() => setForm((p) => ({ ...p, interests: p.interests.filter((_, i) => i !== idx) }))} className="p-1 text-red-500">
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                  </div>
+                  <input type="text" value={item.label} onChange={(e) => handleInterestChange(idx, "label", e.target.value)} placeholder="Label (Open Source)" className="w-full px-3 py-2 bg-card border border-border rounded-lg text-sm font-semibold" />
+                  <input type="text" value={item.description} onChange={(e) => handleInterestChange(idx, "description", e.target.value)} placeholder="Description..." className="w-full px-3 py-2 bg-card border border-border rounded-lg text-sm" />
+                </div>
+              ))}
             </div>
           </div>
 
           {/* Submit Button */}
-          <div className="flex justify-end pt-2">
+          <div className="flex justify-end pt-4">
             <button
               type="submit"
               disabled={saving}
-              className="inline-flex items-center gap-2 px-6 py-3 bg-primary text-primary-foreground font-semibold rounded-xl text-sm hover:opacity-90 transition-all disabled:opacity-50 shadow-lg shadow-primary/20"
+              className="inline-flex items-center gap-2 px-6 py-3 bg-primary text-primary-foreground font-semibold rounded-xl text-sm hover:opacity-90 transition-all shadow-lg"
             >
               {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
-              <span>Save Profile & Experience</span>
+              <span>Save All Profile & About Settings</span>
             </button>
           </div>
         </form>

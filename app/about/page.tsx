@@ -7,10 +7,12 @@ import { ContactCTA } from "@/components/contact-cta"
 import { SpotifyNowPlaying } from "@/components/spotify-now-playing"
 import { ScrollProgress } from "@/components/scroll-progress"
 import { AnimatedCursor } from "@/components/animated-cursor"
-import { Github, Linkedin, Twitter, MapPin, Calendar, Coffee, Book, Code2, Gamepad2, Zap, Heart, Users, Smile } from "lucide-react"
-import { cn } from "@/lib/utils"
+import {
+  Github, Linkedin, Twitter, MapPin, Calendar, Coffee, Book, Code2, Gamepad2,
+  Zap, Heart, Users, Smile, Star, Trophy, Sparkles, Compass
+} from "lucide-react"
 
-const timeline = [
+const DEFAULT_TIMELINE = [
   { year: "2019", event: "First Line of Code", description: "Wrote my first HTML page and got completely hooked on building things for the web.", emoji: "🌱" },
   { year: "2020", event: "Started Coding Journey", description: "Fell deep into JavaScript, built 10+ side projects, and discovered React.", emoji: "🚀" },
   { year: "2021", event: "First Developer Job", description: "Landed a junior developer role at a local agency. Shipped real products for real clients.", emoji: "💼" },
@@ -19,14 +21,14 @@ const timeline = [
   { year: "2024", event: "Software Engineer", description: "Working on cutting-edge products, exploring AI integrations, and building this portfolio.", emoji: "🌟" },
 ]
 
-const interests = [
-  { icon: Code2, label: "Open Source", description: "Contributing to the community" },
-  { icon: Coffee, label: "Ethiopian Coffee", description: "The best coffee in the world" },
-  { icon: Book, label: "Continuous Learning", description: "Always exploring new tech" },
-  { icon: Gamepad2, label: "Gaming", description: "Strategy games and RPGs" },
+const DEFAULT_INTERESTS = [
+  { icon: "Code2", label: "Open Source", description: "Contributing to the community" },
+  { icon: "Coffee", label: "Ethiopian Coffee", description: "The best coffee in the world" },
+  { icon: "Book", label: "Continuous Learning", description: "Always exploring new tech" },
+  { icon: "Gamepad2", label: "Gaming", description: "Strategy games and RPGs" },
 ]
 
-const funFacts = [
+const DEFAULT_FUN_FACTS = [
   { emoji: "☕", fact: "I've tried 40+ Ethiopian coffee varieties and can tell them apart by taste" },
   { emoji: "⌨️", fact: "I type at 95 WPM and have strong opinions about mechanical keyboards" },
   { emoji: "🌍", fact: "I've worked with clients from 8 different countries without leaving Ethiopia" },
@@ -35,12 +37,16 @@ const funFacts = [
   { emoji: "🌙", fact: "My most productive hours are between 10pm and 2am" },
 ]
 
-const workStyle = [
-  { icon: Zap, title: "Fast Learner", desc: "I pick up new technologies quickly and love diving into unfamiliar codebases." },
-  { icon: Heart, title: "Detail-Oriented", desc: "I care deeply about pixel-perfect UI, clean code, and thoughtful UX." },
-  { icon: Users, title: "Collaborative", desc: "I communicate clearly, give honest feedback, and love pair programming." },
-  { icon: Smile, title: "Low Ego", desc: "I'm always open to better ideas, regardless of where they come from." },
+const DEFAULT_WORK_STYLE = [
+  { icon: "Zap", title: "Fast Learner", desc: "I pick up new technologies quickly and love diving into unfamiliar codebases." },
+  { icon: "Heart", title: "Detail-Oriented", desc: "I care deeply about pixel-perfect UI, clean code, and thoughtful UX." },
+  { icon: "Users", title: "Collaborative", desc: "I communicate clearly, give honest feedback, and love pair programming." },
+  { icon: "Smile", title: "Low Ego", desc: "I'm always open to better ideas, regardless of where they come from." },
 ]
+
+const ICON_MAP: Record<string, any> = {
+  Zap, Heart, Users, Smile, Code2, Coffee, Book, Gamepad2, Star, Trophy, Sparkles, Compass
+}
 
 export default function AboutPage() {
   const [profile, setProfile] = useState<{
@@ -50,6 +56,10 @@ export default function AboutPage() {
     location?: string
     yearsExperience?: string
     bio?: string
+    timeline?: typeof DEFAULT_TIMELINE
+    funFacts?: typeof DEFAULT_FUN_FACTS
+    workStyle?: typeof DEFAULT_WORK_STYLE
+    interests?: typeof DEFAULT_INTERESTS
   }>({})
 
   useEffect(() => {
@@ -60,6 +70,11 @@ export default function AboutPage() {
       })
       .catch(() => {})
   }, [])
+
+  const timelineItems  = Array.isArray(profile.timeline)  && profile.timeline.length > 0  ? profile.timeline  : DEFAULT_TIMELINE
+  const funFactItems   = Array.isArray(profile.funFacts)  && profile.funFacts.length > 0  ? profile.funFacts  : DEFAULT_FUN_FACTS
+  const workStyleItems = Array.isArray(profile.workStyle) && profile.workStyle.length > 0 ? profile.workStyle : DEFAULT_WORK_STYLE
+  const interestItems  = Array.isArray(profile.interests) && profile.interests.length > 0 ? profile.interests : DEFAULT_INTERESTS
 
   return (
     <main className="min-h-screen bg-background">
@@ -86,9 +101,13 @@ export default function AboutPage() {
           <div className="absolute top-1/4 left-0 w-96 h-96 bg-primary/20 rounded-full blur-3xl animate-morph" />
           <div className="absolute bottom-0 right-1/4 w-64 h-64 bg-accent/20 rounded-full blur-3xl animate-morph" style={{ animationDelay: "4s" }} />
         </div>
+
         {/* Grid pattern */}
-        <div className="absolute inset-0 opacity-5"
-          style={{ backgroundImage: "linear-gradient(rgba(100,200,180,0.3) 1px, transparent 1px), linear-gradient(90deg, rgba(100,200,180,0.3) 1px, transparent 1px)", backgroundSize: "60px 60px" }} />
+        <div
+          className="absolute inset-0 opacity-5"
+          style={{ backgroundImage: "linear-gradient(rgba(100,200,180,0.3) 1px, transparent 1px), linear-gradient(90deg, rgba(100,200,180,0.3) 1px, transparent 1px)", backgroundSize: "60px 60px" }}
+        />
+
         <div className="container mx-auto px-6 relative">
           <div className="grid lg:grid-cols-2 gap-16 items-center">
             {/* Profile Photo Container */}
@@ -162,18 +181,19 @@ export default function AboutPage() {
       <section className="py-24 bg-secondary/20 relative overflow-hidden">
         <div className="absolute inset-0 opacity-20">
           <div className="absolute top-0 right-0 w-80 h-80 bg-primary/20 rounded-full blur-3xl animate-morph" style={{ animationDelay: "1s" }} />
-        </div>        <div className="container mx-auto px-6">
+        </div>
+        <div className="container mx-auto px-6">
           <div className="text-center mb-16">
             <span className="text-primary text-sm font-medium uppercase tracking-wider mb-2 block">My Journey</span>
             <h2 className="text-3xl md:text-5xl font-bold text-foreground">The Path So Far</h2>
           </div>
           <div className="max-w-3xl mx-auto relative">
             <div className="absolute left-8 top-0 bottom-0 w-px bg-border" />
-            {timeline.map((item, i) => (
-              <div key={item.year} className="relative pl-20 pb-10 last:pb-0 animate-slide-up opacity-0"
+            {timelineItems.map((item, i) => (
+              <div key={`${item.year}-${i}`} className="relative pl-20 pb-10 last:pb-0 animate-slide-up opacity-0"
                 style={{ animationDelay: `${i * 0.15}s`, animationFillMode: "forwards" }}>
                 <div className="absolute left-0 w-16 h-16 rounded-full bg-card border border-border flex flex-col items-center justify-center shadow-sm transition-all duration-300 hover:border-primary/50 hover:scale-110">
-                  <span className="text-lg">{item.emoji}</span>
+                  <span className="text-lg">{item.emoji || "🚀"}</span>
                   <span className="text-xs font-bold text-primary">{item.year}</span>
                 </div>
                 <div className="bg-card rounded-2xl p-5 border border-border hover:border-primary/50 hover:shadow-lg hover:shadow-primary/5 hover:scale-[1.02] transition-all duration-300">
@@ -190,16 +210,17 @@ export default function AboutPage() {
       <section className="py-24 relative overflow-hidden">
         <div className="absolute inset-0 opacity-20">
           <div className="absolute bottom-0 left-0 w-72 h-72 bg-accent/20 rounded-full blur-3xl animate-morph" style={{ animationDelay: "3s" }} />
-        </div>        <div className="container mx-auto px-6">
+        </div>
+        <div className="container mx-auto px-6">
           <div className="text-center mb-16">
             <span className="text-primary text-sm font-medium uppercase tracking-wider mb-2 block">Get to Know Me</span>
             <h2 className="text-3xl md:text-5xl font-bold text-foreground">Fun Facts</h2>
           </div>
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 max-w-5xl mx-auto">
-            {funFacts.map((f, i) => (
+            {funFactItems.map((f, i) => (
               <div key={i} className="flex items-start gap-4 p-5 bg-card border border-border rounded-2xl hover:border-primary/50 hover:shadow-lg hover:shadow-primary/5 hover:scale-[1.02] transition-all duration-300 animate-scale-in opacity-0"
                 style={{ animationDelay: `${i * 0.08}s`, animationFillMode: "forwards" }}>
-                <span className="text-2xl shrink-0 transition-transform duration-300 group-hover:scale-125">{f.emoji}</span>
+                <span className="text-2xl shrink-0 transition-transform duration-300 group-hover:scale-125">{f.emoji || "☕"}</span>
                 <p className="text-sm text-muted-foreground leading-relaxed">{f.fact}</p>
               </div>
             ))}
@@ -211,17 +232,18 @@ export default function AboutPage() {
       <section className="py-24 bg-secondary/20 relative overflow-hidden">
         <div className="absolute inset-0 opacity-20">
           <div className="absolute top-1/2 right-0 w-64 h-64 bg-primary/20 rounded-full blur-3xl animate-morph" style={{ animationDelay: "2s" }} />
-        </div>        <div className="container mx-auto px-6">
+        </div>
+        <div className="container mx-auto px-6">
           <div className="text-center mb-16">
             <span className="text-primary text-sm font-medium uppercase tracking-wider mb-2 block">Collaboration</span>
             <h2 className="text-3xl md:text-5xl font-bold text-foreground">What I'm Like to Work With</h2>
             <p className="text-muted-foreground mt-4 max-w-xl mx-auto">Straight from people who've worked with me — and my own honest self-assessment.</p>
           </div>
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-5 max-w-5xl mx-auto">
-            {workStyle.map((w, i) => {
-              const Icon = w.icon
+            {workStyleItems.map((w, i) => {
+              const Icon = ICON_MAP[w.icon] || Zap
               return (
-                <div key={w.title} className="p-6 bg-card border border-border rounded-2xl text-center hover:border-primary/50 hover:shadow-lg hover:shadow-primary/5 hover:scale-[1.02] transition-all duration-300 animate-scale-in opacity-0"
+                <div key={`${w.title}-${i}`} className="p-6 bg-card border border-border rounded-2xl text-center hover:border-primary/50 hover:shadow-lg hover:shadow-primary/5 hover:scale-[1.02] transition-all duration-300 animate-scale-in opacity-0"
                   style={{ animationDelay: `${i * 0.1}s`, animationFillMode: "forwards" }}>
                   <div className="w-12 h-12 mx-auto mb-4 rounded-xl bg-primary/10 flex items-center justify-center group-hover:bg-primary/20 transition-all duration-300 hover:scale-110 hover:bg-primary/20">
                     <Icon className="w-6 h-6 text-primary" />
@@ -239,16 +261,17 @@ export default function AboutPage() {
       <section className="py-24 relative overflow-hidden">
         <div className="absolute inset-0 opacity-20">
           <div className="absolute bottom-0 right-1/4 w-80 h-80 bg-accent/20 rounded-full blur-3xl animate-morph" style={{ animationDelay: "5s" }} />
-        </div>        <div className="container mx-auto px-6">
+        </div>
+        <div className="container mx-auto px-6">
           <div className="text-center mb-16">
             <span className="text-primary text-sm font-medium uppercase tracking-wider mb-2 block">Beyond Code</span>
             <h2 className="text-3xl md:text-5xl font-bold text-foreground">Things I Love</h2>
           </div>
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 max-w-5xl mx-auto">
-            {interests.map((item, i) => {
-              const Icon = item.icon
+            {interestItems.map((item, i) => {
+              const Icon = ICON_MAP[item.icon] || Code2
               return (
-                <div key={item.label} className="group p-6 bg-card rounded-2xl border border-border hover:border-primary/50 hover:shadow-lg hover:shadow-primary/5 hover:scale-[1.02] transition-all duration-300 text-center animate-scale-in opacity-0"
+                <div key={`${item.label}-${i}`} className="group p-6 bg-card rounded-2xl border border-border hover:border-primary/50 hover:shadow-lg hover:shadow-primary/5 hover:scale-[1.02] transition-all duration-300 text-center animate-scale-in opacity-0"
                   style={{ animationDelay: `${i * 0.1}s`, animationFillMode: "forwards" }}>
                   <div className="w-14 h-14 mx-auto mb-4 rounded-xl bg-primary/10 flex items-center justify-center group-hover:bg-primary/20 group-hover:scale-110 transition-all duration-300">
                     <Icon className="w-7 h-7 text-primary" />

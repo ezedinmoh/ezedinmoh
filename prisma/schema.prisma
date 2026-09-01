@@ -103,6 +103,10 @@ model Profile {
   bio              String   @default("")
   stats            Json?
   experiences      Json?
+  timeline         Json?
+  funFacts         Json?
+  workStyle        Json?
+  interests        Json?
   updatedAt        DateTime @updatedAt
 
   @@map("profile")
