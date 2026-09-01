@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react"
 
-const stats = [
+const DEFAULT_STATS = [
   { value: 5, suffix: "+", label: "Years Experience" },
   { value: 30, suffix: "+", label: "Projects Shipped" },
   { value: 20, suffix: "+", label: "Happy Clients" },
@@ -16,7 +16,7 @@ function CountUp({ target, suffix, active }: { target: number; suffix: string; a
     if (!active) return
     let start = 0
     const duration = 1800
-    const step = Math.ceil(target / (duration / 16))
+    const step = Math.ceil(target / (duration / 16)) || 1
     const timer = setInterval(() => {
       start += step
       if (start >= target) { setCount(target); clearInterval(timer) }
@@ -30,7 +30,19 @@ function CountUp({ target, suffix, active }: { target: number; suffix: string; a
 
 export function StatsBar() {
   const [visible, setVisible] = useState(false)
+  const [stats, setStats] = useState(DEFAULT_STATS)
   const ref = useRef<HTMLElement>(null)
+
+  useEffect(() => {
+    fetch("/api/profile")
+      .then((r) => r.json())
+      .then((data) => {
+        if (Array.isArray(data?.stats) && data.stats.length > 0) {
+          setStats(data.stats)
+        }
+      })
+      .catch(() => {})
+  }, [])
 
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -47,10 +59,9 @@ export function StatsBar() {
       <div className="container mx-auto px-6 relative">
         <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
           {stats.map((stat, i) => (
-            <div key={stat.label} className="text-center group"
-              style={{ animationDelay: `${i * 0.1}s` }}>
+            <div key={`${stat.label}-${i}`} className="text-center group" style={{ animationDelay: `${i * 0.1}s` }}>
               <div className="text-4xl md:text-5xl font-bold text-gradient mb-2 tabular-nums">
-                <CountUp target={stat.value} suffix={stat.suffix} active={visible} />
+                <CountUp target={Number(stat.value) || 0} suffix={stat.suffix || ""} active={visible} />
               </div>
               <div className="text-sm text-muted-foreground">{stat.label}</div>
             </div>

@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react"
 import { ExternalLink } from "lucide-react"
 import { cn } from "@/lib/utils"
 
-const experiences = [
+const DEFAULT_EXPERIENCES = [
   {
     title: "Senior Frontend Engineer",
     company: "TechCorp",
@@ -41,7 +41,19 @@ const experiences = [
 
 export function ExperienceSection() {
   const [isVisible, setIsVisible] = useState(false)
+  const [experiences, setExperiences] = useState(DEFAULT_EXPERIENCES)
   const sectionRef = useRef<HTMLElement>(null)
+
+  useEffect(() => {
+    fetch("/api/profile")
+      .then((r) => r.json())
+      .then((data) => {
+        if (Array.isArray(data?.experiences) && data.experiences.length > 0) {
+          setExperiences(data.experiences)
+        }
+      })
+      .catch(() => {})
+  }, [])
 
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -106,15 +118,19 @@ export function ExperienceSection() {
               )}>
                 <span className="text-sm text-muted-foreground mb-1 block">{exp.period}</span>
                 <h3 className="text-xl font-semibold text-foreground mb-1">{exp.title}</h3>
-                <a
-                  href={exp.companyUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center gap-1 text-primary hover:underline mb-3"
-                >
-                  {exp.company}
-                  <ExternalLink className="w-3 h-3" />
-                </a>
+                {exp.companyUrl ? (
+                  <a
+                    href={exp.companyUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-1 text-primary hover:underline mb-3"
+                  >
+                    {exp.company}
+                    <ExternalLink className="w-3 h-3" />
+                  </a>
+                ) : (
+                  <span className="text-primary font-medium mb-3 block">{exp.company}</span>
+                )}
                 <p className="text-muted-foreground text-sm mb-4 leading-relaxed">
                   {exp.description}
                 </p>
@@ -122,7 +138,7 @@ export function ExperienceSection() {
                   "flex flex-wrap gap-2",
                   index % 2 === 0 ? "md:justify-end" : ""
                 )}>
-                  {exp.technologies.map((tech) => (
+                  {Array.isArray(exp.technologies) && exp.technologies.map((tech) => (
                     <span
                       key={tech}
                       className="px-2 py-1 text-xs bg-secondary rounded text-muted-foreground"

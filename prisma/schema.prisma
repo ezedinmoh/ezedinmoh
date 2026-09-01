@@ -101,6 +101,8 @@ model Profile {
   location         String   @default("Kombolcha, Ethiopia")
   yearsExperience  String   @default("5+ Years Experience")
   bio              String   @default("")
+  stats            Json?
+  experiences      Json?
   updatedAt        DateTime @updatedAt
 
   @@map("profile")
