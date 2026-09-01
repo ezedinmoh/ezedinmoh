@@ -127,10 +127,7 @@ function ProjectCard({
               <img
                 src={project.image}
                 alt={project.title}
-                className={cn(
-                  "absolute inset-0 w-full h-full transition-transform duration-700 group-hover:scale-105",
-                  project.image.includes("cloudinary.com") ? "object-cover object-top" : "object-fill"
-                )}
+                className="absolute inset-0 w-full h-full object-cover object-center transition-transform duration-700 group-hover:scale-105"
               />
             )}
             <div className="absolute inset-0 bg-gradient-to-t from-card/50 via-transparent to-transparent pointer-events-none" />
