@@ -5,6 +5,10 @@ import { ThemeProvider } from '@/components/theme-provider'
 import { BackToTop } from '@/components/back-to-top'
 import { AnalyticsTracker } from '@/components/analytics-tracker'
 import { PageLoader } from '@/components/page-loader'
+import { PwaRegister } from '@/components/pwa/pwa-register'
+import { NetworkStatus } from '@/components/pwa/network-status'
+import { PwaInstallPrompt } from '@/components/pwa/pwa-install-prompt'
+import { PwaUpdatePrompt } from '@/components/pwa/pwa-update-prompt'
 import './globals.css'
 
 const inter = Inter({ 
@@ -20,16 +24,17 @@ const spaceGrotesk = Space_Grotesk({
 export const metadata: Metadata = {
   title: 'Ezedin Mohammed | Software Engineer',
   description: 'Software Engineer from Ethiopia crafting immersive digital experiences with modern web technologies',
-  keywords: ['developer', 'portfolio', 'react', 'nextjs', 'typescript', 'web development', 'software engineer', 'ethiopia'],
+  keywords: ['developer', 'portfolio', 'react', 'nextjs', 'typescript', 'web development', 'software engineer', 'ethiopia', 'pwa'],
   authors: [{ name: 'Ezedin Mohammed' }],
   icons: {
     icon: [
-      {
-        url: '/icon.svg',
-        type: 'image/svg+xml',
-      },
+      { url: '/icon.svg', type: 'image/svg+xml' },
+      { url: '/icons/icon-192.png', sizes: '192x192', type: 'image/png' },
+      { url: '/icons/icon-512.png', sizes: '512x512', type: 'image/png' },
     ],
-    apple: '/apple-icon.png',
+    apple: [
+      { url: '/icons/apple-icon.png', sizes: '180x180', type: 'image/png' },
+    ],
   },
   manifest: '/manifest.webmanifest',
   appleWebApp: {
@@ -82,6 +87,10 @@ export default function RootLayout({
           <PageLoader />
           <BackToTop />
           <AnalyticsTracker />
+          <PwaRegister />
+          <NetworkStatus />
+          <PwaInstallPrompt />
+          <PwaUpdatePrompt />
         </ThemeProvider>
         <Analytics />
       </body>
