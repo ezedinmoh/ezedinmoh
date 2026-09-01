@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { Star } from "lucide-react"
+import { Star, Users } from "lucide-react"
 import { cn } from "@/lib/utils"
 
 interface StarRatingProps {
@@ -79,8 +79,24 @@ export function StarRating({
 
   if (compact) {
     return (
-      <div className={cn("inline-flex items-center gap-1.5 text-xs", className)}>
-        <div className="flex items-center gap-0.5">
+      <div className={cn("inline-flex items-center gap-2 bg-secondary/40 border border-border/50 px-2.5 py-1 rounded-xl text-xs", className)}>
+        {/* Overall Average Score Badge */}
+        <div className="flex items-center gap-1 font-bold text-foreground">
+          <Star className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />
+          <span>{average > 0 ? average : "5.0"}</span>
+          <span className="text-[10px] text-muted-foreground font-normal">/ 5.0</span>
+        </div>
+
+        <span className="w-px h-3 bg-border shrink-0" />
+
+        {/* Total People Rated */}
+        <span className="text-[11px] text-muted-foreground flex items-center gap-1">
+          <Users className="w-3 h-3 opacity-60" />
+          {count > 0 ? `${count}` : "0"}
+        </span>
+
+        {/* Quick Rate Stars */}
+        <div className="flex items-center gap-0.5 ml-1 border-l border-border/50 pl-2">
           {[1, 2, 3, 4, 5].map((star) => (
             <button
               key={star}
@@ -97,66 +113,80 @@ export function StarRating({
               <Star
                 className={cn(
                   "w-3.5 h-3.5 transition-colors",
-                  star <= (hoverRating ?? userRating ?? Math.round(average))
+                  star <= activeDisplayRating
                     ? "fill-amber-400 text-amber-400"
-                    : "fill-muted/20 text-muted-foreground/40"
+                    : "fill-muted/20 text-muted-foreground/30 hover:text-amber-400/60"
                 )}
               />
             </button>
           ))}
         </div>
-        <span className="font-semibold text-foreground">{average > 0 ? average : "New"}</span>
-        {count > 0 && <span className="text-muted-foreground text-[11px]">({count})</span>}
       </div>
     )
   }
 
   return (
-    <div className={cn("flex flex-col gap-1.5 p-3 bg-secondary/30 border border-border/60 rounded-xl", className)}>
-      <div className="flex items-center justify-between">
-        <span className="text-xs font-semibold text-foreground uppercase tracking-wider">
-          Project Rating
-        </span>
-        {userRating ? (
-          <span className="text-[11px] font-medium text-emerald-400 bg-emerald-950/60 px-2 py-0.5 rounded-full border border-emerald-500/30">
-            Your Rating: {userRating} ★
+    <div className={cn("bg-card border border-border/80 rounded-2xl p-4 space-y-3 shadow-sm", className)}>
+      {/* ── PlayStore Header: Overall Score + Voter Count ── */}
+      <div className="flex items-center justify-between border-b border-border/60 pb-3">
+        <div>
+          <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider block mb-0.5">
+            Overall Rating
           </span>
-        ) : (
-          <span className="text-[11px] text-muted-foreground">Click to rate</span>
-        )}
-      </div>
-
-      <div className="flex items-center justify-between gap-4 mt-1">
-        <div className="flex items-center gap-1">
-          {[1, 2, 3, 4, 5].map((star) => (
-            <button
-              key={star}
-              type="button"
-              onClick={() => handleRate(star)}
-              onMouseEnter={() => setHoverRating(star)}
-              onMouseLeave={() => setHoverRating(null)}
-              className="focus:outline-none p-1 transition-transform hover:scale-125 active:scale-95"
-            >
-              <Star
-                className={cn(
-                  "w-5 h-5 transition-all duration-200",
-                  star <= activeDisplayRating
-                    ? "fill-amber-400 text-amber-400 drop-shadow-[0_0_8px_rgba(251,191,36,0.5)]"
-                    : "fill-muted/20 text-muted-foreground/30 hover:text-amber-300/60"
-                )}
-              />
-            </button>
-          ))}
+          <div className="flex items-baseline gap-1.5">
+            <span className="text-2xl font-black text-foreground">{average > 0 ? average : "5.0"}</span>
+            <span className="text-sm font-bold text-amber-400">/ 5.0</span>
+          </div>
         </div>
 
         <div className="text-right">
-          <div className="flex items-baseline gap-1 justify-end">
-            <span className="text-lg font-bold text-foreground">{average > 0 ? average : "—"}</span>
-            <span className="text-xs text-amber-400 font-semibold">★</span>
+          <div className="flex items-center justify-end gap-1 text-amber-400 mb-0.5">
+            {[1, 2, 3, 4, 5].map((s) => (
+              <Star key={s} className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />
+            ))}
           </div>
-          <p className="text-[11px] text-muted-foreground">
-            {count > 0 ? `${count} rating${count > 1 ? "s" : ""}` : "No ratings yet"}
+          <p className="text-xs font-medium text-muted-foreground flex items-center justify-end gap-1">
+            <Users className="w-3 h-3 opacity-60" />
+            {count > 0 ? `${count} rating${count > 1 ? "s" : ""}` : "Be the first to rate"}
           </p>
+        </div>
+      </div>
+
+      {/* ── Interactive Rate Component ── */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-1">
+        <div>
+          <span className="text-xs font-semibold text-foreground block">Rate this Project</span>
+          <p className="text-[11px] text-muted-foreground">Tap stars to share your experience</p>
+        </div>
+
+        <div className="flex items-center gap-3">
+          <div className="flex items-center gap-1">
+            {[1, 2, 3, 4, 5].map((star) => (
+              <button
+                key={star}
+                type="button"
+                onClick={() => handleRate(star)}
+                onMouseEnter={() => setHoverRating(star)}
+                onMouseLeave={() => setHoverRating(null)}
+                className="focus:outline-none p-1 transition-transform hover:scale-125 active:scale-95"
+              >
+                <Star
+                  className={cn(
+                    "w-5 h-5 transition-all duration-200",
+                    star <= activeDisplayRating
+                      ? "fill-amber-400 text-amber-400 drop-shadow-[0_0_8px_rgba(251,191,36,0.5)]"
+                      : "fill-muted/20 text-muted-foreground/30 hover:text-amber-400/60"
+                  )}
+                />
+              </button>
+            ))}
+          </div>
+
+          {userRating ? (
+            <span className="text-xs font-semibold text-emerald-400 bg-emerald-950/60 px-2.5 py-1 rounded-full border border-emerald-500/30 shrink-0">
+              Your Rate: {userRating} ★
+            </span>
+          ) : null}
         </div>
       </div>
     </div>

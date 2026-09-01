@@ -1,11 +1,12 @@
 "use client"
 
-import { useState, useEffect, useRef } from "react"
+import { useState, useEffect } from "react"
 import {
   X, ExternalLink, RefreshCw, Monitor, Tablet, Smartphone,
-  ChevronLeft, ChevronRight, Play, Pause, ArrowUpRight
+  ChevronLeft, ChevronRight, ArrowUpRight
 } from "lucide-react"
 import { cn } from "@/lib/utils"
+import { StarRating } from "@/components/star-rating"
 
 export interface ProjectModalItem {
   id: string
@@ -17,6 +18,8 @@ export interface ProjectModalItem {
   githubUrl?: string | null
   tags?: string[]
   previewMode?: "slideshow" | "iframe"
+  ratingSum?: number
+  ratingCount?: number
 }
 
 interface ProjectPreviewModalProps {
@@ -29,14 +32,13 @@ function isVideoUrl(url: string) {
     url.endsWith(".mp4") ||
     url.endsWith(".webm") ||
     url.endsWith(".mov") ||
-    url.includes("cloudinary.com") && url.includes("/video/upload/")
+    (url.includes("cloudinary.com") && url.includes("/video/upload/"))
   )
 }
 
 export function ProjectPreviewModal({ project, onClose }: ProjectPreviewModalProps) {
-  const [activeTab, setActiveTab] = useState<"preview" | "slideshow">("preview")
   const [deviceView, setDeviceView] = useState<"desktop" | "tablet" | "mobile">("desktop")
-  
+
   // Iframe state
   const [iframeLoading, setIframeLoading] = useState(true)
   const [iframeError, setIframeError] = useState(false)
@@ -45,7 +47,7 @@ export function ProjectPreviewModal({ project, onClose }: ProjectPreviewModalPro
 
   // Slideshow state
   const [currentIndex, setCurrentIndex] = useState(0)
-  const [isPlaying, setIsPlaying] = useState(false)
+  const [isPlaying] = useState(false)
 
   const isIframeMode = project?.previewMode === "iframe" && !!project?.liveUrl
 
@@ -134,11 +136,12 @@ export function ProjectPreviewModal({ project, onClose }: ProjectPreviewModalPro
             <h2 className="font-bold text-foreground text-base sm:text-lg truncate max-w-xs sm:max-w-sm">
               {project.title}
             </h2>
-            {project.tags && project.tags.length > 0 && (
-              <span className="hidden sm:inline-block px-2.5 py-0.5 rounded-full bg-primary/10 text-primary text-xs font-medium">
-                {project.tags[0]}
-              </span>
-            )}
+            <StarRating
+              projectId={project.id}
+              initialSum={project.ratingSum}
+              initialCount={project.ratingCount}
+              compact
+            />
           </div>
 
           {/* View Mode & Controls */}
