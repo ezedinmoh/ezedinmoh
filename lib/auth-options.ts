@@ -1,16 +1,10 @@
 import type { NextAuthOptions } from "next-auth"
 import CredentialsProvider from "next-auth/providers/credentials"
 
-const THIRTY_DAYS = 30 * 24 * 60 * 60
-
 export const authOptions: NextAuthOptions = {
   secret: process.env.NEXTAUTH_SECRET || "ezedinmoh-portfolio-auth-secret-key-2026-v1",
   session: {
     strategy: "jwt",
-    maxAge: THIRTY_DAYS,
-  },
-  jwt: {
-    maxAge: THIRTY_DAYS,
   },
   cookies: {
     sessionToken: {
@@ -20,7 +14,7 @@ export const authOptions: NextAuthOptions = {
         sameSite: "lax",
         path: "/",
         secure: process.env.NODE_ENV === "production",
-        maxAge: THIRTY_DAYS, // Ensures persistent 30-day cookie across mobile & desktop browser restarts
+        // No maxAge: browser session cookie. Automatically erased when browser/tab is closed for security.
       },
     },
   },
@@ -45,7 +39,7 @@ export const authOptions: NextAuthOptions = {
 
         if (isMatch) {
           return {
-            id: "1",
+            id: `admin-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`, // Unique session ID per device login
             email: adminEmail,
             name: adminUsername,
           }
@@ -60,6 +54,7 @@ export const authOptions: NextAuthOptions = {
       if (user) {
         token.email = user.email
         token.name  = user.name
+        token.id    = user.id
       }
       return token
     },
