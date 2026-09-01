@@ -1,14 +1,20 @@
 import nodemailer from "nodemailer"
 
-const smtpUser = process.env.SMTP_USER || "ezedinmoh1@gmail.com"
-const smtpPass = process.env.SMTP_PASS
+const smtpUser = (process.env.SMTP_USER || "ezedinmoh1@gmail.com").trim()
+const smtpPass = (process.env.SMTP_PASS || "").replace(/\s+/g, "")
 
 const transporter = nodemailer.createTransport({
-  service: "gmail",
+  host: "smtp.gmail.com",
+  port: 465,
+  secure: true, // SSL
   auth: {
     user: smtpUser,
     pass: smtpPass,
   },
+  // Ensure connection timeout settings for serverless environments
+  connectionTimeout: 10000,
+  greetingTimeout: 5000,
+  socketTimeout: 10000,
 })
 
 export interface ContactMailData {
@@ -22,7 +28,7 @@ export interface ContactMailData {
  * Send notification email to Admin (ezedinmoh1@gmail.com)
  */
 export async function sendContactNotification(data: ContactMailData) {
-  const adminEmail = process.env.ADMIN_EMAIL || "ezedinmoh1@gmail.com"
+  const adminEmail = (process.env.ADMIN_EMAIL || "ezedinmoh1@gmail.com").trim()
 
   const html = `
     <!DOCTYPE html>

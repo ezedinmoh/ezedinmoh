@@ -26,16 +26,16 @@ export async function POST(req: Request) {
       data: contactData,
     })
 
-    // Send admin notification & client auto-reply concurrently — non-blocking
-    Promise.allSettled([
+    // Await email delivery in serverless environment to prevent premature function container termination
+    const emailResults = await Promise.allSettled([
       sendContactNotification(contactData),
       sendClientAutoReply(contactData),
-    ]).then((results) => {
-      results.forEach((res, idx) => {
-        if (res.status === "rejected") {
-          console.error(`Email send failed for index ${idx}:`, res.reason)
-        }
-      })
+    ])
+
+    emailResults.forEach((res, idx) => {
+      if (res.status === "rejected") {
+        console.error(`[SMTP Error] Email ${idx === 0 ? "Admin Notification" : "Client Auto-Reply"} failed:`, res.reason)
+      }
     })
 
     return NextResponse.json(message, { status: 201 })
