@@ -84,16 +84,20 @@ export default function AboutPage() {
 
       {/* Hero */}
       <section className="pt-32 pb-20 relative overflow-hidden">
-        {/* Background gradient */}
-        <div className="absolute inset-0 bg-gradient-to-br from-background via-background to-primary/10" />
-
-        {/* Cover image backdrop if present */}
-        {profile.coverImageUrl && (
-          <div className="absolute top-0 left-0 right-0 h-96 overflow-hidden opacity-20 pointer-events-none">
+        {/* Cover image banner if present */}
+        {profile.coverImageUrl ? (
+          <div className="absolute top-0 left-0 right-0 h-[480px] overflow-hidden pointer-events-none z-0">
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src={profile.coverImageUrl} alt="Cover backdrop" className="w-full h-full object-cover blur-md" />
-            <div className="absolute inset-0 bg-gradient-to-b from-transparent via-background/60 to-background" />
+            <img
+              src={profile.coverImageUrl}
+              alt="Profile Cover Banner"
+              className="w-full h-full object-cover object-center scale-105 blur-2xl opacity-50 dark:opacity-40 transition-all duration-700"
+            />
+            <div className="absolute inset-0 bg-gradient-to-b from-background/20 via-background/60 to-background" />
+            <div className="absolute inset-0 bg-gradient-to-r from-background via-transparent to-background opacity-80" />
           </div>
+        ) : (
+          <div className="absolute inset-0 bg-gradient-to-br from-background via-background to-primary/10" />
         )}
 
         {/* Mesh blobs */}
