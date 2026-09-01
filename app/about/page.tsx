@@ -1,5 +1,6 @@
 "use client"
 
+import { useState, useEffect } from "react"
 import { Navigation } from "@/components/navigation"
 import { Footer } from "@/components/footer"
 import { ContactCTA } from "@/components/contact-cta"
@@ -42,6 +43,24 @@ const workStyle = [
 ]
 
 export default function AboutPage() {
+  const [profile, setProfile] = useState<{
+    avatarUrl?: string
+    coverImageUrl?: string
+    title?: string
+    location?: string
+    yearsExperience?: string
+    bio?: string
+  }>({})
+
+  useEffect(() => {
+    fetch("/api/profile")
+      .then((r) => r.json())
+      .then((data) => {
+        if (data) setProfile(data)
+      })
+      .catch(() => {})
+  }, [])
+
   return (
     <main className="min-h-screen bg-background">
       <ScrollProgress />
@@ -52,6 +71,16 @@ export default function AboutPage() {
       <section className="pt-32 pb-20 relative overflow-hidden">
         {/* Background gradient */}
         <div className="absolute inset-0 bg-gradient-to-br from-background via-background to-primary/10" />
+
+        {/* Cover image backdrop if present */}
+        {profile.coverImageUrl && (
+          <div className="absolute top-0 left-0 right-0 h-96 overflow-hidden opacity-20 pointer-events-none">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src={profile.coverImageUrl} alt="Cover backdrop" className="w-full h-full object-cover blur-md" />
+            <div className="absolute inset-0 bg-gradient-to-b from-transparent via-background/60 to-background" />
+          </div>
+        )}
+
         {/* Mesh blobs */}
         <div className="absolute inset-0 opacity-30">
           <div className="absolute top-1/4 left-0 w-96 h-96 bg-primary/20 rounded-full blur-3xl animate-morph" />
@@ -62,13 +91,24 @@ export default function AboutPage() {
           style={{ backgroundImage: "linear-gradient(rgba(100,200,180,0.3) 1px, transparent 1px), linear-gradient(90deg, rgba(100,200,180,0.3) 1px, transparent 1px)", backgroundSize: "60px 60px" }} />
         <div className="container mx-auto px-6 relative">
           <div className="grid lg:grid-cols-2 gap-16 items-center">
-            {/* Photo placeholder */}
+            {/* Profile Photo Container */}
             <div className="relative order-2 lg:order-1">
-              <div className="aspect-[4/5] rounded-3xl overflow-hidden bg-gradient-to-br from-primary/20 to-accent/20 animate-glow flex items-center justify-center">
-                <div className="w-48 h-48 rounded-full bg-primary/20 animate-morph flex items-center justify-center">
-                  <span className="text-6xl font-bold text-gradient">EM</span>
-                </div>
+              <div className="aspect-[4/5] rounded-3xl overflow-hidden bg-gradient-to-br from-primary/20 to-accent/20 border border-border/80 shadow-2xl animate-glow flex items-center justify-center relative group">
+                {profile.avatarUrl ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
+                    src={profile.avatarUrl}
+                    alt={profile.title || "Ezedin Mohammed Profile Picture"}
+                    className="w-full h-full object-cover object-center transition-transform duration-700 group-hover:scale-105"
+                  />
+                ) : (
+                  <div className="w-48 h-48 rounded-full bg-primary/20 animate-morph flex items-center justify-center">
+                    <span className="text-6xl font-bold text-gradient">EM</span>
+                  </div>
+                )}
+                <div className="absolute inset-0 bg-gradient-to-t from-card/60 via-transparent to-transparent opacity-60 pointer-events-none" />
               </div>
+
               <div className="absolute -top-4 -right-4 bg-card border border-border px-4 py-2 rounded-full shadow-lg animate-float">
                 <span className="text-sm font-medium text-foreground">React Expert</span>
               </div>
@@ -84,16 +124,22 @@ export default function AboutPage() {
             <div className="order-1 lg:order-2">
               <span className="text-primary text-sm font-medium uppercase tracking-wider mb-4 block">About Me</span>
               <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-foreground mb-6 animate-slide-up opacity-0" style={{ animationDelay: "0.1s", animationFillMode: "forwards" }}>
-                I'm <span className="text-gradient">Ezedin Mohammed</span>
+                I'm <span className="text-gradient">{profile.title || "Ezedin Mohammed"}</span>
               </h1>
               <div className="flex flex-wrap gap-4 mb-6 text-muted-foreground">
-                <span className="inline-flex items-center gap-1"><MapPin className="w-4 h-4" /> Kombolcha, Ethiopia</span>
-                <span className="inline-flex items-center gap-1"><Calendar className="w-4 h-4" /> 5+ Years Experience</span>
+                <span className="inline-flex items-center gap-1"><MapPin className="w-4 h-4" /> {profile.location || "Kombolcha, Ethiopia"}</span>
+                <span className="inline-flex items-center gap-1"><Calendar className="w-4 h-4" /> {profile.yearsExperience || "5+ Years Experience"}</span>
               </div>
               <div className="space-y-4 text-muted-foreground leading-relaxed">
-                <p>I'm a passionate Software Engineer from Ethiopia who believes in the power of clean code and thoughtful design. My journey started with a simple curiosity about how websites work and evolved into a deep love for crafting digital experiences.</p>
-                <p>I specialize in React, TypeScript, and Next.js, but I'm always eager to explore new technologies. Currently focused on AI-powered web applications and developer tooling.</p>
-                <p>When I'm not coding, you'll find me enjoying Ethiopian coffee, contributing to open-source, or playing strategy games.</p>
+                {profile.bio ? (
+                  <p>{profile.bio}</p>
+                ) : (
+                  <>
+                    <p>I'm a passionate Software Engineer from Ethiopia who believes in the power of clean code and thoughtful design. My journey started with a simple curiosity about how websites work and evolved into a deep love for crafting digital experiences.</p>
+                    <p>I specialize in React, TypeScript, and Next.js, but I'm always eager to explore new technologies. Currently focused on AI-powered web applications and developer tooling.</p>
+                    <p>When I'm not coding, you'll find me enjoying Ethiopian coffee, contributing to open-source, or playing strategy games.</p>
+                  </>
+                )}
               </div>
               <div className="flex gap-4 mt-8">
                 {[

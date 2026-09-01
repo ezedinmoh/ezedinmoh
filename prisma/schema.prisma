@@ -92,3 +92,16 @@ model Resume {
 
   @@map("resume")
 }
+
+model Profile {
+  id               String   @id @default("singleton")
+  avatarUrl        String   @default("")
+  coverImageUrl    String   @default("")
+  title            String   @default("Ezedin Mohammed")
+  location         String   @default("Kombolcha, Ethiopia")
+  yearsExperience  String   @default("5+ Years Experience")
+  bio              String   @default("")
+  updatedAt        DateTime @updatedAt
+
+  @@map("profile")
+}
