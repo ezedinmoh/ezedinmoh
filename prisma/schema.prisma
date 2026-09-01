@@ -7,29 +7,45 @@ datasource db {
 }
 
 model Project {
-  id                 String   @id @default(cuid())
-  slug               String   @unique
+  id                 String          @id @default(cuid())
+  slug               String          @unique
   title              String
   description        String
-  image              String   @default("")
-  screenshots        String[] @default([])
+  image              String          @default("")
+  screenshots        String[]        @default([])
   tags               String[]
   stack              String[]
   category           String[]
   liveUrl            String?
   githubUrl          String?
-  featured           Boolean  @default(false)
+  featured           Boolean         @default(false)
   year               String
-  sortOrder          Int      @default(0)
-  featuredSortOrder  Int      @default(0)
-  previewMode        String   @default("slideshow")
+  sortOrder          Int             @default(0)
+  featuredSortOrder  Int             @default(0)
+  previewMode        String          @default("slideshow")
   caseStudyProblem   String?
   caseStudySolution  String?
   caseStudyOutcome   String?
-  createdAt          DateTime @default(now())
-  updatedAt          DateTime @updatedAt
+  ratingSum          Int             @default(0)
+  ratingCount        Int             @default(0)
+  createdAt          DateTime        @default(now())
+  updatedAt          DateTime        @updatedAt
+  ratings            ProjectRating[]
 
   @@map("projects")
+}
+
+model ProjectRating {
+  id        String   @id @default(cuid())
+  projectId String
+  rating    Int
+  userIp    String
+  createdAt DateTime @default(now())
+
+  project   Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@unique([projectId, userIp])
+  @@map("project_ratings")
 }
 
 model GuestbookEntry {

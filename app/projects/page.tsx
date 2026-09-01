@@ -5,6 +5,7 @@ import { Navigation } from "@/components/navigation"
 import { Footer } from "@/components/footer"
 import { ScrollProgress } from "@/components/scroll-progress"
 import { AnimatedCursor } from "@/components/animated-cursor"
+import { StarRating } from "@/components/star-rating"
 import { cn } from "@/lib/utils"
 import type { Project } from "@/lib/projects"
 import {
@@ -62,7 +63,13 @@ function DemoModal({ project, onClose }: { project: Project; onClose: () => void
             </div>
             <p className="text-xs text-muted-foreground truncate mt-0.5">{subtitle}</p>
           </div>
-          <div className="flex items-center gap-2 shrink-0">
+          <div className="flex items-center gap-3 shrink-0">
+            <StarRating
+              projectId={project.id}
+              initialSum={project.ratingSum}
+              initialCount={project.ratingCount}
+              compact
+            />
             {project.liveUrl && (
               <a
                 href={project.liveUrl}
@@ -403,7 +410,15 @@ function ProjectCard({ project, index, onDemo, onCaseStudy }: {
 
       {/* Content */}
       <div className="flex flex-col flex-1 p-5">
-        <h3 className="font-semibold text-foreground group-hover:text-primary transition-colors mb-1.5">{project.title}</h3>
+        <div className="flex items-start justify-between gap-2 mb-1.5">
+          <h3 className="font-semibold text-foreground group-hover:text-primary transition-colors">{project.title}</h3>
+          <StarRating
+            projectId={project.id}
+            initialSum={project.ratingSum}
+            initialCount={project.ratingCount}
+            compact
+          />
+        </div>
         <p className="text-sm text-muted-foreground leading-relaxed line-clamp-2 flex-1 mb-4">{project.description}</p>
         <div className="flex items-center gap-3 pt-3 border-t border-border">
           <button onClick={onDemo}
@@ -448,6 +463,8 @@ export default function ProjectsPage() {
           link: p.liveUrl,
           screenshots: Array.isArray(p.screenshots) ? p.screenshots : [],
           previewMode: (p.previewMode as string | undefined) ?? "slideshow",
+          ratingSum: typeof p.ratingSum === "number" ? p.ratingSum : 0,
+          ratingCount: typeof p.ratingCount === "number" ? p.ratingCount : 0,
           caseStudy: p.caseStudyProblem ? {
             problem:  p.caseStudyProblem,
             solution: p.caseStudySolution,
