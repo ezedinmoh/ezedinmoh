@@ -7,10 +7,22 @@ export default function Loading() {
   const [name, setName]           = useState<string>("Ezedin Mohammed")
 
   useEffect(() => {
+    // 1. Read cached avatar instantly from localStorage if present
+    if (typeof window !== "undefined") {
+      const cachedAvatar = localStorage.getItem("profile_avatar_url")
+      if (cachedAvatar) setAvatarUrl(cachedAvatar)
+    }
+
+    // 2. Fetch fresh profile data
     fetch("/api/profile")
       .then((r) => r.json())
       .then((data) => {
-        if (data?.avatarUrl) setAvatarUrl(data.avatarUrl)
+        if (data?.avatarUrl) {
+          setAvatarUrl(data.avatarUrl)
+          if (typeof window !== "undefined") {
+            localStorage.setItem("profile_avatar_url", data.avatarUrl)
+          }
+        }
         if (data?.title) setName(data.title)
       })
       .catch(() => {})
@@ -60,9 +72,8 @@ export default function Loading() {
 
           {/* Logo / Avatar Box */}
           <div
-            className="relative w-20 h-20 rounded-2xl overflow-hidden flex items-center justify-center animate-scale-in border border-primary/30 shadow-xl"
+            className="relative w-20 h-20 rounded-2xl overflow-hidden flex items-center justify-center animate-scale-in border border-primary/30 shadow-xl bg-card"
             style={{
-              background: "linear-gradient(135deg, oklch(0.44 0.20 185), oklch(0.52 0.18 200))",
               boxShadow: "0 0 40px oklch(0.7 0.15 180 / 0.4), 0 0 80px oklch(0.7 0.15 180 / 0.15)",
             }}
           >
@@ -71,8 +82,7 @@ export default function Loading() {
               <img src={avatarUrl} alt={name} className="w-full h-full object-cover" />
             ) : (
               <span
-                className="text-2xl font-black tracking-tight text-white select-none"
-                style={{ fontFamily: "var(--font-sans)" }}
+                className="text-2xl font-black tracking-tight text-primary select-none"
               >
                 EM
               </span>

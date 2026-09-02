@@ -66,7 +66,12 @@ export default function AboutPage() {
     fetch("/api/profile")
       .then((r) => r.json())
       .then((data) => {
-        if (data) setProfile(data)
+        if (data) {
+          setProfile(data)
+          if (data.avatarUrl && typeof window !== "undefined") {
+            localStorage.setItem("profile_avatar_url", data.avatarUrl)
+          }
+        }
       })
       .catch(() => {})
   }, [])
