@@ -7,6 +7,7 @@ import { ScrollProgress } from "@/components/scroll-progress"
 import { AnimatedCursor } from "@/components/animated-cursor"
 import { Send, MessageSquareHeart, Search, ArrowUpDown, Pin, ChevronDown, Loader2 } from "lucide-react"
 import { cn } from "@/lib/utils"
+import { Skeleton } from "@/components/ui/skeleton"
 
 const AVATARS = ["🦊", "🐼", "🦁", "🐸", "🦋", "🐙", "🦄", "🐺", "🦅", "🐬", "🌟", "🔥", "🌈", "🎭", "🚀", "🎸"]
 const REACTIONS = ["👍", "❤️", "🔥"] as const
@@ -268,8 +269,24 @@ export default function GuestbookPage() {
         </div>
 
         {loading ? (
-          <div className="flex justify-center py-20">
-            <Loader2 className="w-8 h-8 animate-spin text-primary" />
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {[1, 2, 3, 4, 5, 6].map((i) => (
+              <div key={i} className="p-5 bg-card border border-border rounded-2xl space-y-3">
+                <div className="flex items-center gap-3">
+                  <Skeleton className="w-10 h-10 rounded-xl shrink-0" />
+                  <div className="space-y-1.5 flex-1">
+                    <Skeleton className="h-4 w-1/2" />
+                    <Skeleton className="h-3 w-1/3" />
+                  </div>
+                </div>
+                <Skeleton className="h-4 w-full" />
+                <Skeleton className="h-4 w-4/5" />
+                <div className="pt-2 flex gap-2">
+                  <Skeleton className="h-7 w-12 rounded-full" />
+                  <Skeleton className="h-7 w-12 rounded-full" />
+                </div>
+              </div>
+            ))}
           </div>
         ) : filtered.length === 0 ? (
           <div className="text-center py-20 text-muted-foreground">

@@ -3,49 +3,45 @@
 import { useState, useEffect } from "react"
 import { Navigation } from "@/components/navigation"
 import { Footer } from "@/components/footer"
+import { ContactCTA } from "@/components/contact-cta"
 import { ScrollProgress } from "@/components/scroll-progress"
 import { AnimatedCursor } from "@/components/animated-cursor"
-import { StarRating } from "@/components/star-rating"
-import { ProjectPreviewModal } from "@/components/project-preview-modal"
-import {
-  Github, ExternalLink, ArrowUpRight, Loader2,
-  ChevronRight, Monitor, Layers, X
-} from "lucide-react"
+import { ArrowUpRight, Github, ChevronRight, Monitor, Layers, X } from "lucide-react"
 import { cn } from "@/lib/utils"
+import { ProjectPreviewModal } from "@/components/project-preview-modal"
+import { StarRating } from "@/components/star-rating"
+import { Skeleton } from "@/components/ui/skeleton"
 
-interface CaseStudy {
+export interface CaseStudyData {
   problem: string
   solution: string
   outcome: string
 }
 
-interface Project {
+export interface Project {
   id: string
-  slug: string
   title: string
   description: string
   image: string
-  screenshots: string[]
+  screenshots?: string[]
+  previewMode?: "slideshow" | "iframe"
   tags: string[]
   stack: string[]
   category: string[]
-  github?: string
   link?: string
+  github?: string
   liveUrl?: string
   githubUrl?: string
-  featured: boolean
-  year: string
-  previewMode?: "slideshow" | "iframe"
+  featured?: boolean
   ratingSum?: number
   ratingCount?: number
-  caseStudy?: CaseStudy
+  caseStudy?: CaseStudyData
 }
 
-const categories = ["All", "Full-Stack", "Frontend", "Backend", "Mobile", "AI"]
+const categories = ["All", "Full-Stack", "Frontend", "Backend", "AI / ML"]
 
 function CaseStudyModal({ project, onClose }: { project: Project; onClose: () => void }) {
   if (!project.caseStudy) return null
-
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-background/80 backdrop-blur-md animate-fade-in">
       <div className="relative w-full max-w-2xl bg-card border border-border rounded-2xl p-6 sm:p-8 shadow-2xl space-y-6 max-h-[90vh] overflow-y-auto">
@@ -75,18 +71,42 @@ function CaseStudyModal({ project, onClose }: { project: Project; onClose: () =>
         </div>
 
         <div className="flex justify-end gap-3 pt-2">
-          {project.github && (
-            <a href={project.github} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 px-4 py-2 bg-secondary text-foreground text-xs font-medium rounded-xl hover:bg-secondary/80 transition-all">
+          {project.githubUrl && (
+            <a href={project.githubUrl} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 px-4 py-2 bg-secondary text-foreground text-xs font-medium rounded-xl hover:bg-secondary/80 transition-all">
               <Github className="w-3.5 h-3.5" /> Source Code
             </a>
           )}
-          {project.link && (
-            <a href={project.link} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 px-4 py-2 bg-primary text-primary-foreground text-xs font-medium rounded-xl hover:opacity-90 transition-all">
+          {project.liveUrl && (
+            <a href={project.liveUrl} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 px-4 py-2 bg-primary text-primary-foreground text-xs font-medium rounded-xl hover:opacity-90 transition-all">
               <ArrowUpRight className="w-3.5 h-3.5" /> Live Demo
             </a>
           )}
         </div>
       </div>
+    </div>
+  )
+}
+
+export function ProjectsGridSkeleton() {
+  return (
+    <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+      {[1, 2, 3, 4, 5, 6].map((i) => (
+        <div key={i} className="rounded-2xl bg-card border border-border/60 overflow-hidden flex flex-col h-full min-h-[380px]">
+          <Skeleton className="h-52 w-full rounded-none" />
+          <div className="p-5 space-y-3 flex-1 flex flex-col">
+            <div className="flex justify-between items-center">
+              <Skeleton className="h-5 w-2/3" />
+              <Skeleton className="h-5 w-20" />
+            </div>
+            <Skeleton className="h-4 w-full" />
+            <Skeleton className="h-4 w-4/5" />
+            <div className="mt-auto flex justify-between items-center pt-3">
+              <Skeleton className="h-5 w-24" />
+              <Skeleton className="h-5 w-16" />
+            </div>
+          </div>
+        </div>
+      ))}
     </div>
   )
 }
@@ -113,7 +133,7 @@ function ProjectCard({
       onMouseLeave={() => setHovered(false)}
       className="group relative rounded-2xl bg-card border border-border/60 overflow-hidden transition-all duration-500 flex flex-col hover:border-primary/40 hover:shadow-2xl hover:-translate-y-1 h-full min-h-[380px]"
     >
-      <div className="relative h-48 overflow-hidden shrink-0">
+      <div className="relative overflow-hidden shrink-0 h-52">
         {project.image ? (
           <>
             {isVideo ? (
@@ -133,9 +153,17 @@ function ProjectCard({
             <div className="absolute inset-0 bg-gradient-to-t from-card/50 via-transparent to-transparent pointer-events-none" />
           </>
         ) : (
-          <div className="absolute inset-0 bg-gradient-to-br from-primary/20 to-accent/20 flex items-center justify-center">
-            <Monitor className="w-10 h-10 text-primary/40" />
-          </div>
+          <>
+            <div className={cn("absolute inset-0 bg-gradient-to-br from-primary/20 to-accent/20 transition-all duration-700", hovered ? "scale-110 animate-morph" : "scale-100")} />
+            <div className="absolute inset-0 flex items-center justify-center">
+              <div className="grid grid-cols-3 gap-2 p-6 opacity-20">
+                {[...Array(9)].map((_, i) => (
+                  <div key={i} className={cn("w-6 h-6 rounded-lg bg-primary transition-all duration-500", hovered && "animate-pulse-3d")} style={{ animationDelay: `${i * 0.07}s` }} />
+                ))}
+              </div>
+            </div>
+            <div className={cn("absolute inset-0 bg-gradient-to-t from-card via-transparent to-transparent transition-opacity duration-500", hovered ? "opacity-100" : "opacity-60")} />
+          </>
         )}
         <div className="absolute inset-0 bg-background/60 opacity-0 group-hover:opacity-100 transition-all duration-300 flex items-center justify-center gap-3">
           <button onClick={onDemo} className="flex items-center gap-1.5 px-4 py-2 bg-primary text-primary-foreground rounded-full text-sm font-medium hover:opacity-90 transition-all hover:scale-105">
@@ -282,9 +310,7 @@ export default function ProjectsPage() {
       <section className="py-12">
         <div className="container mx-auto px-6">
           {loading ? (
-            <div className="flex justify-center py-20">
-              <Loader2 className="w-8 h-8 animate-spin text-primary" />
-            </div>
+            <ProjectsGridSkeleton />
           ) : filtered.length === 0 ? (
             <div className="text-center py-20 text-muted-foreground">
               <p className="text-4xl mb-3">🔍</p>
@@ -308,13 +334,13 @@ export default function ProjectsPage() {
       <section className="py-24 bg-secondary/30">
         <div className="container mx-auto px-6 text-center">
           <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">Have a project in mind?</h2>
-          <p className="text-muted-foreground mb-8 max-w-lg mx-auto">I'm always excited to work on interesting projects. Let's bring your ideas to life.</p>
-          <a href="/contact" className="inline-flex items-center gap-2 px-8 py-4 bg-primary text-primary-foreground rounded-full font-medium hover:opacity-90 transition-all hover:scale-105">
-            Start a Project <ArrowUpRight className="w-4 h-4" />
-          </a>
+          <p className="text-muted-foreground max-w-xl mx-auto mb-8">
+            I'm always open to discussing new opportunities, creative ideas, or vision for your product.
+          </p>
         </div>
       </section>
 
+      <ContactCTA />
       <Footer />
     </main>
   )

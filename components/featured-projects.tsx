@@ -2,10 +2,11 @@
 
 import { useState, useEffect } from "react"
 import Link from "next/link"
-import { ExternalLink, ArrowUpRight, Github, X, ChevronRight, Monitor, Layers, ArrowRight } from "lucide-react"
+import { ArrowRight, ChevronRight, Github, ArrowUpRight, Monitor, Layers, X } from "lucide-react"
 import { cn } from "@/lib/utils"
+import { ProjectPreviewModal } from "./project-preview-modal"
 import { StarRating } from "@/components/star-rating"
-import { ProjectPreviewModal } from "@/components/project-preview-modal"
+import { Skeleton } from "@/components/ui/skeleton"
 
 interface CaseStudy {
   problem: string
@@ -13,7 +14,7 @@ interface CaseStudy {
   outcome: string
 }
 
-interface DBProject {
+export interface DBProject {
   id: string
   title: string
   description: string
@@ -77,6 +78,64 @@ function CaseStudyModal({ project, onClose }: { project: DBProject; onClose: () 
             </a>
           )}
         </div>
+      </div>
+    </div>
+  )
+}
+
+export function FeaturedProjectsSkeleton() {
+  return (
+    <div className="space-y-6">
+      {/* Hero 2-col row skeleton */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="md:col-span-2">
+          <div className="rounded-2xl bg-card border border-border/60 overflow-hidden flex flex-col h-full min-h-[520px]">
+            <Skeleton className="h-72 sm:h-96 md:h-[380px] w-full rounded-none" />
+            <div className="p-6 space-y-4 flex-1 flex flex-col">
+              <div className="flex justify-between items-center">
+                <Skeleton className="h-7 w-1/2" />
+                <Skeleton className="h-6 w-24" />
+              </div>
+              <Skeleton className="h-4 w-5/6" />
+              <Skeleton className="h-4 w-3/4" />
+              <div className="mt-auto flex justify-between items-center pt-4">
+                <Skeleton className="h-6 w-28" />
+                <Skeleton className="h-6 w-20" />
+              </div>
+            </div>
+          </div>
+        </div>
+        <div className="space-y-6 flex flex-col justify-between">
+          {[1, 2].map((i) => (
+            <div key={i} className="rounded-2xl bg-card border border-border/60 overflow-hidden flex flex-col h-full min-h-[220px]">
+              <Skeleton className="h-36 w-full rounded-none" />
+              <div className="p-4 space-y-3 flex-1 flex flex-col">
+                <Skeleton className="h-5 w-2/3" />
+                <Skeleton className="h-4 w-full" />
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+      {/* 3 Grid items skeleton */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        {[1, 2, 3].map((i) => (
+          <div key={i} className="rounded-2xl bg-card border border-border/60 overflow-hidden flex flex-col h-full min-h-[380px]">
+            <Skeleton className="h-52 w-full rounded-none" />
+            <div className="p-5 space-y-3 flex-1 flex flex-col">
+              <div className="flex justify-between items-center">
+                <Skeleton className="h-5 w-2/3" />
+                <Skeleton className="h-5 w-20" />
+              </div>
+              <Skeleton className="h-4 w-full" />
+              <Skeleton className="h-4 w-4/5" />
+              <div className="mt-auto flex justify-between items-center pt-3">
+                <Skeleton className="h-5 w-24" />
+                <Skeleton className="h-5 w-16" />
+              </div>
+            </div>
+          </div>
+        ))}
       </div>
     </div>
   )
@@ -185,6 +244,7 @@ function ProjectCard({
 
 export function FeaturedProjects() {
   const [projects, setProjects] = useState<DBProject[]>([])
+  const [loading, setLoading] = useState(true)
   const [demoProject, setDemoProject] = useState<DBProject | null>(null)
   const [caseStudyProject, setCaseStudyProject] = useState<DBProject | null>(null)
 
@@ -208,8 +268,9 @@ export function FeaturedProjects() {
             outcome: p.caseStudyOutcome as string,
           } : undefined,
         })).sort((a: any, b: any) => (a.featuredSortOrder ?? a.sortOrder ?? 0) - (b.featuredSortOrder ?? b.sortOrder ?? 0)) as DBProject[])
+        setLoading(false)
       })
-      .catch(() => { })
+      .catch(() => setLoading(false))
   }, [])
 
   // Split all projects into groups of 6
@@ -237,41 +298,44 @@ export function FeaturedProjects() {
           </Link>
         </div>
 
-        {groups.map((group, gi) => {
-          const [groupHero, ...groupRest] = group
-          const baseIndex = gi * 6
-          return (
-            <div key={groupHero.id} className={cn("space-y-6", gi > 0 && "mt-16 pt-16 border-t border-border")}>
-              {/* Hero row: 2-col hero + 2 stacked */}
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:items-stretch">
-                <div className="md:col-span-2">
-                  <ProjectCard project={groupHero} index={baseIndex} large
-                    onDemo={() => setDemoProject(groupHero)}
-                    onCaseStudy={() => setCaseStudyProject(groupHero)} />
+        {loading ? (
+          <FeaturedProjectsSkeleton />
+        ) : (
+          groups.map((group, gi) => {
+            const [groupHero, ...groupRest] = group
+            const baseIndex = gi * 6
+            return (
+              <div key={groupHero.id} className={cn("space-y-6", gi > 0 && "mt-16 pt-16 border-t border-border")}>
+                {/* Hero row: 2-col hero + 2 stacked */}
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:items-stretch">
+                  <div className="md:col-span-2">
+                    <ProjectCard project={groupHero} index={baseIndex} large
+                      onDemo={() => setDemoProject(groupHero)}
+                      onCaseStudy={() => setCaseStudyProject(groupHero)} />
+                  </div>
+                  <div className="space-y-6 flex flex-col justify-between">
+                    {groupRest.slice(0, 2).map((p, i) => (
+                      <ProjectCard key={p.id} project={p} index={baseIndex + i + 1} compact
+                        onDemo={() => setDemoProject(p)}
+                        onCaseStudy={() => setCaseStudyProject(p)} />
+                    ))}
+                  </div>
                 </div>
-                <div className="grid grid-rows-2 gap-6 self-stretch">
-                  {groupRest.slice(0, 2).map((project, i) => (
-                    <ProjectCard key={project.id} project={project} index={baseIndex + i + 1}
-                      compact
-                      onDemo={() => setDemoProject(project)}
-                      onCaseStudy={() => setCaseStudyProject(project)} />
-                  ))}
-                </div>
-              </div>
 
-              {/* Bottom row: remaining 3 side by side */}
-              {groupRest.length > 2 && (
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {groupRest.slice(2).map((project, i) => (
-                    <ProjectCard key={project.id} project={project} index={baseIndex + i + 3}
-                      onDemo={() => setDemoProject(project)}
-                      onCaseStudy={() => setCaseStudyProject(project)} />
-                  ))}
-                </div>
-              )}
-            </div>
-          )
-        })}
+                {/* Remaining projects in grid */}
+                {groupRest.length > 2 && (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {groupRest.slice(2).map((p, i) => (
+                      <ProjectCard key={p.id} project={p} index={baseIndex + i + 3}
+                        onDemo={() => setDemoProject(p)}
+                        onCaseStudy={() => setCaseStudyProject(p)} />
+                    ))}
+                  </div>
+                )}
+              </div>
+            )
+          })
+        )}
       </div>
     </section>
   )
