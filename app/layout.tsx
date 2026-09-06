@@ -117,23 +117,42 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode
 }>) {
-  const jsonLdPerson = {
+  const jsonLdProfilePage = {
     "@context": "https://schema.org",
-    "@type": "Person",
-    name: "Ezedin Mohammed",
-    url: "https://ezedinmoh.vercel.app",
-    jobTitle: "Software Engineer",
-    description: "Software Engineer & Full-Stack Developer specializing in React, Next.js, TypeScript, and AI applications.",
-    address: {
-      "@type": "PostalAddress",
-      addressLocality: "Kombolcha",
-      addressCountry: "ET",
+    "@type": "ProfilePage",
+    dateCreated: "2024-01-01T00:00:00+03:00",
+    dateModified: "2026-09-06T20:00:00+03:00",
+    mainEntity: {
+      "@type": "Person",
+      name: "Ezedin Mohammed",
+      alternateName: "ezedinmoh",
+      description:
+        "Software Engineer & Full-Stack Developer specializing in React, Next.js, TypeScript, and AI applications.",
+      image: "https://ezedinmoh.vercel.app/icons/icon-512.png",
+      jobTitle: "Software Engineer & Full-Stack Developer",
+      url: "https://ezedinmoh.vercel.app",
+      address: {
+        "@type": "PostalAddress",
+        addressLocality: "Kombolcha",
+        addressRegion: "Amhara",
+        addressCountry: "ET",
+      },
+      sameAs: [
+        "https://github.com/ezedinmoh",
+        "https://www.linkedin.com/in/ezedinmoh",
+        "https://x.com/ezedinmoh",
+      ],
+      knowsAbout: [
+        "React",
+        "Next.js",
+        "TypeScript",
+        "JavaScript",
+        "Tailwind CSS",
+        "Node.js",
+        "Full-Stack Development",
+        "AI Web Applications",
+      ],
     },
-    sameAs: [
-      "https://github.com/ezedinmoh",
-      "https://www.linkedin.com/in/ezedinmoh",
-      "https://x.com/ezedinmoh",
-    ],
   }
 
   const jsonLdWebSite = {
@@ -141,9 +160,20 @@ export default function RootLayout({
     "@type": "WebSite",
     name: "Ezedin Mohammed Portfolio",
     url: "https://ezedinmoh.vercel.app",
+    description:
+      "Explore selected full-stack projects, interactive web applications, career journey, and technical insights by Ezedin Mohammed.",
     author: {
       "@type": "Person",
       name: "Ezedin Mohammed",
+      url: "https://ezedinmoh.vercel.app",
+    },
+    potentialAction: {
+      "@type": "SearchAction",
+      target: {
+        "@type": "EntryPoint",
+        urlTemplate: "https://ezedinmoh.vercel.app/projects?q={search_term_string}",
+      },
+      "query-input": "required name=search_term_string",
     },
   }
 
@@ -152,7 +182,7 @@ export default function RootLayout({
       <head>
         <script
           type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLdPerson) }}
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLdProfilePage) }}
         />
         <script
           type="application/ld+json"
