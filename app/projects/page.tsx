@@ -182,28 +182,30 @@ function ProjectCard({
         </div>
       </div>
 
-      <div className="flex flex-col flex-1 p-5">
+      <div className="flex flex-col flex-1 p-3 md:p-5">
         <div className="flex items-start justify-between gap-2 mb-2">
           <h3 className="font-bold text-card-foreground text-base md:text-lg group-hover:text-primary transition-colors">{project.title}</h3>
-          <StarRating
-            projectId={project.id}
-            initialSum={project.ratingSum}
-            initialCount={project.ratingCount}
-            compact
-          />
+          <div className="hidden md:block">
+            <StarRating
+              projectId={project.id}
+              initialSum={project.ratingSum}
+              initialCount={project.ratingCount}
+              compact
+            />
+          </div>
         </div>
-        <p className="text-muted-foreground text-xs leading-relaxed mb-4 line-clamp-2">{project.description}</p>
-        <div className="flex items-center gap-3 mt-auto">
-          <button onClick={onDemo} className="inline-flex items-center gap-1 text-sm font-medium text-primary hover:underline">
+        <p className="text-muted-foreground text-xs leading-relaxed mb-2 md:mb-4 line-clamp-2">{project.description}</p>
+        <div className="flex items-center gap-2 md:gap-3 mt-auto">
+          <button onClick={(e) => { e.stopPropagation(); onDemo() }} className="inline-flex items-center gap-1 text-xs md:text-sm font-medium text-primary hover:underline">
             Preview <ArrowUpRight className="w-3.5 h-3.5" />
           </button>
           {project.caseStudy && (
-            <button onClick={onCaseStudy} className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors">
+            <button onClick={(e) => { e.stopPropagation(); onCaseStudy() }} className="inline-flex items-center gap-1 text-xs md:text-sm text-muted-foreground hover:text-foreground transition-colors">
               Case Study <ChevronRight className="w-3 h-3" />
             </button>
           )}
           {project.github && (
-            <a href={project.github} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors ml-auto">
+            <a href={project.github} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 text-xs md:text-sm text-muted-foreground hover:text-foreground transition-colors ml-auto">
               <Github className="w-4 h-4" />
             </a>
           )}
