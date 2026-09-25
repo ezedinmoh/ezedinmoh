@@ -22,6 +22,7 @@ export const metadata: Metadata = {
     title: "Ezedin Mohammed | Software Engineer & Full-Stack Developer",
     description: "Portfolio of Ezedin Mohammed — Software Engineer & Full-Stack Developer specializing in React, Next.js, TypeScript, and modern web applications.",
     url: "https://ezedinmoh.pro.et",
+    siteName: "Ezedin Mohammed",
     images: [{ url: "/opengraph-image", width: 1200, height: 630, alt: "Ezedin Mohammed Portfolio" }],
     type: "website",
   },

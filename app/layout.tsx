@@ -43,6 +43,7 @@ export const metadata: Metadata = {
     'Kombolcha',
     'Addis Ababa',
   ],
+  applicationName: 'Ezedin Mohammed',
   authors: [{ name: 'Ezedin Mohammed', url: 'https://ezedinmoh.pro.et' }],
   creator: 'Ezedin Mohammed',
   publisher: 'Ezedin Mohammed',
@@ -53,7 +54,7 @@ export const metadata: Metadata = {
     title: 'Ezedin Mohammed | Software Engineer & Full-Stack Developer',
     description: 'Explore selected full-stack projects, interactive web applications, career journey, and technical insights by Ezedin Mohammed.',
     url: 'https://ezedinmoh.pro.et',
-    siteName: 'Ezedin Mohammed Portfolio',
+    siteName: 'Ezedin Mohammed',
     images: [
       {
         url: '/opengraph-image',
@@ -159,8 +160,9 @@ export default function RootLayout({
   const jsonLdWebSite = {
     "@context": "https://schema.org",
     "@type": "WebSite",
-    name: "Ezedin Mohammed Portfolio",
-    url: "https://ezedinmoh.pro.et",
+    name: "Ezedin Mohammed",
+    alternateName: ["Ezedin Moh", "ezedinmoh", "ezedinmoh.pro.et"],
+    url: "https://ezedinmoh.pro.et/",
     description:
       "Explore selected full-stack projects, interactive web applications, career journey, and technical insights by Ezedin Mohammed.",
     author: {
