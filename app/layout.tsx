@@ -190,7 +190,7 @@ export default function RootLayout({
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLdWebSite) }}
         />
       </head>
-      <body className={`${inter.variable} ${spaceGrotesk.variable} font-sans antialiased pb-28`}>
+      <body className={`${inter.variable} ${spaceGrotesk.variable} font-sans antialiased pb-28 lg:pb-0`}>
         <ThemeProvider attribute="class" defaultTheme="dark" enableSystem disableTransitionOnChange={false}>
           {children}
           <PageLoader />
