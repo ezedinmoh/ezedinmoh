@@ -1,11 +1,12 @@
 import { Navigation } from "@/components/navigation"
 import { Hero } from "@/components/hero"
 import { StatsBar } from "@/components/stats-bar"
+import { AboutSection } from "@/components/about-section"
 import { FeaturedProjects } from "@/components/featured-projects"
 import { SkillsSection } from "@/components/skills-section"
 import { ExperienceSection } from "@/components/experience-section"
 import { Testimonials } from "@/components/testimonials"
-import { ContactCTA } from "@/components/contact-cta"
+import { ContactSection } from "@/components/contact-section"
 import { Footer } from "@/components/footer"
 import { ScrollProgress } from "@/components/scroll-progress"
 import { AnimatedCursor } from "@/components/animated-cursor"
@@ -18,11 +19,12 @@ export default function HomePage() {
       <Navigation />
       <Hero />
       <StatsBar />
+      <AboutSection />
       <FeaturedProjects />
       <SkillsSection />
       <ExperienceSection />
       <Testimonials />
-      <ContactCTA />
+      <ContactSection />
       <Footer />
     </main>
   )
