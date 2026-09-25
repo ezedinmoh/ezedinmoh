@@ -217,9 +217,10 @@ function ProjectCard({
         </div>
       </div>
       <div className={cn("flex flex-col flex-1", compact ? "p-3 md:p-4" : "p-3 md:p-5")}>
-        <div className="flex items-start justify-between gap-2 mb-2">
+        <div className="flex items-start justify-between gap-2 mb-1 md:mb-2">
           <h3 className={cn("font-bold text-card-foreground group-hover:text-primary transition-colors", large ? "text-xl md:text-2xl" : compact ? "text-sm md:text-base line-clamp-1" : "text-base md:text-lg")}>{project.title}</h3>
-          <div className="hidden md:block">
+          {/* Desktop: rating sits beside title */}
+          <div className="hidden md:block shrink-0">
             <StarRating
               projectId={project.id}
               initialSum={project.ratingSum}
@@ -227,6 +228,16 @@ function ProjectCard({
               compact
             />
           </div>
+        </div>
+        {/* Mobile: rating on its own full-width row */}
+        <div className="md:hidden mb-2">
+          <StarRating
+            projectId={project.id}
+            initialSum={project.ratingSum}
+            initialCount={project.ratingCount}
+            compact
+            className="w-full justify-between"
+          />
         </div>
         <p className={cn("text-muted-foreground leading-relaxed", large ? "text-sm mb-3 md:mb-5" : compact ? "text-xs mb-2 md:mb-3 line-clamp-1" : "text-xs mb-2 md:mb-4 line-clamp-2")}>{project.description}</p>
         <div className="flex items-center gap-2 md:gap-3 mt-auto">

@@ -183,9 +183,10 @@ function ProjectCard({
       </div>
 
       <div className="flex flex-col flex-1 p-3 md:p-5">
-        <div className="flex items-start justify-between gap-2 mb-2">
+        <div className="flex items-start justify-between gap-2 mb-1 md:mb-2">
           <h3 className="font-bold text-card-foreground text-base md:text-lg group-hover:text-primary transition-colors">{project.title}</h3>
-          <div className="hidden md:block">
+          {/* Desktop: rating beside title */}
+          <div className="hidden md:block shrink-0">
             <StarRating
               projectId={project.id}
               initialSum={project.ratingSum}
@@ -193,6 +194,16 @@ function ProjectCard({
               compact
             />
           </div>
+        </div>
+        {/* Mobile: rating on its own full-width row */}
+        <div className="md:hidden mb-2">
+          <StarRating
+            projectId={project.id}
+            initialSum={project.ratingSum}
+            initialCount={project.ratingCount}
+            compact
+            className="w-full justify-between"
+          />
         </div>
         <p className="text-muted-foreground text-xs leading-relaxed mb-2 md:mb-4 line-clamp-2">{project.description}</p>
         <div className="flex items-center gap-2 md:gap-3 mt-auto">
