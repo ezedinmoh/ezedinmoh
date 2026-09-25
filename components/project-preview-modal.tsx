@@ -136,19 +136,21 @@ export function ProjectPreviewModal({ project, onClose }: ProjectPreviewModalPro
             <h2 className="font-bold text-foreground text-base sm:text-lg truncate max-w-xs sm:max-w-sm">
               {project.title}
             </h2>
-            <StarRating
-              projectId={project.id}
-              initialSum={project.ratingSum}
-              initialCount={project.ratingCount}
-              compact
-            />
+            <div className="hidden lg:block">
+              <StarRating
+                projectId={project.id}
+                initialSum={project.ratingSum}
+                initialCount={project.ratingCount}
+                compact
+              />
+            </div>
           </div>
 
           {/* View Mode & Controls */}
           <div className="flex items-center gap-2">
             {/* Viewport Width Selector (for iframe mode) */}
             {isIframeMode && (
-              <div className="hidden sm:flex items-center bg-secondary/60 p-1 rounded-xl border border-border/60">
+              <div className="hidden lg:flex items-center bg-secondary/60 p-1 rounded-xl border border-border/60">
                 <button
                   type="button"
                   onClick={() => setDeviceView("desktop")}
@@ -228,7 +230,7 @@ export function ProjectPreviewModal({ project, onClose }: ProjectPreviewModalPro
         {/* ── Browser Address Bar Simulation & Loading Progress Bar ── */}
         {isIframeMode && (
           <div className="relative bg-secondary/40 border-b border-border/60 px-4 py-1.5 flex items-center gap-3 text-xs text-muted-foreground">
-            <div className="flex items-center gap-1.5">
+            <div className="hidden lg:flex items-center gap-1.5">
               <span className="w-2.5 h-2.5 rounded-full bg-red-500/80 inline-block" />
               <span className="w-2.5 h-2.5 rounded-full bg-yellow-500/80 inline-block" />
               <span className="w-2.5 h-2.5 rounded-full bg-green-500/80 inline-block" />
@@ -376,7 +378,7 @@ export function ProjectPreviewModal({ project, onClose }: ProjectPreviewModalPro
         </div>
 
         {/* ── Modal Footer ── */}
-        <div className="px-6 py-3 border-t border-border bg-card flex flex-wrap items-center justify-between gap-4 shrink-0">
+        <div className="hidden lg:flex px-6 py-3 border-t border-border bg-card flex-wrap items-center justify-between gap-4 shrink-0">
           <p className="text-xs text-muted-foreground max-w-xl line-clamp-1">
             {project.description}
           </p>

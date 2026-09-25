@@ -168,7 +168,12 @@ function ProjectCard({
         large ? "h-full min-h-[520px]" : compact ? "h-full min-h-[220px]" : "h-full min-h-[380px]"
       )}
     >
-      <div className={cn("relative overflow-hidden shrink-0", large ? "h-72 sm:h-96 md:h-[380px]" : compact ? "h-36" : "h-52")}>
+      <div
+        className={cn("relative overflow-hidden shrink-0 cursor-pointer", large ? "h-72 sm:h-96 md:h-[380px]" : compact ? "h-36" : "h-52")}
+        onClick={onDemo}
+        role="button"
+        aria-label={`Preview ${project.title}`}
+      >
         {project.image ? (
           <>
             {isVideo ? (
@@ -201,11 +206,11 @@ function ProjectCard({
           </>
         )}
         <div className="absolute inset-0 bg-background/60 opacity-0 group-hover:opacity-100 transition-all duration-300 flex items-center justify-center gap-3">
-          <button onClick={onDemo} className="flex items-center gap-1.5 px-4 py-2 bg-primary text-primary-foreground rounded-full text-sm font-medium hover:opacity-90 transition-all hover:scale-105">
+          <button onClick={(e) => { e.stopPropagation(); onDemo() }} className="flex items-center gap-1.5 px-4 py-2 bg-primary text-primary-foreground rounded-full text-sm font-medium hover:opacity-90 transition-all hover:scale-105">
             <Monitor className="w-3.5 h-3.5" /> Preview
           </button>
           {project.caseStudy && (
-            <button onClick={onCaseStudy} className="flex items-center gap-1.5 px-4 py-2 bg-card border border-border text-foreground rounded-full text-sm font-medium hover:border-primary/50 transition-all hover:scale-105">
+            <button onClick={(e) => { e.stopPropagation(); onCaseStudy() }} className="flex items-center gap-1.5 px-4 py-2 bg-card border border-border text-foreground rounded-full text-sm font-medium hover:border-primary/50 transition-all hover:scale-105">
               <Layers className="w-3.5 h-3.5" /> Case Study
             </button>
           )}

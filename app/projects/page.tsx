@@ -133,7 +133,12 @@ function ProjectCard({
       onMouseLeave={() => setHovered(false)}
       className="group relative rounded-2xl bg-card border border-border/60 overflow-hidden transition-all duration-500 flex flex-col hover:border-primary/40 hover:shadow-2xl hover:-translate-y-1 h-full min-h-[380px]"
     >
-      <div className="relative overflow-hidden shrink-0 h-52">
+      <div
+        className="relative overflow-hidden shrink-0 h-52 cursor-pointer"
+        onClick={onDemo}
+        role="button"
+        aria-label={`Preview ${project.title}`}
+      >
         {project.image ? (
           <>
             {isVideo ? (
@@ -166,11 +171,11 @@ function ProjectCard({
           </>
         )}
         <div className="absolute inset-0 bg-background/60 opacity-0 group-hover:opacity-100 transition-all duration-300 flex items-center justify-center gap-3">
-          <button onClick={onDemo} className="flex items-center gap-1.5 px-4 py-2 bg-primary text-primary-foreground rounded-full text-sm font-medium hover:opacity-90 transition-all hover:scale-105">
+          <button onClick={(e) => { e.stopPropagation(); onDemo() }} className="flex items-center gap-1.5 px-4 py-2 bg-primary text-primary-foreground rounded-full text-sm font-medium hover:opacity-90 transition-all hover:scale-105">
             <Monitor className="w-3.5 h-3.5" /> Preview
           </button>
           {project.caseStudy && (
-            <button onClick={onCaseStudy} className="flex items-center gap-1.5 px-4 py-2 bg-card border border-border text-foreground rounded-full text-sm font-medium hover:border-primary/50 transition-all hover:scale-105">
+            <button onClick={(e) => { e.stopPropagation(); onCaseStudy() }} className="flex items-center gap-1.5 px-4 py-2 bg-card border border-border text-foreground rounded-full text-sm font-medium hover:border-primary/50 transition-all hover:scale-105">
               <Layers className="w-3.5 h-3.5" /> Case Study
             </button>
           )}
