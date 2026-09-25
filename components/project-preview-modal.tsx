@@ -1,9 +1,10 @@
 "use client"
 
 import { useState, useEffect } from "react"
+import Link from "next/link"
 import {
   X, ExternalLink, RefreshCw, Monitor, Tablet, Smartphone,
-  ChevronLeft, ChevronRight, ArrowUpRight
+  ChevronLeft, ChevronRight, ArrowUpRight, Home
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { StarRating } from "@/components/star-rating"
@@ -224,6 +225,16 @@ export function ProjectPreviewModal({ project, onClose }: ProjectPreviewModalPro
             >
               <X className="w-5 h-5" />
             </button>
+
+            {/* Back to Home Button */}
+            <Link
+              href="/"
+              className="inline-flex items-center gap-1.5 p-2 rounded-xl text-muted-foreground hover:text-foreground hover:bg-secondary transition-all"
+              aria-label="Back to Home"
+              title="Back to Home"
+            >
+              <Home className="w-5 h-5" />
+            </Link>
           </div>
         </div>
 
