@@ -139,20 +139,106 @@ export function Hero() {
           </div>
         </div>
 
-          {/* Video — right column */}
-          <div className="hidden lg:flex items-center justify-center self-stretch py-8">
-            <div className="relative w-full">
-              <div className="absolute -inset-2 rounded-3xl bg-gradient-to-br from-primary/30 to-accent/20 blur-2xl opacity-50 animate-morph" />
-              <div className="relative rounded-3xl overflow-hidden border border-primary/20 shadow-2xl shadow-primary/10">
-                <video
-                  src="/tech.mp4"
-                  autoPlay
-                  loop
-                  muted
-                  playsInline
-                  className="w-full h-auto block"
+          {/* Right column — Orbital Developer Visual */}
+          <div className="hidden lg:flex items-center justify-center">
+            <div className="relative w-[500px] h-[500px] flex items-center justify-center">
+
+              {/* Deep glow behind everything */}
+              <div className="absolute inset-[80px] rounded-full bg-primary/10 blur-3xl" />
+              <div className="absolute inset-[120px] rounded-full bg-accent/8 blur-2xl" />
+
+              {/* Orbital ring 1 — outermost, slow clockwise */}
+              <div
+                className="absolute inset-0 rounded-full border border-primary/20"
+                style={{ animation: 'spin 28s linear infinite' }}
+              >
+                {/* Small orbiting dot */}
+                <span className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 w-2.5 h-2.5 rounded-full bg-primary shadow-[0_0_8px_3px_hsl(var(--primary)/0.5)]" />
+              </div>
+
+              {/* Orbital ring 2 — dashed, counter-clockwise */}
+              <div
+                className="absolute inset-[55px] rounded-full border border-dashed border-primary/30"
+                style={{ animation: 'spin 20s linear infinite reverse' }}
+              >
+                <span className="absolute bottom-0 left-1/2 -translate-x-1/2 translate-y-1/2 w-2 h-2 rounded-full bg-accent/90 shadow-[0_0_6px_2px_hsl(var(--accent)/0.4)]" />
+              </div>
+
+              {/* Orbital ring 3 — inner subtle, slow clockwise */}
+              <div
+                className="absolute inset-[105px] rounded-full border border-primary/12"
+                style={{ animation: 'spin 35s linear infinite' }}
+              />
+
+              {/* Developer illustration */}
+              <div className="relative z-10 w-[230px] h-[230px] rounded-full overflow-hidden border border-primary/25 shadow-[0_0_40px_hsl(var(--primary)/0.15)]">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src="/developer.png"
+                  alt="Ezedin Mohammed"
+                  className="w-full h-full object-cover object-top"
+                />
+                {/* Radial vignette to blend white bg into dark edges */}
+                <div
+                  className="absolute inset-0 rounded-full pointer-events-none"
+                  style={{ background: 'radial-gradient(circle at center, transparent 55%, hsl(var(--background)) 90%)' }}
                 />
               </div>
+
+              {/* ── Floating badge: Available for work (top-right) ── */}
+              <div
+                className="absolute top-10 right-12 z-20 flex items-center gap-2 px-3 py-1.5 bg-card/95 border border-border/60 backdrop-blur-md rounded-full shadow-xl text-xs font-medium"
+                style={{ animation: 'float 4s ease-in-out infinite' }}
+              >
+                <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse shrink-0" />
+                Available for work
+              </div>
+
+              {/* ── Floating badge: </> (left) ── */}
+              <div
+                className="absolute left-2 top-[38%] z-20 w-11 h-11 bg-card/95 border border-border/60 backdrop-blur-md rounded-2xl flex items-center justify-center shadow-xl"
+                style={{ animation: 'float 5s ease-in-out infinite 1.2s' }}
+              >
+                <span className="font-mono text-xs font-bold text-primary">&lt;/&gt;</span>
+              </div>
+
+              {/* ── Floating badge: {} (right) ── */}
+              <div
+                className="absolute right-2 top-[42%] z-20 w-11 h-11 bg-card/95 border border-border/60 backdrop-blur-md rounded-2xl flex items-center justify-center shadow-xl"
+                style={{ animation: 'float 6s ease-in-out infinite 2.4s' }}
+              >
+                <span className="font-mono text-xs font-bold text-primary">&#123;&#125;</span>
+              </div>
+
+              {/* ── Code snippet card (bottom) ── */}
+              <div
+                className="absolute -bottom-2 left-1/2 -translate-x-1/2 z-20 w-[272px] bg-card/95 border border-border/60 backdrop-blur-md rounded-2xl p-3.5 shadow-2xl"
+                style={{ animation: 'float 7s ease-in-out infinite 0.6s' }}
+              >
+                {/* Window chrome dots */}
+                <div className="flex items-center gap-1.5 mb-2.5">
+                  <span className="w-2.5 h-2.5 rounded-full bg-red-400/80" />
+                  <span className="w-2.5 h-2.5 rounded-full bg-yellow-400/80" />
+                  <span className="w-2.5 h-2.5 rounded-full bg-emerald-400/80" />
+                  <span className="ml-auto text-[10px] text-muted-foreground font-mono opacity-60">ezedin.js</span>
+                </div>
+                {/* Syntax-highlighted snippet */}
+                <pre className="text-[11px] font-mono leading-[1.65] text-left select-none">
+                  <span className="text-blue-400">const </span>
+                  <span className="text-foreground">dev</span>
+                  <span className="text-muted-foreground"> = {'{'}</span>{"\n"}
+                  <span className="text-muted-foreground">  name: </span>
+                  <span className="text-emerald-400">&apos;Ezedin Mohammed&apos;</span>
+                  <span className="text-muted-foreground">,</span>{"\n"}
+                  <span className="text-muted-foreground">  stack: </span>
+                  <span className="text-emerald-400">&apos;React / Next.js&apos;</span>
+                  <span className="text-muted-foreground">,</span>{"\n"}
+                  <span className="text-muted-foreground">  status: </span>
+                  <span className="text-emerald-400">&apos;Open to Work&apos;</span>{"\n"}
+                  <span className="text-muted-foreground">{'}'}</span>
+                </pre>
+              </div>
+
             </div>
           </div>
 
