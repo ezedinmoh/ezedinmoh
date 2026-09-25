@@ -9,6 +9,7 @@ import { PwaRegister } from '@/components/pwa/pwa-register'
 import { NetworkStatus } from '@/components/pwa/network-status'
 import { PwaInstallPrompt } from '@/components/pwa/pwa-install-prompt'
 import { PwaUpdatePrompt } from '@/components/pwa/pwa-update-prompt'
+import { BottomNav } from '@/components/bottom-nav'
 import './globals.css'
 
 const inter = Inter({ 
@@ -189,11 +190,12 @@ export default function RootLayout({
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLdWebSite) }}
         />
       </head>
-      <body className={`${inter.variable} ${spaceGrotesk.variable} font-sans antialiased`}>
+      <body className={`${inter.variable} ${spaceGrotesk.variable} font-sans antialiased pb-28`}>
         <ThemeProvider attribute="class" defaultTheme="dark" enableSystem disableTransitionOnChange={false}>
           {children}
           <PageLoader />
           <BackToTop />
+          <BottomNav />
           <AnalyticsTracker />
           <PwaRegister />
           <NetworkStatus />
