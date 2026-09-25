@@ -4,12 +4,12 @@ export const metadata: Metadata = {
   title: "Resume & Curriculum Vitae",
   description: "View and download the professional resume and CV of Ezedin Mohammed — Software Engineer & Full-Stack Developer.",
   alternates: {
-    canonical: "https://ezedinmoh.vercel.app/resume",
+    canonical: "https://ezedinmoh.pro.et/resume",
   },
   openGraph: {
     title: "Resume & Curriculum Vitae | Ezedin Mohammed",
     description: "View and download the professional resume and CV of Ezedin Mohammed — Software Engineer & Full-Stack Developer.",
-    url: "https://ezedinmoh.vercel.app/resume",
+    url: "https://ezedinmoh.pro.et/resume",
     images: [{ url: "/opengraph-image", width: 1200, height: 630, alt: "Ezedin Mohammed Resume" }],
   },
   twitter: {

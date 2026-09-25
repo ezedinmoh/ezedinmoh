@@ -4,12 +4,12 @@ export const metadata: Metadata = {
   title: "Guestbook & Messages",
   description: "Leave a message, feedback, or friendly hello on Ezedin Mohammed's portfolio guestbook.",
   alternates: {
-    canonical: "https://ezedinmoh.vercel.app/guestbook",
+    canonical: "https://ezedinmoh.pro.et/guestbook",
   },
   openGraph: {
     title: "Guestbook | Ezedin Mohammed",
     description: "Leave a message, feedback, or friendly hello on Ezedin Mohammed's portfolio guestbook.",
-    url: "https://ezedinmoh.vercel.app/guestbook",
+    url: "https://ezedinmoh.pro.et/guestbook",
     images: [{ url: "/opengraph-image", width: 1200, height: 630, alt: "Ezedin Mohammed Guestbook" }],
   },
   twitter: {

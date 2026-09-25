@@ -6,6 +6,10 @@ import { ArrowLeft, Home } from "lucide-react"
 export default function NotFound() {
   return (
     <main className="min-h-screen bg-background flex flex-col">
+      <head>
+        <title>404: Page Not Found | Ezedin Mohammed</title>
+        <meta name="robots" content="noindex, follow" />
+      </head>
       <Navigation />
       <div className="flex-1 flex items-center justify-center px-6 py-32">
         <div className="text-center max-w-lg">

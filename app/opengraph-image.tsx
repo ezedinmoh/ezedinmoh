@@ -64,7 +64,7 @@ export default function OGImage() {
 
         {/* Domain */}
         <div style={{ position: "absolute", bottom: 48, right: 80, fontSize: 18, color: "rgba(255,255,255,0.3)" }}>
-          ezedin.dev
+          ezedinmoh.pro.et
         </div>
       </div>
     ),

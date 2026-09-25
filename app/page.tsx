@@ -1,3 +1,4 @@
+import type { Metadata } from "next"
 import { Navigation } from "@/components/navigation"
 import { Hero } from "@/components/hero"
 import { StatsBar } from "@/components/stats-bar"
@@ -10,6 +11,21 @@ import { ContactCTA } from "@/components/contact-cta"
 import { Footer } from "@/components/footer"
 import { ScrollProgress } from "@/components/scroll-progress"
 import { AnimatedCursor } from "@/components/animated-cursor"
+
+export const metadata: Metadata = {
+  title: "Ezedin Mohammed | Software Engineer & Full-Stack Developer",
+  description: "Portfolio of Ezedin Mohammed — Software Engineer & Full-Stack Developer specializing in React, Next.js, TypeScript, and modern web applications.",
+  alternates: {
+    canonical: "https://ezedinmoh.pro.et",
+  },
+  openGraph: {
+    title: "Ezedin Mohammed | Software Engineer & Full-Stack Developer",
+    description: "Portfolio of Ezedin Mohammed — Software Engineer & Full-Stack Developer specializing in React, Next.js, TypeScript, and modern web applications.",
+    url: "https://ezedinmoh.pro.et",
+    images: [{ url: "/opengraph-image", width: 1200, height: 630, alt: "Ezedin Mohammed Portfolio" }],
+    type: "website",
+  },
+}
 
 export default function HomePage() {
   return (

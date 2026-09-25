@@ -9,6 +9,6 @@ export default function robots(): MetadataRoute.Robots {
         disallow: ["/admin/", "/api/"],
       },
     ],
-    sitemap: "https://ezedinmoh.vercel.app/sitemap.xml",
+    sitemap: "https://ezedinmoh.pro.et/sitemap.xml",
   }
 }

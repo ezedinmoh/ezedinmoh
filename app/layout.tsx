@@ -23,7 +23,7 @@ const spaceGrotesk = Space_Grotesk({
 });
 
 export const metadata: Metadata = {
-  metadataBase: new URL('https://ezedinmoh.vercel.app'),
+  metadataBase: new URL('https://ezedinmoh.pro.et'),
   title: {
     default: 'Ezedin Mohammed | Software Engineer & Full-Stack Developer',
     template: '%s | Ezedin Mohammed',
@@ -43,16 +43,16 @@ export const metadata: Metadata = {
     'Kombolcha',
     'Addis Ababa',
   ],
-  authors: [{ name: 'Ezedin Mohammed', url: 'https://ezedinmoh.vercel.app' }],
+  authors: [{ name: 'Ezedin Mohammed', url: 'https://ezedinmoh.pro.et' }],
   creator: 'Ezedin Mohammed',
   publisher: 'Ezedin Mohammed',
   alternates: {
-    canonical: './',
+    canonical: 'https://ezedinmoh.pro.et',
   },
   openGraph: {
     title: 'Ezedin Mohammed | Software Engineer & Full-Stack Developer',
     description: 'Explore selected full-stack projects, interactive web applications, career journey, and technical insights by Ezedin Mohammed.',
-    url: 'https://ezedinmoh.vercel.app',
+    url: 'https://ezedinmoh.pro.et',
     siteName: 'Ezedin Mohammed Portfolio',
     images: [
       {
@@ -129,9 +129,9 @@ export default function RootLayout({
       alternateName: "ezedinmoh",
       description:
         "Software Engineer & Full-Stack Developer specializing in React, Next.js, TypeScript, and AI applications.",
-      image: "https://ezedinmoh.vercel.app/icons/icon-512.png",
+      image: "https://ezedinmoh.pro.et/icons/icon-512.png",
       jobTitle: "Software Engineer & Full-Stack Developer",
-      url: "https://ezedinmoh.vercel.app",
+      url: "https://ezedinmoh.pro.et",
       address: {
         "@type": "PostalAddress",
         addressLocality: "Kombolcha",
@@ -160,19 +160,19 @@ export default function RootLayout({
     "@context": "https://schema.org",
     "@type": "WebSite",
     name: "Ezedin Mohammed Portfolio",
-    url: "https://ezedinmoh.vercel.app",
+    url: "https://ezedinmoh.pro.et",
     description:
       "Explore selected full-stack projects, interactive web applications, career journey, and technical insights by Ezedin Mohammed.",
     author: {
       "@type": "Person",
       name: "Ezedin Mohammed",
-      url: "https://ezedinmoh.vercel.app",
+      url: "https://ezedinmoh.pro.et",
     },
     potentialAction: {
       "@type": "SearchAction",
       target: {
         "@type": "EntryPoint",
-        urlTemplate: "https://ezedinmoh.vercel.app/projects?q={search_term_string}",
+        urlTemplate: "https://ezedinmoh.pro.et/projects?q={search_term_string}",
       },
       "query-input": "required name=search_term_string",
     },
