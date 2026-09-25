@@ -4,7 +4,7 @@ import { useState, useEffect } from "react"
 import Link from "next/link"
 import {
   X, ExternalLink, RefreshCw, Monitor, Tablet, Smartphone,
-  ChevronLeft, ChevronRight, ArrowUpRight, Home
+  ChevronLeft, ChevronRight, ArrowUpRight, ArrowLeft
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { StarRating } from "@/components/star-rating"
@@ -229,11 +229,12 @@ export function ProjectPreviewModal({ project, onClose }: ProjectPreviewModalPro
             {/* Back to Home Button */}
             <Link
               href="/"
-              className="inline-flex items-center gap-1.5 p-2 rounded-xl text-muted-foreground hover:text-foreground hover:bg-secondary transition-all"
+              className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-muted-foreground hover:text-foreground hover:bg-secondary transition-all text-xs font-medium"
               aria-label="Back to Home"
               title="Back to Home"
             >
-              <Home className="w-5 h-5" />
+              <ArrowLeft className="w-4 h-4" />
+              <span>Back</span>
             </Link>
           </div>
         </div>
