@@ -188,6 +188,35 @@
 .animate-rotate-3d { animation: rotate3d 20s linear infinite; }
 .animate-pulse-3d { animation: pulse3d 2s ease-in-out infinite; }
 
+/* Hero specific animations from reference design */
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
+}
+
+.animate-blink {
+  animation: blink 1s step-start infinite;
+}
+
+@keyframes heroFloat {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-16px); }
+}
+
+.animate-hero-float {
+  animation: heroFloat 2.8s ease-in-out infinite;
+}
+
+.float-paused {
+  animation: heroFloat 2.8s ease-in-out infinite;
+  animation-play-state: paused !important;
+}
+
+.float-paused:hover,
+.float-on-hover:hover {
+  animation-play-state: running !important;
+}
+
 /* Stagger animations */
 .stagger-1 { animation-delay: 0.1s; }
 .stagger-2 { animation-delay: 0.2s; }

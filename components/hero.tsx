@@ -14,19 +14,35 @@ const roles = [
 
 export function Hero() {
   const [roleIndex, setRoleIndex] = useState(0)
-  const [isTyping, setIsTyping] = useState(true)
+  const [text, setText] = useState("")
+  const [isDeleting, setIsDeleting] = useState(false)
 
   useEffect(() => {
-    const interval = setInterval(() => {
-      setIsTyping(false)
-      setTimeout(() => {
-        setRoleIndex((prev) => (prev + 1) % roles.length)
-        setIsTyping(true)
-      }, 500)
-    }, 3000)
+    const currentRole = roles[roleIndex]
+    const typingSpeed = isDeleting ? 40 : 85
+    const pauseDuration = 1500
 
-    return () => clearInterval(interval)
-  }, [])
+    if (!isDeleting && text === currentRole) {
+      const timer = setTimeout(() => setIsDeleting(true), pauseDuration)
+      return () => clearTimeout(timer)
+    }
+
+    if (isDeleting && text === "") {
+      setIsDeleting(false)
+      setRoleIndex((prev) => (prev + 1) % roles.length)
+      return
+    }
+
+    const timer = setTimeout(() => {
+      setText((prev) =>
+        isDeleting
+          ? currentRole.slice(0, prev.length - 1)
+          : currentRole.slice(0, prev.length + 1)
+      )
+    }, typingSpeed)
+
+    return () => clearTimeout(timer)
+  }, [text, isDeleting, roleIndex])
 
   return (
     <section className="relative min-h-screen flex items-center justify-center overflow-hidden">
@@ -70,15 +86,12 @@ export function Hero() {
             <span className="text-gradient">Ezedin</span>
           </h1>
 
-          {/* Animated Role */}
-          <div className="h-16 md:h-20 mb-8 overflow-hidden animate-slide-up opacity-0 stagger-3" style={{ animationFillMode: 'forwards' }}>
-            <p 
-              className={`text-2xl md:text-4xl text-muted-foreground font-light transition-all duration-500 ${
-                isTyping ? "translate-y-0 opacity-100" : "translate-y-8 opacity-0"
-              }`}
-            >
-              {roles[roleIndex]}
-            </p>
+          {/* Animated Role with Typewriter & Syntax Brackets */}
+          <div className="h-10 mb-8 font-mono text-xl sm:text-2xl md:text-3xl flex items-center animate-slide-up opacity-0 stagger-3" style={{ animationFillMode: 'forwards' }}>
+            <span className="text-muted-foreground/60 select-none">&lt;&nbsp;</span>
+            <span className="text-primary font-semibold tracking-tight">{text}</span>
+            <span className="inline-block w-[2px] h-[1em] bg-primary ml-1 align-middle animate-blink" />
+            <span className="text-muted-foreground/60 select-none">&nbsp;/&gt;</span>
           </div>
 
           {/* Description */}
@@ -141,97 +154,66 @@ export function Hero() {
 
           {/* Right column — Orbital Developer Visual */}
           <div className="hidden lg:flex items-center justify-center">
-            <div className="relative w-[520px] h-[520px] flex items-center justify-center">
+            <div className="relative mx-auto max-w-sm lg:max-w-md w-full aspect-square flex items-center justify-center">
 
-              {/* Ambient radial glow behind the rings */}
-              <div className="absolute inset-[60px] rounded-full bg-primary/15 blur-3xl pointer-events-none" />
-              <div className="absolute inset-[120px] rounded-full bg-accent/10 blur-2xl pointer-events-none" />
+              {/* 1. Ambient Glow */}
+              <div className="absolute inset-6 rounded-full bg-primary/20 blur-[70px] pointer-events-none" />
 
-              {/* Orbital ring 1 — outermost ring */}
-              <div
-                className="absolute inset-2 rounded-full border border-primary/20"
-                style={{ animation: 'spin 30s linear infinite' }}
-              >
-                {/* Orbiting glowing dot */}
-                <span className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 w-2.5 h-2.5 rounded-full bg-primary shadow-[0_0_10px_3px_hsl(var(--primary)/0.6)]" />
-              </div>
+              {/* 2. Clockwise Dashed Orbital Ring (22s) */}
+              <div className="absolute inset-0 rounded-full border border-dashed border-primary/30 animate-[spin_22s_linear_infinite] pointer-events-none" />
 
-              {/* Orbital ring 2 — dashed middle ring */}
-              <div
-                className="absolute inset-16 rounded-full border border-dashed border-primary/30"
-                style={{ animation: 'spin 22s linear infinite reverse' }}
-              >
-                <span className="absolute bottom-0 left-1/2 -translate-x-1/2 translate-y-1/2 w-2 h-2 rounded-full bg-accent shadow-[0_0_8px_2px_hsl(var(--accent)/0.5)]" />
-              </div>
+              {/* 3. Counter-Clockwise Outer Dashed Orbital Ring (32s) */}
+              <div className="absolute -inset-6 rounded-full border border-dashed border-border/40 animate-[spin_32s_linear_infinite_reverse] pointer-events-none" />
 
-              {/* Orbital ring 3 — inner halo backdrop */}
-              <div className="absolute inset-28 rounded-full bg-gradient-to-b from-primary/15 via-primary/5 to-transparent border border-primary/25 shadow-[inset_0_0_30px_hsl(var(--primary)/0.1)] pointer-events-none" />
-
-              {/* Developer illustration — unclipped, sitting at desk */}
-              <div className="relative z-10 flex items-center justify-center">
+              {/* 4. Center Developer Illustration Frame */}
+              <div className="relative z-10 w-[80%] aspect-square flex items-center justify-center">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
                   src="/developer.png"
                   alt="Ezedin Mohammed"
-                  className="w-[360px] h-auto object-contain drop-shadow-[0_20px_30px_rgba(0,0,0,0.6)] select-none pointer-events-none"
+                  className="w-full h-full object-contain drop-shadow-[0_20px_35px_rgba(0,0,0,0.65)] select-none pointer-events-none"
                   priority-hint="high"
                 />
               </div>
 
-              {/* ── Floating badge: Available for work (top-right) ── */}
-              <div
-                className="absolute top-6 right-10 z-20 flex items-center gap-2 px-3.5 py-1.5 bg-card/95 border border-border/80 backdrop-blur-md rounded-full shadow-xl text-xs font-medium"
-                style={{ animation: 'float 4s ease-in-out infinite' }}
-              >
-                <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse shrink-0" />
-                <span className="text-foreground/90 font-mono text-[11px]">Available for work</span>
+              {/* 5. Left "</>" Chip with float-on-hover & neon glow */}
+              <span className="absolute top-2 left-0 sm:-left-2 z-20 w-11 h-11 bg-card/90 border border-border/70 backdrop-blur-md rounded-2xl flex items-center justify-center font-mono text-xs font-bold text-primary animate-hero-float float-paused float-on-hover [animation-delay:0.3s] cursor-pointer hover:border-primary hover:shadow-[0_0_14px_rgba(79,227,194,0.5),inset_0_0_10px_rgba(79,227,194,0.2)] transition-all duration-300 shadow-lg">
+                &lt;/&gt;
+              </span>
+
+              {/* 6. Right "{ }" Chip with float-on-hover & neon glow */}
+              <span className="absolute top-16 right-0 sm:-right-3 z-20 w-11 h-11 bg-card/90 border border-border/70 backdrop-blur-md rounded-2xl flex items-center justify-center font-mono text-xs font-bold text-primary animate-hero-float float-paused float-on-hover [animation-delay:0.9s] cursor-pointer hover:border-primary hover:shadow-[0_0_14px_rgba(79,227,194,0.5),inset_0_0_10px_rgba(79,227,194,0.2)] transition-all duration-300 shadow-lg">
+                &#123; &#125;
+              </span>
+
+              {/* 7. Top-Right "Available for work" pill with radar ping */}
+              <div className="absolute -top-4 -right-4 sm:right-2 z-20 flex items-center gap-2 px-3.5 py-1.5 bg-card/95 border border-border/70 backdrop-blur-md rounded-full animate-hero-float float-paused float-on-hover cursor-pointer hover:border-primary hover:shadow-[0_0_14px_rgba(79,227,194,0.5),inset_0_0_10px_rgba(79,227,194,0.2)] transition-all duration-300 shadow-xl">
+                <span className="relative flex w-2 h-2">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75" />
+                  <span className="relative inline-flex rounded-full h-2 w-2 bg-primary" />
+                </span>
+                <span className="font-mono text-[11px] text-foreground/90 font-medium select-none">
+                  Available for work
+                </span>
               </div>
 
-              {/* ── Floating badge: </> (middle-left) ── */}
-              <div
-                className="absolute left-2 top-[30%] z-20 w-10 h-10 bg-card/95 border border-border/70 backdrop-blur-md rounded-xl flex items-center justify-center shadow-xl"
-                style={{ animation: 'float 5s ease-in-out infinite 1.2s' }}
-              >
-                <span className="font-mono text-xs font-bold text-primary">&lt;/&gt;</span>
-              </div>
-
-              {/* ── Floating badge: {} (middle-right) ── */}
-              <div
-                className="absolute right-4 top-[35%] z-20 w-10 h-10 bg-card/95 border border-border/70 backdrop-blur-md rounded-xl flex items-center justify-center shadow-xl"
-                style={{ animation: 'float 6s ease-in-out infinite 2.4s' }}
-              >
-                <span className="font-mono text-xs font-bold text-primary">&#123;&#125;</span>
-              </div>
-
-              {/* ── Code snippet card (bottom-left overlapping desk) ── */}
-              <div className="absolute -bottom-2 -left-4 z-20">
-                <div
-                  className="w-[260px] bg-card/95 border border-border/70 backdrop-blur-md rounded-2xl p-3.5 shadow-2xl"
-                  style={{ animation: 'float 7s ease-in-out infinite 0.6s' }}
-                >
-                  {/* Window chrome dots */}
-                  <div className="flex items-center gap-1.5 mb-2.5">
-                    <span className="w-2.5 h-2.5 rounded-full bg-red-400/80" />
-                    <span className="w-2.5 h-2.5 rounded-full bg-yellow-400/80" />
-                    <span className="w-2.5 h-2.5 rounded-full bg-emerald-400/80" />
-                    <span className="ml-auto text-[10px] text-muted-foreground font-mono opacity-60">whoami.js</span>
-                  </div>
-                  {/* Syntax-highlighted snippet */}
-                  <pre className="text-[11px] font-mono leading-[1.65] text-left select-none">
-                    <span className="text-blue-400 font-semibold">const </span>
-                    <span className="text-foreground font-medium">dev</span>
-                    <span className="text-muted-foreground"> = {'{'}</span>{"\n"}
-                    <span className="text-muted-foreground">  name: </span>
-                    <span className="text-emerald-400">&apos;Ezedin Mohammed&apos;</span>
-                    <span className="text-muted-foreground">,</span>{"\n"}
-                    <span className="text-muted-foreground">  stack: </span>
-                    <span className="text-emerald-400">&apos;React / Next.js&apos;</span>
-                    <span className="text-muted-foreground">,</span>{"\n"}
-                    <span className="text-muted-foreground">  status: </span>
-                    <span className="text-emerald-400">&apos;Open to Work&apos;</span>{"\n"}
-                    <span className="text-muted-foreground">{'}'}</span>
-                  </pre>
+              {/* 8. Bottom-Left "whoami.js" code snippet card with float-on-hover & neon glow */}
+              <div className="absolute -bottom-10 -left-4 sm:-left-8 z-20 w-64 sm:w-72 bg-card/95 border border-border/70 backdrop-blur-md rounded-2xl p-4 shadow-2xl animate-hero-float float-paused float-on-hover [animation-delay:1s] cursor-pointer hover:border-primary hover:shadow-[0_0_16px_rgba(79,227,194,0.5),inset_0_0_12px_rgba(79,227,194,0.2)] transition-all duration-300">
+                {/* Window chrome buttons */}
+                <div className="flex items-center gap-1.5 mb-3">
+                  <span className="w-2.5 h-2.5 rounded-full bg-[#F2564C]" />
+                  <span className="w-2.5 h-2.5 rounded-full bg-amber-400" />
+                  <span className="w-2.5 h-2.5 rounded-full bg-emerald-400" />
+                  <span className="ml-2 font-mono text-[10px] text-muted-foreground select-none">whoami.js</span>
                 </div>
+                {/* Syntax-highlighted snippet */}
+                <pre className="font-mono text-xs leading-relaxed select-none text-left">
+                  <span className="text-amber-400 font-semibold">const</span> <span className="text-foreground">dev</span> = &#123;{"\n"}
+                  &nbsp;&nbsp;<span className="text-muted-foreground">name:</span> <span className="text-primary font-medium">&quot;Ezedin Mohammed&quot;</span>,{"\n"}
+                  &nbsp;&nbsp;<span className="text-muted-foreground">stack:</span> <span className="text-primary font-medium">&quot;React / Next.js&quot;</span>,{"\n"}
+                  &nbsp;&nbsp;<span className="text-muted-foreground">status:</span> <span className="text-primary font-medium">&quot;Open to Work&quot;</span>{"\n"}
+                  &#125;
+                </pre>
               </div>
 
             </div>
