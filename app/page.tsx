@@ -6,7 +6,7 @@ import { FeaturedProjects } from "@/components/featured-projects"
 import { SkillsSection } from "@/components/skills-section"
 import { ExperienceSection } from "@/components/experience-section"
 import { Testimonials } from "@/components/testimonials"
-import { ContactSection } from "@/components/contact-section"
+import { ContactCTA } from "@/components/contact-cta"
 import { Footer } from "@/components/footer"
 import { ScrollProgress } from "@/components/scroll-progress"
 import { AnimatedCursor } from "@/components/animated-cursor"
@@ -24,7 +24,7 @@ export default function HomePage() {
       <SkillsSection />
       <ExperienceSection />
       <Testimonials />
-      <ContactSection />
+      <ContactCTA />
       <Footer />
     </main>
   )
