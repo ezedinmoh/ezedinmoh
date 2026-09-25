@@ -225,6 +225,38 @@
 .stagger-5 { animation-delay: 0.5s; }
 .stagger-6 { animation-delay: 0.6s; }
 
+/* Responsive full-width container matching modern viewport-fitted desktop design */
+.container {
+  width: 100% !important;
+  max-width: 100% !important;
+  margin-left: auto !important;
+  margin-right: auto !important;
+}
+
+@media (min-width: 1024px) {
+  .container {
+    max-width: 1560px !important;
+    padding-left: 3.5rem !important;
+    padding-right: 3.5rem !important;
+  }
+}
+
+@media (min-width: 1280px) {
+  .container {
+    max-width: 1620px !important;
+    padding-left: 4.5rem !important;
+    padding-right: 4.5rem !important;
+  }
+}
+
+@media (min-width: 1536px) {
+  .container {
+    max-width: 1720px !important;
+    padding-left: 5.5rem !important;
+    padding-right: 5.5rem !important;
+  }
+}
+
 /* 3D Perspective */
 .perspective { perspective: 1000px; }
 .preserve-3d { transform-style: preserve-3d; }

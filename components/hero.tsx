@@ -70,7 +70,7 @@ export function Hero() {
 
       {/* Content */}
       <div className="relative z-10 container mx-auto px-6 py-20">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
+        <div className="grid grid-cols-1 lg:grid-cols-[1.1fr,0.9fr] gap-12 lg:gap-16 items-center w-full">
         <div className="max-w-4xl lg:max-w-none">
           {/* Greeting */}
           <div className="animate-slide-up opacity-0 stagger-1" style={{ animationFillMode: 'forwards' }}>
@@ -154,7 +154,7 @@ export function Hero() {
 
           {/* Right column — Orbital Developer Visual */}
           <div className="hidden lg:flex items-center justify-center">
-            <div className="relative mx-auto max-w-sm lg:max-w-md w-full aspect-square flex items-center justify-center">
+            <div className="relative mx-auto max-w-md lg:max-w-lg xl:max-w-[540px] w-full aspect-square flex items-center justify-center">
 
               {/* 1. Ambient Glow */}
               <div className="absolute inset-6 rounded-full bg-primary/20 blur-[70px] pointer-events-none" />

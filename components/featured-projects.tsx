@@ -304,7 +304,7 @@ export function FeaturedProjects() {
       <div className="absolute inset-0">
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[400px] bg-primary/5 rounded-full blur-3xl" />
       </div>
-      <div className="w-full max-w-[1480px] mx-auto px-4 sm:px-6 lg:px-8 relative">
+      <div className="container mx-auto px-4 sm:px-6 relative">
         <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-4 mb-12">
           <div>
             <span className="text-primary text-sm font-medium uppercase tracking-wider mb-2 block">Selected Work</span>
