@@ -84,7 +84,7 @@ export function PageLoader() {
             }}
           >
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/icon.svg" alt="Ezedin Mohammed logo" width={96} height={96} style={{ borderRadius: "22px" }} />
+            <img src="/profile.jpg" alt="Ezedin Mohammed" width={96} height={96} style={{ borderRadius: "22px", objectFit: "cover" }} />
           </div>
         </div>
 

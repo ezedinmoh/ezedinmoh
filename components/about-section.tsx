@@ -6,13 +6,24 @@ import Image from "next/image"
 import { ArrowRight, MapPin, Calendar, Briefcase, Mail, Code2, Sparkles, UserCheck } from "lucide-react"
 
 export function AboutSection() {
-  const [avatarUrl, setAvatarUrl] = useState<string | null>(null)
+  const [avatarUrl, setAvatarUrl] = useState<string>("/profile.jpg")
 
   useEffect(() => {
+    // Check localStorage cache or profile endpoint
+    if (typeof window !== "undefined") {
+      const cached = localStorage.getItem("profile_avatar_url")
+      if (cached) setAvatarUrl(cached)
+    }
+
     fetch("/api/profile")
       .then((r) => r.json())
       .then((data) => {
-        if (data?.avatarUrl) setAvatarUrl(data.avatarUrl)
+        if (data?.avatarUrl) {
+          setAvatarUrl(data.avatarUrl)
+          if (typeof window !== "undefined") {
+            localStorage.setItem("profile_avatar_url", data.avatarUrl)
+          }
+        }
       })
       .catch(() => {})
   }, [])
@@ -40,7 +51,7 @@ export function AboutSection() {
             {/* Inner avatar circle */}
             <div className="relative z-10 w-[84%] aspect-square rounded-full overflow-hidden border-2 border-primary/40 shadow-2xl bg-card">
               <Image
-                src={avatarUrl || "/developer.png"}
+                src={avatarUrl || "/profile.jpg"}
                 alt="Ezedin Mohammed"
                 fill
                 sizes="(max-width: 768px) 320px, 380px"

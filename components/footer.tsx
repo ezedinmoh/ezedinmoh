@@ -1,4 +1,5 @@
 import Link from "next/link"
+import Image from "next/image"
 import { Github, Linkedin, Twitter, Mail, Heart } from "lucide-react"
 
 const footerLinks = {
@@ -24,10 +25,21 @@ export function Footer() {
         <div className="grid md:grid-cols-3 gap-12 mb-12">
           {/* Brand */}
           <div>
-            <Link href="/" className="text-2xl font-bold mb-4 inline-block">
-              <span className="text-gradient">E</span>
-              <span className="text-foreground">zedin</span>
-              <span className="text-muted-foreground opacity-50">.</span>
+            <Link href="/" className="flex items-center gap-3 text-2xl font-bold mb-4">
+              <div className="relative w-9 h-9 rounded-full overflow-hidden border border-primary/40 ring-2 ring-primary/20 shrink-0">
+                <Image
+                  src="/profile.jpg"
+                  alt="Ezedin Mohammed"
+                  fill
+                  sizes="36px"
+                  className="object-cover"
+                />
+              </div>
+              <div>
+                <span className="text-gradient">E</span>
+                <span className="text-foreground">zedin</span>
+                <span className="text-muted-foreground opacity-50">.</span>
+              </div>
             </Link>
             <p className="text-muted-foreground text-sm leading-relaxed max-w-xs">
               Software Engineer from Ethiopia, passionate about crafting beautiful, performant web experiences.

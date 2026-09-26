@@ -61,9 +61,16 @@ export default function AboutPage() {
     funFacts?: typeof DEFAULT_FUN_FACTS
     workStyle?: typeof DEFAULT_WORK_STYLE
     interests?: typeof DEFAULT_INTERESTS
-  }>({})
+  }>({
+    avatarUrl: "/profile.jpg",
+  })
 
   useEffect(() => {
+    if (typeof window !== "undefined") {
+      const cached = localStorage.getItem("profile_avatar_url")
+      if (cached) setProfile((p) => ({ ...p, avatarUrl: cached }))
+    }
+
     fetch("/api/profile")
       .then((r) => r.json())
       .then((data) => {

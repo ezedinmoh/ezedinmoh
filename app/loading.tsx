@@ -1,9 +1,10 @@
 "use client"
 
 import { useState, useEffect } from "react"
+import Image from "next/image"
 
 export default function Loading() {
-  const [avatarUrl, setAvatarUrl] = useState<string | null>(null)
+  const [avatarUrl, setAvatarUrl] = useState<string>("/profile.jpg")
   const [name, setName]           = useState<string>("Ezedin Mohammed")
 
   useEffect(() => {
@@ -77,16 +78,14 @@ export default function Loading() {
               boxShadow: "0 0 40px oklch(0.7 0.15 180 / 0.4), 0 0 80px oklch(0.7 0.15 180 / 0.15)",
             }}
           >
-            {avatarUrl ? (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img src={avatarUrl} alt={name} className="w-full h-full object-cover" />
-            ) : (
-              <span
-                className="text-2xl font-black tracking-tight text-primary select-none"
-              >
-                EM
-              </span>
-            )}
+            <Image
+              src={avatarUrl || "/profile.jpg"}
+              alt={name}
+              fill
+              sizes="80px"
+              priority
+              className="object-cover"
+            />
           </div>
         </div>
 

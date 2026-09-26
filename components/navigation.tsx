@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from "react"
 import Link from "next/link"
+import Image from "next/image"
 import { usePathname } from "next/navigation"
 import {
   Menu, X, Home, User, FolderOpen, BookOpen,
@@ -57,10 +58,22 @@ export function Navigation() {
       <nav className="container mx-auto px-4 sm:px-6 flex items-center justify-between gap-3">
 
         {/* ── Logo ── */}
-        <Link href="/" className="text-xl font-bold tracking-tight group shrink-0">
-          <span className="text-gradient">E</span>
-          <span className="text-foreground group-hover:text-primary transition-colors">zedin</span>
-          <span className="text-muted-foreground opacity-40">.</span>
+        <Link href="/" className="flex items-center gap-2.5 text-xl font-bold tracking-tight group shrink-0">
+          <div className="relative w-8 h-8 rounded-full overflow-hidden border border-primary/40 ring-2 ring-primary/20 shrink-0">
+            <Image
+              src="/profile.jpg"
+              alt="Ezedin Mohammed"
+              fill
+              sizes="32px"
+              priority
+              className="object-cover"
+            />
+          </div>
+          <div>
+            <span className="text-gradient">E</span>
+            <span className="text-foreground group-hover:text-primary transition-colors">zedin</span>
+            <span className="text-muted-foreground opacity-40">.</span>
+          </div>
         </Link>
 
         {/* ── Desktop links ── */}

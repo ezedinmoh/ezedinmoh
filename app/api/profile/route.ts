@@ -78,7 +78,7 @@ export const DEFAULT_INTERESTS = [
 
 const DEFAULT_PROFILE = {
   id: "singleton",
-  avatarUrl: "",
+  avatarUrl: "/profile.jpg",
   coverImageUrl: "",
   title: "Ezedin Mohammed",
   location: "Kombolcha, Ethiopia",

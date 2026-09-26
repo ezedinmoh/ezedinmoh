@@ -217,26 +217,27 @@ export function ProjectPreviewModal({ project, onClose }: ProjectPreviewModalPro
               </a>
             )}
 
+            {/* Back / Exit Preview Button */}
+            <button
+              type="button"
+              onClick={onClose}
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-muted-foreground hover:text-foreground hover:bg-secondary transition-all text-xs font-medium cursor-pointer"
+              aria-label="Exit preview"
+              title="Exit preview"
+            >
+              <ArrowLeft className="w-4 h-4" />
+              <span>Back</span>
+            </button>
+
             {/* Close Button */}
             <button
               type="button"
               onClick={onClose}
-              className="p-2 rounded-xl text-muted-foreground hover:text-foreground hover:bg-secondary transition-all ml-1"
+              className="p-2 rounded-xl text-muted-foreground hover:text-foreground hover:bg-secondary transition-all"
               aria-label="Close modal"
             >
               <X className="w-5 h-5" />
             </button>
-
-            {/* Back to Home Button */}
-            <Link
-              href="/"
-              className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-muted-foreground hover:text-foreground hover:bg-secondary transition-all text-xs font-medium"
-              aria-label="Back to Home"
-              title="Back to Home"
-            >
-              <ArrowLeft className="w-4 h-4" />
-              <span>Back</span>
-            </Link>
           </div>
         </div>
 
