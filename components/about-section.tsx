@@ -37,8 +37,8 @@ export function AboutSection() {
       <div className="container mx-auto px-4 sm:px-6 relative">
         <div className="grid lg:grid-cols-[0.85fr,1.15fr] gap-12 lg:gap-16 items-center">
 
-          {/* Left Column: Circular Profile Frame with Rotating Dashed Rings */}
-          <div className="relative mx-auto lg:mx-0 max-w-sm w-full aspect-square flex items-center justify-center">
+          {/* Left Column: Circular Profile Frame with Rotating Dashed Rings (Desktop only) */}
+          <div className="hidden lg:flex relative mx-auto lg:mx-0 max-w-sm w-full aspect-square items-center justify-center">
             {/* Ambient glow behind circle */}
             <div className="absolute inset-4 rounded-full bg-primary/15 blur-2xl pointer-events-none" />
 
