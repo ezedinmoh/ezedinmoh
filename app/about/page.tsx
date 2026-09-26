@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
+import Image from "next/image"
 import { Navigation } from "@/components/navigation"
 import { Footer } from "@/components/footer"
 import { ContactCTA } from "@/components/contact-cta"
@@ -92,11 +93,13 @@ export default function AboutPage() {
         {/* Cover image banner if present */}
         {profile.coverImageUrl ? (
           <div className="absolute top-0 left-0 right-0 h-[480px] overflow-hidden pointer-events-none z-0">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
+            <Image
               src={profile.coverImageUrl}
               alt="Profile Cover Banner"
-              className="w-full h-full object-cover object-center scale-105 blur-2xl opacity-50 dark:opacity-40 transition-all duration-700"
+              fill
+              priority
+              sizes="100vw"
+              className="object-cover object-center scale-105 blur-2xl opacity-50 dark:opacity-40 transition-all duration-700"
             />
             <div className="absolute inset-0 bg-gradient-to-b from-background/20 via-background/60 to-background" />
             <div className="absolute inset-0 bg-gradient-to-r from-background via-transparent to-background opacity-80" />
@@ -123,11 +126,12 @@ export default function AboutPage() {
             <div className="relative order-2 lg:order-1">
               <div className="aspect-[4/5] rounded-3xl overflow-hidden bg-gradient-to-br from-primary/20 to-accent/20 border border-border/80 shadow-2xl animate-glow flex items-center justify-center relative group">
                 {profile.avatarUrl ? (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img
+                  <Image
                     src={profile.avatarUrl}
                     alt={profile.title || "Ezedin Mohammed Profile Picture"}
-                    className="w-full h-full object-cover object-center transition-transform duration-700 group-hover:scale-105"
+                    fill
+                    sizes="(max-width: 1024px) 100vw, 50vw"
+                    className="object-cover object-center transition-transform duration-700 group-hover:scale-105"
                   />
                 ) : (
                   <div className="w-48 h-48 rounded-full bg-primary/20 animate-morph flex items-center justify-center">

@@ -16,6 +16,14 @@ const navItems = [
 export function BottomNav() {
   const pathname = usePathname()
 
+  const triggerHaptic = () => {
+    if (typeof navigator !== "undefined" && "vibrate" in navigator) {
+      try {
+        navigator.vibrate(12)
+      } catch {}
+    }
+  }
+
   // Never show on admin dashboard
   if (pathname.startsWith("/admin")) return null
 
@@ -27,9 +35,9 @@ export function BottomNav() {
       <nav
         className={cn(
           "flex items-center gap-0.5",
-          "bg-card/85 backdrop-blur-2xl",
-          "border border-border/50",
-          "rounded-2xl shadow-xl shadow-black/20",
+          "bg-card/90 backdrop-blur-2xl",
+          "border border-border/60",
+          "rounded-2xl shadow-2xl shadow-black/25",
           "px-2 py-2"
         )}
         aria-label="Site navigation"
@@ -46,18 +54,19 @@ export function BottomNav() {
               <Link
                 key={href}
                 href={href}
+                onClick={triggerHaptic}
                 aria-label={label}
                 aria-current={isActive ? "page" : undefined}
-                className="flex flex-col items-center gap-1 px-3 py-1 rounded-xl transition-all duration-200 active:scale-95"
+                className="flex flex-col items-center gap-1 px-3 py-1 rounded-xl transition-transform duration-150 active:scale-90"
               >
                 {/* Icon inside a coloured badge chip */}
                 <span
                   className={cn(
-                    "flex items-center justify-center rounded-xl transition-all duration-200",
+                    "flex items-center justify-center rounded-xl transition-all duration-300",
                     "w-12 h-8",
                     isActive
                       ? "bg-primary shadow-md shadow-primary/35 text-primary-foreground"
-                      : "bg-primary/12 text-primary"
+                      : "bg-primary/12 text-primary hover:bg-primary/20"
                   )}
                 >
                   <Icon className="w-[18px] h-[18px]" strokeWidth={2.5} />
@@ -79,11 +88,12 @@ export function BottomNav() {
             <Link
               key={href}
               href={href}
+              onClick={triggerHaptic}
               aria-label={label}
               aria-current={isActive ? "page" : undefined}
               className={cn(
                 "flex flex-col items-center gap-1 px-3 py-1 rounded-xl",
-                "transition-all duration-200 active:scale-95",
+                "transition-all duration-150 active:scale-90",
                 isActive
                   ? "text-primary bg-primary/10"
                   : "text-muted-foreground hover:text-foreground hover:bg-secondary/50"
@@ -93,7 +103,7 @@ export function BottomNav() {
               <span
                 className={cn(
                   "block h-1 w-4 rounded-full transition-all duration-300 mb-0.5",
-                  isActive ? "bg-primary opacity-100" : "opacity-0"
+                  isActive ? "bg-primary opacity-100 scale-100" : "opacity-0 scale-50"
                 )}
               />
               <Icon className="w-5 h-5" strokeWidth={isActive ? 2.5 : 1.8} />

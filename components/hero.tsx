@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react"
 import Link from "next/link"
+import Image from "next/image"
 import { ArrowRight, Github, Linkedin, Twitter } from "lucide-react"
 import { ThreeScene } from "./three-scene"
 
@@ -167,12 +168,13 @@ export function Hero() {
 
               {/* 4. Center Developer Illustration Frame */}
               <div className="relative z-10 w-[80%] aspect-square flex items-center justify-center">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
+                <Image
                   src="/developer.png"
                   alt="Ezedin Mohammed"
+                  width={432}
+                  height={432}
+                  priority
                   className="w-full h-full object-contain drop-shadow-[0_20px_35px_rgba(0,0,0,0.65)] select-none pointer-events-none"
-                  priority-hint="high"
                 />
               </div>
 

@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react"
 import Link from "next/link"
+import Image from "next/image"
 import {
   X, ExternalLink, RefreshCw, Monitor, Tablet, Smartphone,
   ChevronLeft, ChevronRight, ArrowUpRight, ArrowLeft
@@ -350,11 +351,12 @@ export function ProjectPreviewModal({ project, onClose }: ProjectPreviewModalPro
                       className="max-w-full max-h-full object-contain rounded-xl shadow-lg"
                     />
                   ) : (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img
+                    <Image
                       src={mediaList[currentIndex]}
                       alt={`${project.title} screenshot ${currentIndex + 1}`}
-                      className="max-w-full max-h-full object-contain rounded-xl shadow-lg"
+                      fill
+                      sizes="(max-width: 1024px) 100vw, 80vw"
+                      className="object-contain rounded-xl shadow-lg"
                     />
                   )}
 

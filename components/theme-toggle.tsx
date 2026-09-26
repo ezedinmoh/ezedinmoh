@@ -20,7 +20,12 @@ export function ThemeToggle() {
 
   return (
     <button
-      onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+      onClick={() => {
+        if (typeof navigator !== "undefined" && "vibrate" in navigator) {
+          try { navigator.vibrate(10) } catch {}
+        }
+        setTheme(theme === "dark" ? "light" : "dark")
+      }}
       className="relative p-2.5 rounded-full bg-secondary/80 hover:bg-secondary text-foreground transition-all duration-300 hover:scale-110 active:scale-95 overflow-hidden"
       aria-label={`Switch to ${theme === "dark" ? "light" : "dark"} mode`}
     >

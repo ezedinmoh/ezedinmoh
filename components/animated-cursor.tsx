@@ -35,9 +35,9 @@ export function AnimatedCursor() {
     const handleMouseLeave = () => setIsHidden(true)
     const handleMouseEnter = () => setIsHidden(false)
 
-    document.addEventListener("mousemove", handleMouseMove)
-    document.addEventListener("mousedown", handleMouseDown)
-    document.addEventListener("mouseup", handleMouseUp)
+    document.addEventListener("mousemove", handleMouseMove, { passive: true })
+    document.addEventListener("mousedown", handleMouseDown, { passive: true })
+    document.addEventListener("mouseup", handleMouseUp, { passive: true })
     document.addEventListener("mouseleave", handleMouseLeave)
     document.addEventListener("mouseenter", handleMouseEnter)
 

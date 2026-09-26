@@ -1,6 +1,7 @@
 import type { Metadata } from "next"
 import { notFound } from "next/navigation"
 import Link from "next/link"
+import Image from "next/image"
 import { ArrowLeft, ArrowUpRight, Github, Calendar, Layers, CheckCircle2, AlertCircle, Lightbulb } from "lucide-react"
 import { prisma } from "@/lib/db"
 import { allProjects, type Project } from "@/lib/projects"
@@ -237,12 +238,16 @@ export default async function ProjectDetailPage({ params }: ProjectPageProps) {
               </div>
             </div>
           ) : project.image ? (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img
-              src={project.image}
-              alt={project.title}
-              className="w-full h-auto object-cover max-h-[600px]"
-            />
+            <div className="relative w-full aspect-[16/9] max-h-[600px] overflow-hidden">
+              <Image
+                src={project.image}
+                alt={project.title}
+                fill
+                priority
+                sizes="(max-width: 1200px) 100vw, 1200px"
+                className="object-cover"
+              />
+            </div>
           ) : null}
         </div>
 

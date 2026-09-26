@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react"
 import Link from "next/link"
+import Image from "next/image"
 import { ArrowRight, MapPin, Calendar, Briefcase, Mail, Code2, Sparkles, UserCheck } from "lucide-react"
 
 export function AboutSection() {
@@ -38,11 +39,12 @@ export function AboutSection() {
 
             {/* Inner avatar circle */}
             <div className="relative z-10 w-[84%] aspect-square rounded-full overflow-hidden border-2 border-primary/40 shadow-2xl bg-card">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
+              <Image
                 src={avatarUrl || "/developer.png"}
                 alt="Ezedin Mohammed"
-                className="w-full h-full object-cover object-top hover:scale-105 transition-transform duration-700"
+                fill
+                sizes="(max-width: 768px) 320px, 380px"
+                className="object-cover object-top hover:scale-105 transition-transform duration-700"
               />
             </div>
 
