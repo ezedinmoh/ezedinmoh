@@ -132,7 +132,8 @@ function ProjectCard({
     <article
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
-      className="group relative rounded-2xl bg-card border border-border/60 overflow-hidden transition-all duration-500 flex flex-col hover:border-primary/40 hover:shadow-2xl hover:-translate-y-1 h-full min-h-[380px]"
+      onClick={onDemo}
+      className="group relative rounded-2xl bg-card border border-border/60 overflow-hidden transition-all duration-500 flex flex-col hover:border-primary/40 hover:shadow-2xl hover:-translate-y-1 h-full min-h-[380px] cursor-pointer"
     >
       <div
         className="relative overflow-hidden shrink-0 h-52 cursor-pointer"
@@ -173,7 +174,8 @@ function ProjectCard({
             <div className={cn("absolute inset-0 bg-gradient-to-t from-card via-transparent to-transparent transition-opacity duration-500", hovered ? "opacity-100" : "opacity-60")} />
           </>
         )}
-        <div className="absolute inset-0 bg-background/60 opacity-0 group-hover:opacity-100 transition-all duration-300 flex items-center justify-center gap-3">
+        {/* Desktop-only hover overlay */}
+        <div className="hidden md:flex absolute inset-0 bg-background/60 opacity-0 group-hover:opacity-100 transition-all duration-300 items-center justify-center gap-3">
           <button onClick={(e) => { e.stopPropagation(); onDemo() }} className="flex items-center gap-1.5 px-4 py-2 bg-primary text-primary-foreground rounded-full text-sm font-medium hover:opacity-90 transition-all hover:scale-105">
             <Monitor className="w-3.5 h-3.5" /> Preview
           </button>
@@ -189,7 +191,7 @@ function ProjectCard({
         <div className="flex items-start justify-between gap-2 mb-1 md:mb-2">
           <h3 className="font-bold text-card-foreground text-base md:text-lg group-hover:text-primary transition-colors">{project.title}</h3>
           {/* Desktop: rating beside title */}
-          <div className="hidden md:block shrink-0">
+          <div className="hidden md:block shrink-0" onClick={(e) => e.stopPropagation()}>
             <StarRating
               projectId={project.id}
               initialSum={project.ratingSum}
@@ -199,7 +201,7 @@ function ProjectCard({
           </div>
         </div>
         {/* Mobile: rating on its own full-width row */}
-        <div className="md:hidden mb-2">
+        <div className="md:hidden mb-2" onClick={(e) => e.stopPropagation()}>
           <StarRating
             projectId={project.id}
             initialSum={project.ratingSum}
@@ -214,12 +216,12 @@ function ProjectCard({
             Preview <ArrowUpRight className="w-3.5 h-3.5" />
           </button>
           {project.caseStudy && (
-            <button onClick={(e) => { e.stopPropagation(); onCaseStudy() }} className="inline-flex items-center gap-1 text-xs md:text-sm text-muted-foreground hover:text-foreground transition-colors">
+            <button onClick={(e) => { e.stopPropagation(); onCaseStudy() }} className="hidden md:inline-flex items-center gap-1 text-xs md:text-sm text-muted-foreground hover:text-foreground transition-colors">
               Case Study <ChevronRight className="w-3 h-3" />
             </button>
           )}
           {project.github && (
-            <a href={project.github} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 text-xs md:text-sm text-muted-foreground hover:text-foreground transition-colors ml-auto">
+            <a onClick={(e) => e.stopPropagation()} href={project.github} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 text-xs md:text-sm text-muted-foreground hover:text-foreground transition-colors ml-auto">
               <Github className="w-4 h-4" />
             </a>
           )}
