@@ -29,7 +29,7 @@ export function AboutSection() {
   }, [])
 
   return (
-    <section id="about" className="py-24 md:py-32 bg-secondary/15 relative overflow-hidden">
+    <section id="about" suppressHydrationWarning className="py-24 md:py-32 bg-secondary/15 relative overflow-hidden">
       {/* Ambient background glow */}
       <div className="absolute top-1/2 -left-48 w-96 h-96 bg-primary/10 rounded-full blur-3xl pointer-events-none" />
       <div className="absolute bottom-0 right-0 w-80 h-80 bg-accent/10 rounded-full blur-3xl pointer-events-none" />
@@ -38,7 +38,10 @@ export function AboutSection() {
         <div className="grid lg:grid-cols-[0.85fr,1.15fr] gap-12 lg:gap-16 items-center">
 
           {/* Left Column: Circular Profile Frame with Rotating Dashed Rings (Desktop only) */}
-          <div className="hidden lg:flex relative mx-auto lg:mx-0 max-w-sm w-full aspect-square items-center justify-center">
+          <div
+            suppressHydrationWarning
+            className="hidden lg:flex relative mx-auto lg:mx-0 max-w-sm w-full aspect-square items-center justify-center"
+          >
             {/* Ambient glow behind circle */}
             <div className="absolute inset-4 rounded-full bg-primary/15 blur-2xl pointer-events-none" />
 

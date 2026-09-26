@@ -1,10 +1,9 @@
-const CACHE_VERSION = 'ezedinmoh-v1';
+const CACHE_VERSION = 'ezedinmoh-v2';
 const STATIC_CACHE = `${CACHE_VERSION}-static`;
 const RUNTIME_CACHE = `${CACHE_VERSION}-runtime`;
 const IMAGE_CACHE = `${CACHE_VERSION}-images`;
 
 const PRECACHE_ASSETS = [
-  '/',
   '/offline',
   '/manifest.webmanifest',
   '/icon.svg',
