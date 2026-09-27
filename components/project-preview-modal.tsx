@@ -129,7 +129,7 @@ export function ProjectPreviewModal({ project, onClose }: ProjectPreviewModalPro
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 md:p-6 bg-background/80 backdrop-blur-md animate-fade-in">
+    <div data-project-preview-modal className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 md:p-6 bg-background/80 backdrop-blur-md animate-fade-in">
       <div className="relative w-full max-w-6xl h-[92vh] flex flex-col bg-card border border-border rounded-2xl md:rounded-3xl shadow-2xl overflow-hidden">
         
         {/* ── Modal Header ── */}

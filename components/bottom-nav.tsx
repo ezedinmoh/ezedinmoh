@@ -29,7 +29,7 @@ export function BottomNav() {
 
   return (
     <div
-      className="lg:hidden fixed left-1/2 -translate-x-1/2 z-50"
+      className="site-bottom-nav lg:hidden fixed left-1/2 -translate-x-1/2 z-50"
       style={{ bottom: "max(1.25rem, calc(env(safe-area-inset-bottom, 0px) + 0.75rem))" }}
     >
       <nav

@@ -3,6 +3,10 @@
 
 @custom-variant dark (&:is(.dark *));
 
+body:has([data-project-preview-modal]) .site-bottom-nav {
+  display: none;
+}
+
 :root {
   --background: oklch(0.96 0.012 240);
   --foreground: oklch(0.10 0.03 255);
