@@ -9,6 +9,8 @@ const footerLinks = {
     { label: "Projects", href: "/projects" },
     { label: "Blog", href: "/blog" },
     { label: "Contact", href: "/contact" },
+    { label: "Terms of Service", href: "/terms" },
+    { label: "Privacy Policy", href: "/privacy" },
   ],
   social: [
     { label: "GitHub", href: "https://github.com/ezedinmoh", icon: Github },
@@ -91,6 +93,15 @@ export function Footer() {
           <p className="text-sm text-muted-foreground">
             &copy; {new Date().getFullYear()} Ezedin Mohammed. All rights reserved.
           </p>
+          <div className="flex items-center gap-4 text-xs text-muted-foreground">
+            <Link href="/terms" className="hover:text-primary transition-colors">
+              Terms of Service
+            </Link>
+            <span>•</span>
+            <Link href="/privacy" className="hover:text-primary transition-colors">
+              Privacy Policy
+            </Link>
+          </div>
           <p className="text-sm text-muted-foreground flex items-center gap-1">
             Crafted with <Heart className="w-4 h-4 text-primary fill-primary" /> using Next.js & TailwindCSS
           </p>

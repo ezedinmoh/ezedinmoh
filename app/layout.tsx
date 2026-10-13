@@ -74,6 +74,12 @@ export const metadata: Metadata = {
   },
   verification: {
     google: 'UlRnEDKTyZXpHnPuIQTJn64LKDr4sZ8Tp3zPAZKJR-A',
+    other: {
+      'tiktok-developers-site-verification': '47ocCVKNoAos77AVlG62jRAmuEIgczqr',
+    },
+  },
+  other: {
+    'tiktok-developers-site-verification': '47ocCVKNoAos77AVlG62jRAmuEIgczqr',
   },
   robots: {
     index: true,
