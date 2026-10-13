@@ -280,7 +280,7 @@ export default function ProjectsPage() {
       {caseStudyProject && <CaseStudyModal project={caseStudyProject} onClose={() => setCaseStudyProject(null)} />}
 
       {/* Hero */}
-      <section className="pt-32 pb-12 relative overflow-hidden">
+      <section className="pt-20 sm:pt-32 pb-4 sm:pb-12 relative overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-br from-background via-background to-primary/10" />
         <div className="absolute inset-0 opacity-30">
           <div className="absolute top-0 right-1/4 w-96 h-96 bg-primary/20 rounded-full blur-3xl animate-morph" />
@@ -288,50 +288,68 @@ export default function ProjectsPage() {
         </div>
         <div className="absolute inset-0 opacity-5"
           style={{ backgroundImage: "linear-gradient(rgba(100,200,180,0.3) 1px, transparent 1px), linear-gradient(90deg, rgba(100,200,180,0.3) 1px, transparent 1px)", backgroundSize: "60px 60px" }} />
-        <div className="container mx-auto px-6 relative">
+        <div className="container mx-auto px-4 sm:px-6 relative">
           <div className="max-w-3xl">
-            <span className="text-primary text-sm font-medium uppercase tracking-wider mb-4 block animate-fade-in">Portfolio</span>
-            <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold text-foreground mb-6 animate-slide-up opacity-0" style={{ animationDelay: "0.1s", animationFillMode: "forwards" }}>
+            <span className="text-primary text-xs sm:text-sm font-medium uppercase tracking-wider mb-2 sm:mb-4 block animate-fade-in">Portfolio</span>
+            <h1 className="text-3xl sm:text-5xl md:text-6xl lg:text-7xl font-bold text-foreground mb-2 sm:mb-6 animate-slide-up opacity-0" style={{ animationDelay: "0.1s", animationFillMode: "forwards" }}>
               My <span className="text-gradient">Projects</span>
             </h1>
-            <p className="text-lg text-muted-foreground leading-relaxed animate-slide-up opacity-0" style={{ animationDelay: "0.2s", animationFillMode: "forwards" }}>
-              {projects.length} projects spanning full-stack apps, AI tools, and creative experiments. Click any card to preview live or read the case study.
+            <p className="text-sm sm:text-lg text-muted-foreground leading-relaxed animate-slide-up opacity-0" style={{ animationDelay: "0.2s", animationFillMode: "forwards" }}>
+              {projects.length} projects spanning full-stack apps, AI tools, and creative experiments.
+              <span className="hidden sm:inline"> Click any card to preview live or read the case study.</span>
             </p>
           </div>
         </div>
       </section>
 
       {/* Filters */}
-      <section className="pb-8 sticky top-16 z-30 bg-background/95 backdrop-blur-md border-b border-border/40 py-4">
-        <div className="container mx-auto px-6 flex flex-wrap gap-3 items-center">
-          <div className="flex gap-2 flex-wrap">
+      <section className="sticky top-16 z-30 bg-background/95 backdrop-blur-md border-b border-border/40 py-2.5 sm:py-4">
+        <div className="container mx-auto px-4 sm:px-6 flex items-center justify-between gap-3">
+          {/* Categories: Smooth horizontal scroll on mobile, compact pills */}
+          <div className="flex items-center gap-1.5 sm:gap-2 overflow-x-auto no-scrollbar py-0.5 max-w-full">
             {categories.map(cat => (
-              <button key={cat} onClick={() => setActiveCategory(cat)}
-                className={cn("px-4 py-1.5 rounded-full text-sm font-medium transition-all",
-                  activeCategory === cat ? "bg-primary text-primary-foreground" : "bg-secondary text-muted-foreground hover:text-foreground")}>
+              <button
+                key={cat}
+                onClick={() => setActiveCategory(cat)}
+                className={cn(
+                  "px-3 py-1 sm:px-4 sm:py-1.5 rounded-full text-xs sm:text-sm font-medium transition-all whitespace-nowrap shrink-0",
+                  activeCategory === cat
+                    ? "bg-primary text-primary-foreground shadow-sm"
+                    : "bg-secondary text-muted-foreground hover:text-foreground"
+                )}
+              >
                 {cat}
               </button>
             ))}
           </div>
-          <div className="w-px h-5 bg-border hidden sm:block" />
-          <div className="flex gap-2 flex-wrap">
-            {["React", "Next.js", "Node.js", "TypeScript", "AI", "Python"].map(tech => (
-              <button key={tech} onClick={() => setActiveTech(activeTech === tech ? null : tech)}
-                className={cn("px-3 py-1 rounded-full text-xs font-medium transition-all border",
-                  activeTech === tech
-                    ? "bg-primary/15 border-primary/40 text-primary"
-                    : "bg-transparent border-border text-muted-foreground hover:border-primary/30 hover:text-foreground")}>
-                {tech}
-              </button>
-            ))}
+
+          {/* Desktop-only: Tech stack filters, divider and project count */}
+          <div className="hidden md:flex items-center gap-3 ml-auto shrink-0">
+            <div className="w-px h-5 bg-border" />
+            <div className="flex gap-1.5 flex-wrap">
+              {["React", "Next.js", "Node.js", "TypeScript", "AI", "Python"].map(tech => (
+                <button
+                  key={tech}
+                  onClick={() => setActiveTech(activeTech === tech ? null : tech)}
+                  className={cn(
+                    "px-2.5 py-1 rounded-full text-xs font-medium transition-all border whitespace-nowrap",
+                    activeTech === tech
+                      ? "bg-primary/15 border-primary/40 text-primary"
+                      : "bg-transparent border-border text-muted-foreground hover:border-primary/30 hover:text-foreground"
+                  )}
+                >
+                  {tech}
+                </button>
+              ))}
+            </div>
+            <span className="text-xs text-muted-foreground whitespace-nowrap">{filtered.length} projects</span>
           </div>
-          <span className="ml-auto text-xs text-muted-foreground">{filtered.length} projects</span>
         </div>
       </section>
 
       {/* Grid */}
-      <section className="py-12">
-        <div className="container mx-auto px-6">
+      <section className="py-6 sm:py-12">
+        <div className="container mx-auto px-4 sm:px-6">
           {loading ? (
             <ProjectsGridSkeleton />
           ) : filtered.length === 0 ? (

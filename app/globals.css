@@ -549,3 +549,12 @@ html {
 .sh-comment  { color: oklch(0.5 0.02 250); font-style: italic; }
 .sh-fn       { color: oklch(0.75 0.15 200); }
 .sh-number   { color: oklch(0.78 0.15 60); }
+
+/* Hide scrollbar utility */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}

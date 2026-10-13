@@ -2,16 +2,23 @@
 
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { Home, User, Layers, FileText, Mail } from "lucide-react"
+import { Home, User, Layers, FileText, Mail, type LucideIcon } from "lucide-react"
 import { cn } from "@/lib/utils"
 
-const navItems = [
+interface NavItem {
+  href: string
+  label: string
+  icon: LucideIcon
+  featured?: boolean
+}
+
+const navItems: NavItem[] = [
   { href: "/",         label: "Home",     icon: Home },
   { href: "/about",    label: "About",    icon: User },
   { href: "/projects", label: "Projects", icon: Layers, featured: true },
   { href: "/resume",   label: "Resume",   icon: FileText },
   { href: "/contact",  label: "Contact",  icon: Mail },
-] as const
+]
 
 export function BottomNav() {
   const pathname = usePathname()
