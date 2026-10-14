@@ -6,7 +6,7 @@ import Image from "next/image"
 import { usePathname } from "next/navigation"
 import {
   Menu, X, Home, User, FolderOpen, Play,
-  FileText, MessageSquareHeart, Mail, ArrowRight
+  FileText, MessageSquareHeart, Mail, ArrowRight, ArrowLeft
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { ThemeToggle } from "./theme-toggle"
@@ -47,12 +47,17 @@ export function Navigation() {
   // close on route change
   useEffect(() => { setIsOpen(false) }, [pathname])
 
+  const isReels = pathname?.startsWith("/reels")
+
   return (
     <header
       suppressHydrationWarning
       className={cn(
         "fixed top-0 left-0 right-0 z-50 transition-all duration-300",
-        atTop ? "py-5 bg-transparent" : "py-3 bg-background/95 backdrop-blur-md border-b border-border/40"
+        atTop && !isReels
+          ? "py-5 bg-transparent"
+          : "py-3 bg-background/95 backdrop-blur-md border-b border-border/40",
+        isReels && "h-14 flex items-center py-0"
       )}
     >
       <nav className="container mx-auto px-4 sm:px-6 flex items-center justify-between gap-3">
@@ -99,6 +104,24 @@ export function Navigation() {
 
         {/* ── Desktop right actions ── */}
         <div className="hidden lg:flex items-center gap-2 shrink-0">
+          {isReels && (
+            <button
+              onClick={() => {
+                if (typeof window !== "undefined") {
+                  if (window.history.length > 1 && document.referrer.includes(window.location.host)) {
+                    window.history.back()
+                  } else {
+                    window.location.href = "/"
+                  }
+                }
+              }}
+              className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full border border-cyan-500/40 bg-cyan-500/15 text-cyan-400 hover:bg-cyan-500/25 text-xs font-semibold transition-all duration-200 active:scale-95 cursor-pointer shadow-[0_0_12px_rgba(6,182,212,0.25)] mr-1"
+              aria-label="Back to site"
+            >
+              <ArrowLeft className="w-3.5 h-3.5" />
+              <span>Back</span>
+            </button>
+          )}
           <ThemeToggle />
           <Link
             href="/contact"
@@ -119,27 +142,42 @@ export function Navigation() {
           </Link>
         </div>
 
-        {/* ── Tablet/Mobile right: reels + theme + hire me + hamburger ── */}
+        {/* ── Tablet/Mobile right: reels/back + theme + hire me + hamburger ── */}
         <div className="flex lg:hidden items-center gap-1.5 sm:gap-2">
-          {/* Mobile Reels Button */}
-          <Link
-            href="/reels"
-            className={cn(
-              "relative flex items-center gap-1 px-2.5 py-1.5 rounded-full border text-xs font-semibold transition-all duration-200 active:scale-95",
-              pathname.startsWith("/reels")
-                ? "bg-cyan-500/20 border-cyan-500 text-cyan-400 shadow-[0_0_12px_rgba(6,182,212,0.4)] ring-1 ring-cyan-500/50"
-                : "bg-secondary/70 border-border text-foreground hover:border-cyan-500/50 hover:text-cyan-400"
-            )}
-            aria-label="Watch Reels"
-            title="Watch Reels"
-          >
-            <Play className="w-3 h-3 fill-current text-cyan-400" />
-            <span className="text-[11px] font-bold tracking-tight">Reels</span>
-            <span className="relative flex h-1.5 w-1.5 ml-0.5">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-cyan-400 opacity-75" />
-              <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-cyan-500" />
-            </span>
-          </Link>
+          {/* Mobile Reels / Back Button */}
+          {isReels ? (
+            <button
+              onClick={() => {
+                if (typeof window !== "undefined") {
+                  if (window.history.length > 1 && document.referrer.includes(window.location.host)) {
+                    window.history.back()
+                  } else {
+                    window.location.href = "/"
+                  }
+                }
+              }}
+              className="relative flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-cyan-500/50 bg-cyan-500/20 text-cyan-400 hover:bg-cyan-500/30 text-xs font-bold transition-all duration-200 active:scale-95 cursor-pointer shadow-[0_0_12px_rgba(6,182,212,0.4)] ring-1 ring-cyan-500/50"
+              aria-label="Back to site"
+              title="Back"
+            >
+              <ArrowLeft className="w-3.5 h-3.5" />
+              <span className="text-[11px] font-bold tracking-tight">Back</span>
+            </button>
+          ) : (
+            <Link
+              href="/reels"
+              className="relative flex items-center gap-1 px-2.5 py-1.5 rounded-full border text-xs font-semibold transition-all duration-200 active:scale-95 bg-secondary/70 border-border text-foreground hover:border-cyan-500/50 hover:text-cyan-400"
+              aria-label="Watch Reels"
+              title="Watch Reels"
+            >
+              <Play className="w-3 h-3 fill-current text-cyan-400" />
+              <span className="text-[11px] font-bold tracking-tight">Reels</span>
+              <span className="relative flex h-1.5 w-1.5 ml-0.5">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-cyan-400 opacity-75" />
+                <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-cyan-500" />
+              </span>
+            </Link>
+          )}
           <ThemeToggle />
           <Link
             href="/contact"

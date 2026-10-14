@@ -3,17 +3,14 @@
 
 @custom-variant dark (&:is(.dark *));
 
-body:has([data-project-preview-modal]) .site-bottom-nav,
-body:has([data-reels-page]) .site-bottom-nav {
+body:has([data-project-preview-modal]) .site-bottom-nav {
   display: none !important;
 }
 
+/* ── Reels page global fixes ── */
 body:has([data-reels-page]) {
   padding-bottom: 0 !important;
-}
-
-body:has([data-project-preview-modal]) .site-bottom-nav {
-  display: none;
+  overflow: hidden !important;
 }
 
 :root {
@@ -566,4 +563,10 @@ html {
 .no-scrollbar {
   -ms-overflow-style: none;
   scrollbar-width: none;
+}
+
+/* Vinyl disc spin (used inline in Reels) */
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
 }

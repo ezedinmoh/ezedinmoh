@@ -32,7 +32,7 @@ export function BottomNav() {
   }
 
   // Never show on admin dashboard
-  if (pathname.startsWith("/admin") || pathname.startsWith("/reels")) return null
+  if (pathname.startsWith("/admin")) return null
 
   return (
     <div
