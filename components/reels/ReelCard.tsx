@@ -416,13 +416,8 @@ function ReelCardComponent({
               key={`tk-${tiktokId}`}
               src={iframeSrc}
               suppressHydrationWarning
-              className="absolute inset-0 border-none pointer-events-none"
-              style={{
-                background: "black",
-                width: "calc(100% + 78px)",
-                maxWidth: "none",
-                height: "100%",
-              }}
+              className="absolute inset-0 w-full h-full border-none pointer-events-none"
+              style={{ background: "black" }}
               allow="autoplay; fullscreen; encrypted-media; picture-in-picture; accelerometer; gyroscope; clipboard-write; web-share"
               referrerPolicy="no-referrer-when-downgrade"
               loading="eager"

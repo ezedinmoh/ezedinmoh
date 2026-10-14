@@ -126,6 +126,34 @@ export function ReelsFeed({ initialReels }: ReelsFeedProps) {
     setActiveIndex(prev => Math.max(prev - 1, 0))
   }, [])
 
+  // Universal touch swipe handlers: detects swipe anywhere across the mobile section
+  const handleFeedTouchStart = useCallback((e: React.TouchEvent) => {
+    if (e.touches.length !== 1) return
+    touchStartY.current = e.touches[0].clientY
+    touchStartX.current = e.touches[0].clientX
+    touchStartTime.current = Date.now()
+  }, [])
+
+  const handleFeedTouchEnd = useCallback((e: React.TouchEvent) => {
+    if (touchStartY.current === null || touchStartX.current === null) return
+    const touch = e.changedTouches[0]
+    const dy = touch.clientY - touchStartY.current
+    const dx = touch.clientX - touchStartX.current
+    const duration = Date.now() - touchStartTime.current
+
+    touchStartY.current = null
+    touchStartX.current = null
+
+    // Require vertical swipe > 35px, dominated by vertical movement, within 700ms
+    if (Math.abs(dy) > 35 && Math.abs(dy) > Math.abs(dx) * 1.1 && duration < 700) {
+      if (dy < 0) {
+        goToNext()
+      } else {
+        goToPrev()
+      }
+    }
+  }, [goToNext, goToPrev])
+
   const handleBack = useCallback(() => {
     if (typeof window !== "undefined") {
       if (window.history.length > 1 && document.referrer.includes(window.location.host)) {
@@ -228,6 +256,8 @@ export function ReelsFeed({ initialReels }: ReelsFeedProps) {
           overscrollBehavior: "none",
           touchAction: "none",
         }}
+        onTouchStartCapture={handleFeedTouchStart}
+        onTouchEndCapture={handleFeedTouchEnd}
       >
         {/* Preloaded sliding strip on mobile — zero reload when switching reels */}
         {!isDesktop && (
