@@ -1,5 +1,4 @@
 import { MetadataRoute } from "next"
-import { blogPosts } from "@/lib/blog"
 import { allProjects } from "@/lib/projects"
 import { prisma } from "@/lib/db"
 
@@ -12,7 +11,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: BASE_URL, lastModified: new Date(), changeFrequency: "weekly", priority: 1.0 },
     { url: `${BASE_URL}/projects`, lastModified: new Date(), changeFrequency: "weekly", priority: 0.9 },
     { url: `${BASE_URL}/about`, lastModified: new Date(), changeFrequency: "monthly", priority: 0.9 },
-    { url: `${BASE_URL}/blog`, lastModified: new Date(), changeFrequency: "weekly", priority: 0.8 },
+    { url: `${BASE_URL}/reels`, lastModified: new Date(), changeFrequency: "weekly", priority: 0.8 },
     { url: `${BASE_URL}/resume`, lastModified: new Date(), changeFrequency: "monthly", priority: 0.8 },
     { url: `${BASE_URL}/guestbook`, lastModified: new Date(), changeFrequency: "daily", priority: 0.7 },
     { url: `${BASE_URL}/contact`, lastModified: new Date(), changeFrequency: "monthly", priority: 0.7 },
@@ -26,14 +25,9 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       select: { id: true, slug: true, updatedAt: true },
     })
     if (dbProjects && dbProjects.length > 0) {
-      projectIds = dbProjects.map((p) => ({
-        id: p.slug || p.id,
-        updatedAt: p.updatedAt,
-      }))
+      projectIds = dbProjects.map((p) => ({ id: p.slug || p.id, updatedAt: p.updatedAt }))
     }
-  } catch {
-    // fallback to static list
-  }
+  } catch { }
 
   const projectRoutes: MetadataRoute.Sitemap = projectIds.map((item) => ({
     url: `${BASE_URL}/projects/${item.id}`,
@@ -42,12 +36,19 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: 0.8,
   }))
 
-  const blogRoutes: MetadataRoute.Sitemap = blogPosts.map((post) => ({
-    url: `${BASE_URL}/blog/${post.id}`,
-    lastModified: new Date(post.date),
-    changeFrequency: "monthly",
-    priority: 0.7,
-  }))
+  let reelRoutes: MetadataRoute.Sitemap = []
+  try {
+    const reels = await prisma.reel.findMany({
+      where: { published: true },
+      select: { id: true, updatedAt: true },
+    })
+    reelRoutes = reels.map((r) => ({
+      url: `${BASE_URL}/reels/${r.id}`,
+      lastModified: r.updatedAt,
+      changeFrequency: "monthly" as const,
+      priority: 0.6,
+    }))
+  } catch { }
 
-  return [...staticRoutes, ...projectRoutes, ...blogRoutes]
+  return [...staticRoutes, ...projectRoutes, ...reelRoutes]
 }

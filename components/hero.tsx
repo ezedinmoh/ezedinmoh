@@ -157,12 +157,16 @@ export function Hero() {
           <div className="hidden lg:flex items-center justify-center">
             <div className="relative w-full max-w-[620px] flex items-end justify-center">
 
-              {/* Soft cyan glow behind figure */}
-              <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-[80%] h-[60%] bg-sky-500/10 blur-[80px] rounded-full pointer-events-none" />
-              <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-[40%] h-[30%] bg-primary/10 blur-[50px] rounded-full pointer-events-none" />
+              {/* Soft cyan glow behind figure — positioned around upper body & tech orbit */}
+              <div className="absolute top-8 left-1/2 -translate-x-1/2 w-[85%] h-[60%] bg-sky-500/15 blur-[90px] rounded-full pointer-events-none" />
+              <div className="absolute top-16 left-1/2 -translate-x-1/2 w-[55%] h-[40%] bg-primary/15 blur-[60px] rounded-full pointer-events-none" />
 
-              {/* Transparent hero image — no mask, full blend */}
-              <div className="relative z-10 w-full">
+              {/* Deep dark grounding shadows underneath chair and legs */}
+              <div className="absolute -bottom-6 right-0 w-[80%] h-20 bg-black/85 blur-2xl rounded-full pointer-events-none z-0" />
+              <div className="absolute -bottom-3 right-4 w-[65%] h-12 bg-black/95 blur-lg rounded-full pointer-events-none z-0" />
+
+              {/* Hero image container with smooth bottom fade mask & dark shadows */}
+              <div className="relative z-10 w-full [mask-image:linear-gradient(to_bottom,black_75%,transparent_98%)]">
                 <Image
                   src="/hero-image.png"
                   alt="Ezedin Mohammed — Full-Stack Developer"
@@ -172,6 +176,10 @@ export function Hero() {
                   className="w-full h-auto object-contain select-none pointer-events-none
                     drop-shadow-[0_0_60px_rgba(56,189,248,0.15)]"
                 />
+
+                {/* Dark shadow gradient layers specifically over the cut legs area */}
+                <div className="absolute bottom-0 right-0 w-[85%] h-32 bg-gradient-to-t from-background via-background/75 to-transparent pointer-events-none" />
+                <div className="absolute -bottom-1 right-0 w-[65%] h-20 bg-gradient-to-t from-background via-background/90 to-transparent pointer-events-none blur-[1px]" />
               </div>
 
               {/* "Available for work" pill — top right */}

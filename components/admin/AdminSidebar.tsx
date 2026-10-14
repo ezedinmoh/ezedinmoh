@@ -4,17 +4,18 @@ import { useState } from "react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { signOut } from "next-auth/react"
-import { LayoutDashboard, FolderKanban, User, MessageSquare, Mail, BarChart2, LogOut, Menu, X, FileText, Home } from "lucide-react"
+import { LayoutDashboard, FolderKanban, User, MessageSquare, Mail, BarChart2, LogOut, Menu, X, FileText, Home, Play } from "lucide-react"
 import { cn } from "@/lib/utils"
 
 const links = [
-  { href: "/admin",           label: "Overview",   icon: LayoutDashboard },
-  { href: "/admin/projects",  label: "Projects",   icon: FolderKanban    },
-  { href: "/admin/profile",   label: "Profile",    icon: User            },
-  { href: "/admin/resume",    label: "Resume",     icon: FileText        },
-  { href: "/admin/guestbook", label: "Guestbook",  icon: MessageSquare   },
-  { href: "/admin/messages",  label: "Messages",   icon: Mail            },
-  { href: "/admin/analytics", label: "Analytics",  icon: BarChart2       },
+  { href: "/admin", label: "Overview", icon: LayoutDashboard },
+  { href: "/admin/projects", label: "Projects", icon: FolderKanban },
+  { href: "/admin/reels", label: "Reels", icon: Play },
+  { href: "/admin/profile", label: "Profile", icon: User },
+  { href: "/admin/resume", label: "Resume", icon: FileText },
+  { href: "/admin/guestbook", label: "Guestbook", icon: MessageSquare },
+  { href: "/admin/messages", label: "Messages", icon: Mail },
+  { href: "/admin/analytics", label: "Analytics", icon: BarChart2 },
 ]
 
 function NavLinks({ onNav }: { onNav?: () => void }) {

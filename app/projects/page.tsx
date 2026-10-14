@@ -88,7 +88,7 @@ function CaseStudyModal({ project, onClose }: { project: Project; onClose: () =>
   )
 }
 
-export function ProjectsGridSkeleton() {
+function ProjectsGridSkeleton() {
   return (
     <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
       {[1, 2, 3, 4, 5, 6].map((i) => (

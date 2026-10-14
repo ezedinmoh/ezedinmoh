@@ -5,7 +5,7 @@ import Link from "next/link"
 import Image from "next/image"
 import { usePathname } from "next/navigation"
 import {
-  Menu, X, Home, User, FolderOpen, BookOpen,
+  Menu, X, Home, User, FolderOpen, Play,
   FileText, MessageSquareHeart, Mail, ArrowRight
 } from "lucide-react"
 import { cn } from "@/lib/utils"
@@ -15,7 +15,7 @@ const navLinks = [
   { href: "/", label: "Home", icon: Home },
   { href: "/about", label: "About", icon: User },
   { href: "/projects", label: "Projects", icon: FolderOpen },
-  { href: "/blog", label: "Blog", icon: BookOpen },
+  { href: "/reels", label: "Reels", icon: Play },
   { href: "/resume", label: "Resume", icon: FileText },
   { href: "/guestbook", label: "Guestbook", icon: MessageSquareHeart },
   { href: "/contact", label: "Contact", icon: Mail },
@@ -119,8 +119,27 @@ export function Navigation() {
           </Link>
         </div>
 
-        {/* ── Tablet/Mobile right: theme + hire me + hamburger ── */}
-        <div className="flex lg:hidden items-center gap-2">
+        {/* ── Tablet/Mobile right: reels + theme + hire me + hamburger ── */}
+        <div className="flex lg:hidden items-center gap-1.5 sm:gap-2">
+          {/* Mobile Reels Button */}
+          <Link
+            href="/reels"
+            className={cn(
+              "relative flex items-center gap-1 px-2.5 py-1.5 rounded-full border text-xs font-semibold transition-all duration-200 active:scale-95",
+              pathname.startsWith("/reels")
+                ? "bg-cyan-500/20 border-cyan-500 text-cyan-400 shadow-[0_0_12px_rgba(6,182,212,0.4)] ring-1 ring-cyan-500/50"
+                : "bg-secondary/70 border-border text-foreground hover:border-cyan-500/50 hover:text-cyan-400"
+            )}
+            aria-label="Watch Reels"
+            title="Watch Reels"
+          >
+            <Play className="w-3 h-3 fill-current text-cyan-400" />
+            <span className="text-[11px] font-bold tracking-tight">Reels</span>
+            <span className="relative flex h-1.5 w-1.5 ml-0.5">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-cyan-400 opacity-75" />
+              <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-cyan-500" />
+            </span>
+          </Link>
           <ThemeToggle />
           <Link
             href="/contact"

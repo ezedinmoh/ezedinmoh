@@ -7,7 +7,7 @@ const footerLinks = {
     { label: "Home", href: "/" },
     { label: "About", href: "/about" },
     { label: "Projects", href: "/projects" },
-    { label: "Blog", href: "/blog" },
+    { label: "Reels", href: "/reels" },
     { label: "Contact", href: "/contact" },
     { label: "Terms of Service", href: "/terms" },
     { label: "Privacy Policy", href: "/privacy" },

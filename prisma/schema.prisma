@@ -93,6 +93,73 @@ model Resume {
   @@map("resume")
 }
 
+model Reel {
+  id          String   @id @default(cuid())
+  tiktokId    String   @unique
+  tiktokUrl   String
+  title       String?
+  caption     String?
+  thumbnail   String?
+  category       String?
+  views          Int      @default(0)
+  tiktokLikes    Int      @default(0)
+  tiktokComments Int      @default(0)
+  tiktokShares   Int      @default(0)
+  duration       Int      @default(0)
+  authorName     String?
+  authorAvatar   String?
+  musicTitle     String?
+  published      Boolean  @default(false)
+  featured    Boolean  @default(false)
+  order       Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  likes       ReelLike[]
+  comments    ReelComment[]
+  shareEvents ReelShareEvent[]
+
+  @@map("reels")
+}
+
+model ReelLike {
+  id        String   @id @default(cuid())
+  reelId    String
+  guestId   String
+  createdAt DateTime @default(now())
+  reel      Reel     @relation(fields: [reelId], references: [id], onDelete: Cascade)
+
+  @@unique([reelId, guestId])
+  @@index([reelId])
+  @@map("reel_likes")
+}
+
+model ReelComment {
+  id          String   @id @default(cuid())
+  reelId      String
+  guestId     String?
+  displayName String   @default("Anonymous")
+  text        String
+  hidden      Boolean  @default(false)
+  flagged     Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  reel        Reel     @relation(fields: [reelId], references: [id], onDelete: Cascade)
+
+  @@index([reelId])
+  @@map("reel_comments")
+}
+
+model ReelShareEvent {
+  id        String   @id @default(cuid())
+  reelId    String
+  eventType String   @default("share")
+  createdAt DateTime @default(now())
+  reel      Reel     @relation(fields: [reelId], references: [id], onDelete: Cascade)
+
+  @@index([reelId])
+  @@map("reel_share_events")
+}
+
 model Profile {
   id               String   @id @default("singleton")
   avatarUrl        String   @default("")

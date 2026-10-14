@@ -2,7 +2,7 @@ import { NextResponse } from "next/server"
 import { prisma } from "@/lib/db"
 import { requireAuth } from "@/lib/api/auth"
 
-export const DEFAULT_STATS = [
+const DEFAULT_STATS = [
   { value: 5, suffix: "+", label: "Years Experience" },
   { value: 30, suffix: "+", label: "Projects Shipped" },
   { value: 20, suffix: "+", label: "Happy Clients" },

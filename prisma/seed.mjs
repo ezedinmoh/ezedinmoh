@@ -15,33 +15,62 @@
  */
 
 import { createRequire } from "module"
-import { readFileSync, existsSync } from "fs"
-import { resolve } from "path"
+import https from "https"
+import dns from "dns"
+
+// Force IPv4 — Node v24 prefers IPv6 which hangs on Neon's AWS endpoints
+dns.setDefaultResultOrder("ipv4first")
 
 const require = createRequire(import.meta.url)
 
-// ── 1. Load env ─────────────────────────────────────────────────────────────
-function loadEnv() {
-    for (const file of [".env.local", ".env"]) {
-        const p = resolve(process.cwd(), file)
-        if (!existsSync(p)) continue
-        const lines = readFileSync(p, "utf8").split("\n")
-        for (const line of lines) {
-            const m = line.match(/^\s*([A-Z_][A-Z0-9_]*)=["']?(.+?)["']?\s*$/)
-            if (m && !process.env[m[1]]) process.env[m[1]] = m[2].trim()
-        }
-    }
-}
-loadEnv()
+// ── 1. Load env ───────────────────────────────────────────────────────────────
+const dotenv = require("dotenv")
+dotenv.config({ path: ".env.local", override: false })
+dotenv.config({ path: ".env", override: false })
 
-// ── 2. Build Prisma client with Neon adapter ────────────────────────────────
+
+// ── 2. IPv4-only fetch + Prisma client ───────────────────────────────────────
+function ipv4Fetch(input, init) {
+    return new Promise((resolve, reject) => {
+        const u = new URL(typeof input === "string" ? input : (input.url ?? String(input)))
+        const body = init?.body
+        const req = https.request(
+            {
+                hostname: u.hostname, port: Number(u.port) || 443, path: u.pathname + u.search,
+                method: (init?.method || "GET").toUpperCase(),
+                headers: init?.headers || {}, family: 4
+            },
+            (res) => {
+                const chunks = []
+                res.on("data", c => chunks.push(c))
+                res.on("end", () => {
+                    const buf = Buffer.concat(chunks)
+                    const text = buf.toString("utf8")
+                    resolve({
+                        ok: res.statusCode >= 200 && res.statusCode < 300,
+                        status: res.statusCode, statusText: res.statusMessage ?? "",
+                        headers: { get: (k) => res.headers[k.toLowerCase()] ?? null },
+                        text: () => Promise.resolve(text),
+                        json: () => Promise.resolve(JSON.parse(text)),
+                        arrayBuffer: () => Promise.resolve(buf.buffer.slice(buf.byteOffset, buf.byteOffset + buf.byteLength)),
+                    })
+                })
+            }
+        )
+        req.on("error", reject)
+        if (body) req.write(body)
+        req.end()
+    })
+}
+
 const { PrismaClient } = require("@prisma/client")
 const { PrismaNeonHttp } = require("@prisma/adapter-neon")
+const { neonConfig } = require("@neondatabase/serverless")
+neonConfig.fetchFunction = ipv4Fetch
 
 function getDbUrl() {
     let url = (process.env.DATABASE_URL || "").trim().replace(/^["']|["']$/g, "")
-    // Strip channel_binding param — Neon HTTP adapter doesn't support it
-    url = url.replace(/([?&])channel_binding=[^&]*&?/g, "$1").replace(/[?&]$/, "")
+    url = url.replace(/([?&])channel_binding=[^&]*(&|$)/g, (_, pre, post) => post === "&" ? pre : "")
     if (!url) throw new Error("DATABASE_URL not set")
     return url
 }
@@ -254,6 +283,181 @@ async function main() {
         })
 
         console.log(`  ✓  [${i + 1}/${projects.length}] ${p.title}`)
+    }
+
+    // ── 5. Seed initial Reels ─────────────────────────────────────────────────
+    const reels = [
+        {
+            tiktokId: "7690214314351037717",
+            tiktokUrl: "https://www.tiktok.com/@ezedinmoh/video/7690214314351037717",
+            title: "From concept to interactive ecommerce experience. 🦁💻 Built with React, TanStack Start & GSAP.",
+            caption: "From concept to interactive ecommerce experience. 🦁💻 Built with React, TanStack Start & GSAP. 🔗Like . Share . Repost #UIUX #Ecommerce #WebDesign",
+            thumbnail: "https://p16-common-sign.tiktokcdn-us.com/tos-alisg-p-0037/ooT5I1ZwXSLiCIMyAAImK26fWIbwTiIBBOqALI~tplv-tiktokx-cropcenter-q:300:400:q70.jpeg?dr=8596&refresh_token=c1d00fc8&x-expires=1792054800&x-signature=WYZGTH1R0%2FJPYvOklMc954MHG6E%3D&t=bacd0480&ps=933b5bde&shp=d05b14bd&shcp=1d1a97fc&idc=useast5&biz_tag=tt_video&s=AWEME_DETAIL&sc=cover",
+            category: "Ecommerce",
+            views: 349,
+            tiktokLikes: 39,
+            tiktokComments: 8,
+            tiktokShares: 2,
+            duration: 20,
+            authorName: "Ezedin Moh",
+            authorAvatar: "https://p19-common-sign.tiktokcdn-us.com/tos-alisg-avt-0068/26e572e342b6f05e711781c157a51849~tplv-tiktokx-cropcenter-q:300:300:q70.jpeg?dr=8834&refresh_token=aff22ae6&x-expires=1792054800&x-signature=KwwjE7biRQJ3vnI1gG%2BE3vH9D8M%3D&t=223449c4&ps=87d6e48a&shp=d05b14bd&shcp=1d1a97fc&idc=useast5&s=AWEME_DETAIL&sc=avatar",
+            musicTitle: "original sound - tenlyedits",
+            order: 0,
+        },
+        {
+            tiktokId: "7682790473752186133",
+            tiktokUrl: "https://www.tiktok.com/@ezedinmoh/video/7682790473752186133",
+            title: "Did I cook? 👨‍💻🔥 📱 Modern • Responsive • Performance-focused @Amore Cafe",
+            caption: "Did I cook? 👨‍💻🔥 📱 Modern • Responsive • Performance-focused @Amore Cafe Share & repost ❤️🚀 #AmoreCafe #WebDevelopment #WebsiteDesign",
+            thumbnail: "https://p16-common-sign.tiktokcdn-us.com/tos-alisg-p-0037/o8BwIAAyqEBwIC5eCjFEgCDEEnARxQAQICf8Us~tplv-tiktokx-cropcenter-q:300:400:q70.jpeg?dr=8596&refresh_token=2b286684&x-expires=1792054800&x-signature=TLvsM2RvYk70S%2BGT0vevuSfkD6k%3D&t=bacd0480&ps=933b5bde&shp=d05b14bd&shcp=1d1a97fc&idc=useast5&biz_tag=tt_video&s=AWEME_DETAIL&sc=cover",
+            category: "Web Design",
+            views: 404,
+            tiktokLikes: 51,
+            tiktokComments: 10,
+            tiktokShares: 6,
+            duration: 84,
+            authorName: "Ezedin Moh",
+            authorAvatar: "https://p19-common-sign.tiktokcdn-us.com/tos-alisg-avt-0068/26e572e342b6f05e711781c157a51849~tplv-tiktokx-cropcenter-q:300:300:q70.jpeg?dr=8834&refresh_token=aff22ae6&x-expires=1792054800&x-signature=KwwjE7biRQJ3vnI1gG%2BE3vH9D8M%3D&t=223449c4&ps=87d6e48a&shp=d05b14bd&shcp=1d1a97fc&idc=useast5&s=AWEME_DETAIL&sc=avatar",
+            order: 1,
+        },
+        {
+            tiktokId: "7670064348332576021",
+            tiktokUrl: "https://www.tiktok.com/@ezedinmoh/video/7670064348332576021",
+            title: "What if Holland Dairy had a modern premium website? So I built one from scratch!",
+            caption: "What if Holland Dairy had a modern premium website? So I built one from scratch! @Holland Dairy Website Link 🖇️ https://holland-dairy.vercel.app #HollandDairy #WebDevelopment",
+            thumbnail: "https://p19-common-sign.tiktokcdn-us.com/tos-alisg-p-0037/osdAbIn3v114AAiiilGEBxvGYEBaBVINu3Xu3~tplv-tiktokx-cropcenter-q:300:400:q70.jpeg?dr=8596&refresh_token=6b8ac214&x-expires=1792054800&x-signature=wOWoBtLsSmSv1iT958LzkG5nt80%3D&t=bacd0480&ps=933b5bde&shp=d05b14bd&shcp=1d1a97fc&idc=useast5&biz_tag=tt_video&s=AWEME_DETAIL&sc=cover",
+            category: "Case Studies",
+            views: 487,
+            tiktokLikes: 41,
+            tiktokComments: 4,
+            tiktokShares: 60,
+            duration: 153,
+            authorName: "Ezedin Moh",
+            authorAvatar: "https://p19-common-sign.tiktokcdn-us.com/tos-alisg-avt-0068/26e572e342b6f05e711781c157a51849~tplv-tiktokx-cropcenter-q:300:300:q70.jpeg?dr=8834&refresh_token=aff22ae6&x-expires=1792054800&x-signature=KwwjE7biRQJ3vnI1gG%2BE3vH9D8M%3D&t=223449c4&ps=87d6e48a&shp=d05b14bd&shcp=1d1a97fc&idc=useast5&s=AWEME_DETAIL&sc=avatar",
+            order: 2,
+        },
+        {
+            tiktokId: "7690919403667377460",
+            tiktokUrl: "https://www.tiktok.com/@ezedinmoh/video/7690919403667377460",
+            title: "🦁 You’ll come for the shoes. You’ll stay for the experience. A modern, premium footwear experience.",
+            caption: "🦁 You’ll come for the shoes. You’ll stay for the experience. A modern, premium footwear experience. ✨ #Ecommerce #WebDesign #creatorsearchinsights",
+            thumbnail: "https://p16-common-sign.tiktokcdn-us.com/tos-alisg-p-0037/oQEi7qJEyB68ygR23TIAOFEBHoDCMuAsSfeWnU~tplv-tiktokx-cropcenter-q:300:400:q70.jpeg?dr=8596&refresh_token=fe055e87&x-expires=1792054800&x-signature=s5LLZFmlri5VUJAIHzcGXcHcJew%3D&t=bacd0480&ps=933b5bde&shp=d05b14bd&shcp=1d1a97fc&idc=useast5&s=AWEME_DETAIL&sc=cover&biz_tag=tt_video",
+            category: "Ecommerce",
+            views: 442,
+            tiktokLikes: 27,
+            tiktokComments: 8,
+            tiktokShares: 1,
+            duration: 53,
+            authorName: "Ezedin Moh",
+            authorAvatar: "https://p19-common-sign.tiktokcdn-us.com/tos-alisg-avt-0068/26e572e342b6f05e711781c157a51849~tplv-tiktokx-cropcenter-q:300:300:q70.jpeg?dr=8834&refresh_token=aff22ae6&x-expires=1792054800&x-signature=KwwjE7biRQJ3vnI1gG%2BE3vH9D8M%3D&t=223449c4&ps=87d6e48a&shp=d05b14bd&shcp=1d1a97fc&idc=useast5&s=AWEME_DETAIL&sc=avatar",
+            order: 3,
+        },
+        {
+            tiktokId: "7683112730294865173",
+            tiktokUrl: "https://www.tiktok.com/@ezedinmoh/video/7683112730294865173",
+            title: "🔥 One of my top works! 💻 Need a modern website for your business? Contact Me 💬 @Amore Cafe",
+            caption: "🔥 One of my top works! 💻 Need a modern website for your business? Contact Me 💬 @Amore Cafe #WebDeveloper #WebDevelopment #FullStackDeveloper",
+            thumbnail: "https://p19-common-sign.tiktokcdn-us.com/tos-alisg-p-0037/oEADAcYfTYVQeE4AWEG8RIJVoP5jIuLAA92Icf~tplv-tiktokx-cropcenter-q:300:400:q70.jpeg?dr=8596&refresh_token=e92408c1&x-expires=1792054800&x-signature=BsCG1Jx2tAhCbp5VRfDWDCvsAdc%3D&t=bacd0480&ps=933b5bde&shp=d05b14bd&shcp=1d1a97fc&idc=useast5&biz_tag=tt_video&s=AWEME_DETAIL&sc=cover",
+            category: "Showcase",
+            views: 254,
+            tiktokLikes: 21,
+            tiktokComments: 5,
+            tiktokShares: 2,
+            duration: 70,
+            authorName: "Ezedin Moh",
+            authorAvatar: "https://p19-common-sign.tiktokcdn-us.com/tos-alisg-avt-0068/26e572e342b6f05e711781c157a51849~tplv-tiktokx-cropcenter-q:300:300:q70.jpeg?dr=8834&refresh_token=aff22ae6&x-expires=1792054800&x-signature=KwwjE7biRQJ3vnI1gG%2BE3vH9D8M%3D&t=223449c4&ps=87d6e48a&shp=d05b14bd&shcp=1d1a97fc&idc=useast5&s=AWEME_DETAIL&sc=avatar",
+            order: 4,
+        },
+        {
+            tiktokId: "7677198929301196052",
+            tiktokUrl: "https://www.tiktok.com/@ezedinmoh/video/7677198929301196052",
+            title: "Looking for a website for your business? DM me 📩 @BYD @byd ethiopia",
+            caption: "Looking for a website for your business? DM me 📩 🖇️ Website Link In Bio @BYD @byd ethiopia #WebDevelopment #Ethiopia #BYD #WebDesign",
+            thumbnail: "https://p19-common-sign.tiktokcdn-us.com/tos-alisg-p-0037/oAif85X1RAQ4A8XAi5nWCI4AqZKvIzZlCCCwEB~tplv-tiktokx-cropcenter-q:300:400:q70.jpeg?dr=8596&refresh_token=ad35a890&x-expires=1792054800&x-signature=sPaqFar%2BtRcxcYmn4CPYahvN3Aw%3D&t=bacd0480&ps=933b5bde&shp=d05b14bd&shcp=1d1a97fc&idc=useast5&biz_tag=tt_video&s=AWEME_DETAIL&sc=cover",
+            category: "Showcase",
+            views: 622,
+            tiktokLikes: 38,
+            tiktokComments: 12,
+            tiktokShares: 1,
+            duration: 37,
+            authorName: "Ezedin Moh",
+            authorAvatar: "https://p19-common-sign.tiktokcdn-us.com/tos-alisg-avt-0068/26e572e342b6f05e711781c157a51849~tplv-tiktokx-cropcenter-q:300:300:q70.jpeg?dr=8834&refresh_token=aff22ae6&x-expires=1792054800&x-signature=KwwjE7biRQJ3vnI1gG%2BE3vH9D8M%3D&t=223449c4&ps=87d6e48a&shp=d05b14bd&shcp=1d1a97fc&idc=useast5&s=AWEME_DETAIL&sc=avatar",
+            order: 5,
+        },
+        {
+            tiktokId: "7671611191864675605",
+            tiktokUrl: "https://www.tiktok.com/@ezedinmoh/video/7671611191864675605",
+            title: "Smooth animations Clean UI Premium feel. ✨ Built with modern web technologies. 🚀",
+            caption: "Smooth animations Clean UI Premium feel. ✨ Built with modern web technologies. 🚀 #iPhone15 #Apple #WebDevelopment #NextJS #React",
+            thumbnail: "https://p16-common-sign.tiktokcdn-us.com/tos-alisg-p-0037/oIEA3qEEpCwAqgRae6IABFEBmCDVFdArOfL6bc~tplv-tiktokx-cropcenter-q:300:400:q70.jpeg?dr=8596&refresh_token=c66363b9&x-expires=1792054800&x-signature=URfRimvk%2F%2B0LzsdE0fAjAW2wSJA%3D&t=bacd0480&ps=933b5bde&shp=d05b14bd&shcp=1d1a97fc&idc=useast5&biz_tag=tt_video&s=AWEME_DETAIL&sc=cover",
+            category: "UI/UX",
+            views: 568,
+            tiktokLikes: 49,
+            tiktokComments: 9,
+            tiktokShares: 0,
+            duration: 30,
+            authorName: "Ezedin Moh",
+            authorAvatar: "https://p19-common-sign.tiktokcdn-us.com/tos-alisg-avt-0068/26e572e342b6f05e711781c157a51849~tplv-tiktokx-cropcenter-q:300:300:q70.jpeg?dr=8834&refresh_token=aff22ae6&x-expires=1792054800&x-signature=KwwjE7biRQJ3vnI1gG%2BE3vH9D8M%3D&t=223449c4&ps=87d6e48a&shp=d05b14bd&shcp=1d1a97fc&idc=useast5&s=AWEME_DETAIL&sc=avatar",
+            order: 6,
+        },
+        {
+            tiktokId: "7668291336642645269",
+            tiktokUrl: "https://www.tiktok.com/@ezedinmoh/video/7668291336642645269",
+            title: "📩 DM me for work. 🔗 Website Link in bio 🎨 Inspired by @Haliyung",
+            caption: "📩 DM me for work. 🔗 Website Link in bio 🎨 Inspired by @Haliyung #WebDesign #UIUX #NextJS #TailwindCSS",
+            thumbnail: "https://p19-common-sign.tiktokcdn-us.com/tos-alisg-p-0037/oI77gkG5QLAmgvC1wDI4CfItDcnfejZsUaLGAg~tplv-tiktokx-cropcenter-q:300:400:q70.jpeg?dr=8596&refresh_token=5d90b6bb&x-expires=1792054800&x-signature=wDwcAHAYVRaEWXo5%2B2zxByST%2BtY%3D&t=bacd0480&ps=933b5bde&shp=d05b14bd&shcp=1d1a97fc&idc=useast5&biz_tag=tt_video&s=AWEME_DETAIL&sc=cover",
+            category: "Web Design",
+            views: 565,
+            tiktokLikes: 48,
+            tiktokComments: 6,
+            tiktokShares: 61,
+            duration: 113,
+            authorName: "Ezedin Moh",
+            authorAvatar: "https://p19-common-sign.tiktokcdn-us.com/tos-alisg-avt-0068/26e572e342b6f05e711781c157a51849~tplv-tiktokx-cropcenter-q:300:300:q70.jpeg?dr=8834&refresh_token=aff22ae6&x-expires=1792054800&x-signature=KwwjE7biRQJ3vnI1gG%2BE3vH9D8M%3D&t=223449c4&ps=87d6e48a&shp=d05b14bd&shcp=1d1a97fc&idc=useast5&s=AWEME_DETAIL&sc=avatar",
+            order: 7,
+        },
+    ]
+
+    console.log(`\n🎬  Seeding ${reels.length} reels with real TikTok metrics...\n`)
+    for (const r of reels) {
+        await prisma.reel.upsert({
+            where: { tiktokId: r.tiktokId },
+            update: {
+                tiktokUrl: r.tiktokUrl,
+                title: r.title,
+                caption: r.caption,
+                thumbnail: r.thumbnail,
+                category: r.category,
+                views: r.views,
+                tiktokLikes: r.tiktokLikes,
+                tiktokComments: r.tiktokComments,
+                tiktokShares: r.tiktokShares,
+                duration: r.duration,
+                authorName: r.authorName,
+                authorAvatar: r.authorAvatar,
+                musicTitle: r.musicTitle || null,
+                order: r.order,
+            },
+            create: {
+                tiktokId: r.tiktokId,
+                tiktokUrl: r.tiktokUrl,
+                title: r.title,
+                caption: r.caption,
+                thumbnail: r.thumbnail,
+                category: r.category,
+                views: r.views,
+                tiktokLikes: r.tiktokLikes,
+                tiktokComments: r.tiktokComments,
+                tiktokShares: r.tiktokShares,
+                duration: r.duration,
+                authorName: r.authorName,
+                authorAvatar: r.authorAvatar,
+                musicTitle: r.musicTitle || null,
+                order: r.order,
+                published: true,
+            },
+        })
+        console.log(`  ✓  Reel ${r.order + 1}/8: ${r.tiktokId} (${r.views} views, ${r.tiktokLikes} likes)`)
     }
 
     console.log("\n✅  Seed complete!\n")

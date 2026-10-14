@@ -3,14 +3,14 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
-    "build": "prisma generate && next build",
+    "dev": "NODE_OPTIONS='--dns-result-order=ipv4first' next dev",
+    "build": "NODE_OPTIONS='--dns-result-order=ipv4first' prisma generate && next build",
     "start": "next start",
     "lint": "eslint .",
     "postinstall": "prisma generate",
-    "db:seed": "node prisma/seed.mjs",
-    "db:push": "prisma db push && node prisma/seed.mjs",
-    "db:push:schema": "prisma db push --skip-generate && node prisma/seed.mjs"
+    "db:seed": "NODE_OPTIONS='--dns-result-order=ipv4first' node prisma/seed.mjs",
+    "db:push": "NODE_OPTIONS='--dns-result-order=ipv4first' prisma db push && node prisma/seed.mjs",
+    "db:push:schema": "NODE_OPTIONS='--dns-result-order=ipv4first' prisma db push --skip-generate && node prisma/seed.mjs"
   },
   "prisma": {
     "seed": "node prisma/seed.mjs"
