@@ -232,9 +232,9 @@ export function ReelsFeed({ initialReels }: ReelsFeedProps) {
         {/* Preloaded sliding strip on mobile — zero reload when switching reels */}
         {!isDesktop && (
           <div
-            className="w-full h-full"
+            className="w-full h-full flex flex-col"
             style={{
-              transform: `translateY(-${activeIndex * 100}%)`,
+              transform: `translate3d(0, -${activeIndex * 100}%, 0)`,
               transition: "transform 0.35s cubic-bezier(0.25, 1, 0.5, 1)",
               willChange: "transform",
             }}
@@ -244,7 +244,11 @@ export function ReelsFeed({ initialReels }: ReelsFeedProps) {
               const isCurrent = idx === activeIndex
 
               return (
-                <div key={reel.id} className="relative w-full h-full shrink-0">
+                <div
+                  key={reel.id}
+                  className="relative w-full shrink-0 overflow-hidden"
+                  style={{ height: "100%", minHeight: "100%" }}
+                >
                   {isLoaded ? (
                     <ReelCard
                       reel={reel}
@@ -372,9 +376,9 @@ export function ReelsFeed({ initialReels }: ReelsFeedProps) {
                 {/* Preloading sliding strip on desktop — zero reload when switching reels */}
                 {isDesktop && (
                   <div
-                    className="w-full h-full"
+                    className="w-full h-full flex flex-col"
                     style={{
-                      transform: `translateY(-${activeIndex * 100}%)`,
+                      transform: `translate3d(0, -${activeIndex * 100}%, 0)`,
                       transition: "transform 0.35s cubic-bezier(0.25, 1, 0.5, 1)",
                       willChange: "transform",
                     }}
@@ -384,7 +388,11 @@ export function ReelsFeed({ initialReels }: ReelsFeedProps) {
                       const isCurrent = idx === activeIndex
 
                       return (
-                        <div key={reel.id} className="relative w-full h-full shrink-0">
+                        <div
+                          key={reel.id}
+                          className="relative w-full shrink-0 overflow-hidden"
+                          style={{ height: "100%", minHeight: "100%" }}
+                        >
                           {isLoaded ? (
                             <ReelCard
                               reel={reel}

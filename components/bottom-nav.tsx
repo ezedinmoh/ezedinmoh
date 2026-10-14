@@ -2,7 +2,7 @@
 
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { Home, User, Layers, FileText, Mail, type LucideIcon } from "lucide-react"
+import { Home, User, Layers, Clapperboard, FileText, Mail, type LucideIcon } from "lucide-react"
 import { cn } from "@/lib/utils"
 
 interface NavItem {
@@ -16,6 +16,7 @@ const navItems: NavItem[] = [
   { href: "/",         label: "Home",     icon: Home },
   { href: "/about",    label: "About",    icon: User },
   { href: "/projects", label: "Projects", icon: Layers, featured: true },
+  { href: "/reels",    label: "Reels",    icon: Clapperboard },
   { href: "/resume",   label: "Resume",   icon: FileText },
   { href: "/contact",  label: "Contact",  icon: Mail },
 ]

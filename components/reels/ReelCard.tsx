@@ -103,9 +103,10 @@ function ReelCardComponent({
   const totalLikes = (tiktokLikes || 0) + siteLikeCount
   const totalComments = (tiktokComments || 0) + siteCommentCount
 
-  // Embed player URL — strictly memoized per tiktokId
+  // Embed player URL — strictly memoized with native controls, music, and descriptions disabled to prevent conflict
   const iframeSrc = useMemo(
-    () => `https://www.tiktok.com/player/v1/${tiktokId}?music_info=1&description=0&autoplay=1&loop=1&rel=0&controls=0&native_context_menu=0&closed_caption=0`,
+    () =>
+      `https://www.tiktok.com/player/v1/${tiktokId}?controls=0&play_button=0&volume_control=0&fullscreen_button=0&progress_bar=0&music_info=0&description=0&autoplay=1&loop=1&rel=0&native_context_menu=0&closed_caption=0`,
     [tiktokId]
   )
 
@@ -395,7 +396,7 @@ function ReelCardComponent({
     <div className={cn("relative w-full h-full bg-black overflow-hidden select-none", className)}>
 
       {/* ══ VIDEO LAYER ══ */}
-      <div className="absolute inset-0 w-full h-full">
+      <div className="absolute inset-0 w-full h-full overflow-hidden">
         {!iframeError ? (
           <>
             {iframeLoading && (
@@ -414,8 +415,13 @@ function ReelCardComponent({
               ref={iframeRef}
               key={`tk-${tiktokId}`}
               src={iframeSrc}
-              className="absolute inset-0 w-full h-full border-none pointer-events-none"
-              style={{ background: "black" }}
+              className="absolute inset-0 border-none pointer-events-none"
+              style={{
+                background: "black",
+                width: "calc(100% + 78px)",
+                maxWidth: "none",
+                height: "100%",
+              }}
               allow="autoplay; fullscreen; encrypted-media; picture-in-picture; accelerometer; gyroscope; clipboard-write; web-share"
               referrerPolicy="no-referrer-when-downgrade"
               loading="eager"
@@ -473,7 +479,7 @@ function ReelCardComponent({
       />
 
       {/* ══ PAUSE INDICATOR ══ */}
-      {!isPlaying && (
+      {!isPlaying && isActive && (
         <div className="absolute inset-0 z-20 flex items-center justify-center pointer-events-none">
           <div className="w-18 h-18 rounded-full bg-black/60 backdrop-blur-md flex items-center justify-center border border-white/20 shadow-2xl animate-in zoom-in-75 duration-150">
             <Play className="w-9 h-9 fill-white text-white ml-1" />
@@ -491,7 +497,7 @@ function ReelCardComponent({
       )}
 
       {/* ══ SOUND HINT (Tap to unmute) ══ */}
-      {isMuted && !iframeLoading && (
+      {isMuted && !iframeLoading && isActive && (
         <div className="absolute inset-x-0 bottom-48 z-30 flex justify-center pointer-events-auto">
           <button
             type="button"
@@ -514,7 +520,10 @@ function ReelCardComponent({
           Mobile: Minimal circular button ONLY displaying mute and unmute icon
       */}
       <div
-        className="absolute top-3 right-3 z-30 pointer-events-auto flex items-center justify-end"
+        className={cn(
+          "absolute top-3 right-3 z-30 flex items-center justify-end transition-opacity duration-200",
+          isActive ? "pointer-events-auto opacity-100" : "pointer-events-none opacity-0 invisible"
+        )}
         onClick={e => { e.preventDefault(); e.stopPropagation() }}
       >
         {/* Desktop: Collapsible hover slider pill */}
@@ -583,7 +592,10 @@ function ReelCardComponent({
 
       {/* ══ RIGHT SIDEBAR ══ */}
       <div
-        className="absolute right-2 z-30 flex flex-col items-center gap-3 pointer-events-auto"
+        className={cn(
+          "absolute right-2 z-30 flex flex-col items-center gap-3 transition-opacity duration-200",
+          isActive ? "pointer-events-auto opacity-100" : "pointer-events-none opacity-0 invisible"
+        )}
         style={{ bottom: "88px" }}
         onClick={e => { e.preventDefault(); e.stopPropagation() }}
       >
@@ -662,7 +674,12 @@ function ReelCardComponent({
       </div>
 
       {/* ══ BOTTOM OVERLAY ══ */}
-      <div className="absolute bottom-0 left-0 right-0 z-20 pointer-events-none">
+      <div
+        className={cn(
+          "absolute bottom-0 left-0 right-0 z-20 transition-opacity duration-200",
+          isActive ? "opacity-100" : "opacity-0 invisible pointer-events-none"
+        )}
+      >
         <div className="absolute inset-x-0 bottom-0 h-44 bg-gradient-to-t from-black/85 via-black/40 to-transparent" />
         <div
           className="relative px-3 pb-4 pt-16 pointer-events-auto max-w-[calc(100%-64px)]"
