@@ -9,18 +9,7 @@ import { allProjects } from "../lib/projects"
 async function main() {
   console.log("Syncing database with the 9 real projects, preserving DB fields...")
 
-  const validIds = new Set(allProjects.map(p => p.id))
-
-  // Remove any legacy / sample projects from DB
-  const existing = await prisma.project.findMany()
-  for (const p of existing) {
-    if (!validIds.has(p.id) && !validIds.has(p.slug)) {
-      await prisma.project.delete({ where: { id: p.id } })
-      console.log(`  ✓ Removed extra project: ${p.title}`)
-    }
-  }
-
-  // Upsert the 9 real projects preserving any DB user edits
+  // Upsert all projects preserving any DB user edits and custom sort orders
   for (let i = 0; i < allProjects.length; i++) {
     const p = allProjects[i]
     const slug = p.id
@@ -29,6 +18,9 @@ async function main() {
     const imageToUse = existingRecord?.image || p.image || ""
     const liveUrlToUse = existingRecord?.liveUrl || p.liveUrl || p.link || null
     const githubUrlToUse = existingRecord?.githubUrl || p.github || null
+    const sortOrder = (existingRecord?.sortOrder !== undefined && existingRecord?.sortOrder !== null) ? existingRecord.sortOrder : i
+    const featuredSortOrder = (existingRecord?.featuredSortOrder !== undefined && existingRecord?.featuredSortOrder !== null) ? existingRecord.featuredSortOrder : i
+    const featured = existingRecord ? existingRecord.featured : (p.featured ?? false)
 
     await prisma.project.upsert({
       where: { slug },
@@ -41,10 +33,11 @@ async function main() {
         category: p.category,
         liveUrl: liveUrlToUse,
         githubUrl: githubUrlToUse,
-        featured: p.featured ?? false,
+        featured,
         year: p.year,
-        sortOrder: i,
-        featuredSortOrder: i,
+        previewMode: p.previewMode ?? "iframe",
+        sortOrder,
+        featuredSortOrder,
         caseStudyProblem: p.caseStudy?.problem ?? null,
         caseStudySolution: p.caseStudy?.solution ?? null,
         caseStudyOutcome: p.caseStudy?.outcome ?? null,

@@ -9,8 +9,8 @@
     "lint": "eslint .",
     "postinstall": "prisma generate",
     "db:seed": "NODE_OPTIONS='--dns-result-order=ipv4first' node prisma/seed.mjs",
-    "db:push": "NODE_OPTIONS='--dns-result-order=ipv4first' prisma db push && node prisma/seed.mjs",
-    "db:push:schema": "NODE_OPTIONS='--dns-result-order=ipv4first' prisma db push --skip-generate && node prisma/seed.mjs"
+    "db:push": "NODE_OPTIONS='--dns-result-order=ipv4first' prisma db push",
+    "db:push:schema": "NODE_OPTIONS='--dns-result-order=ipv4first' prisma db push --skip-generate"
   },
   "prisma": {
     "seed": "node prisma/seed.mjs"

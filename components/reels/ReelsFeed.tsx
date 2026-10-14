@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect, useRef, useCallback } from "react"
+import { useState, useEffect, useRef, useCallback, useMemo } from "react"
 import {
   Film,
   ChevronUp,
@@ -23,7 +23,6 @@ import {
 import { ReelCard } from "./ReelCard"
 import { ReelData, CATEGORIES, formatCompactNumber, formatDuration, getRelatedProject } from "./types"
 import { cn } from "@/lib/utils"
-import Link from "next/link"
 
 interface ReelsFeedProps {
   initialReels: ReelData[]
@@ -42,6 +41,40 @@ export function ReelsFeed({ initialReels }: ReelsFeedProps) {
   const [activeIndex, setActiveIndex] = useState(0)
   const [desktopTab, setDesktopTab] = useState<"details" | "comments" | "playlist">("details")
 
+  // Prevent duplicate audio: only mount the card for the active viewport
+  const [isDesktop, setIsDesktop] = useState(false)
+  useEffect(() => {
+    const mq = window.matchMedia("(min-width: 1024px)")
+    setIsDesktop(mq.matches)
+    const handler = (e: MediaQueryListEvent) => setIsDesktop(e.matches)
+    mq.addEventListener("change", handler)
+    return () => mq.removeEventListener("change", handler)
+  }, [])
+
+  // Global sound state — persists across reel transitions
+  const [isMuted, setIsMuted] = useState(true)
+  const [volume, setVolume] = useState(80)
+
+  const toggleMute = useCallback(() => {
+    setIsMuted(prev => {
+      const next = !prev
+      if (!next && volume === 0) {
+        setVolume(80)
+      }
+      return next
+    })
+  }, [volume])
+
+  const handleVolumeChange = useCallback((newVol: number) => {
+    const clamped = Math.max(0, Math.min(100, Math.round(newVol)))
+    setVolume(clamped)
+    if (clamped === 0) {
+      setIsMuted(true)
+    } else {
+      setIsMuted(false)
+    }
+  }, [])
+
   const [comments, setComments] = useState<CommentItem[]>([])
   const [commentsTotal, setCommentsTotal] = useState(0)
   const [commentsLoading, setCommentsLoading] = useState(false)
@@ -51,15 +84,37 @@ export function ReelsFeed({ initialReels }: ReelsFeedProps) {
   const [commentError, setCommentError] = useState<string | null>(null)
 
   const isScrollingRef = useRef(false)
+  // Touch tracking for the swipe overlay
   const touchStartY = useRef<number | null>(null)
   const touchStartX = useRef<number | null>(null)
   const touchStartTime = useRef<number>(0)
 
-  const filteredReels = selectedCategory === "All"
-    ? reels
-    : reels.filter(r => r.category === selectedCategory)
+  const filteredReels = useMemo(
+    () => (selectedCategory === "All" ? reels : reels.filter(r => r.category === selectedCategory)),
+    [reels, selectedCategory]
+  )
 
   useEffect(() => { setActiveIndex(0) }, [selectedCategory])
+
+  // Set of reel IDs that have been mounted — once loaded, they STAY mounted in the sliding strip
+  // This guarantees that swiping to next or navigating back to previous NEVER reloads or refreshes!
+  const [loadedReelIds, setLoadedReelIds] = useState<Set<string>>(() => {
+    const initial = new Set<string>()
+    if (initialReels[0]) initial.add(initialReels[0].id)
+    if (initialReels[1]) initial.add(initialReels[1].id)
+    return initial
+  })
+
+  // Whenever activeIndex or filteredReels changes, ensure current and adjacent reels are marked as loaded
+  useEffect(() => {
+    setLoadedReelIds(prev => {
+      const next = new Set(prev)
+      if (filteredReels[activeIndex]) next.add(filteredReels[activeIndex].id)
+      if (filteredReels[activeIndex + 1]) next.add(filteredReels[activeIndex + 1].id)
+      if (activeIndex > 0 && filteredReels[activeIndex - 1]) next.add(filteredReels[activeIndex - 1].id)
+      return next
+    })
+  }, [activeIndex, filteredReels])
 
   const currentReel = filteredReels[activeIndex] || filteredReels[0]
 
@@ -81,7 +136,7 @@ export function ReelsFeed({ initialReels }: ReelsFeedProps) {
     }
   }, [])
 
-  // Desktop wheel nav
+  // Desktop: mouse wheel nav
   useEffect(() => {
     function handleWheel(e: WheelEvent) {
       if (Math.abs(e.deltaY) < 30) return
@@ -89,8 +144,7 @@ export function ReelsFeed({ initialReels }: ReelsFeedProps) {
       const target = e.target as HTMLElement | null
       if (target?.closest("[data-scrollable-panel]")) return
       isScrollingRef.current = true
-      if (e.deltaY > 0) goToNext()
-      else goToPrev()
+      if (e.deltaY > 0) goToNext(); else goToPrev()
       setTimeout(() => { isScrollingRef.current = false }, 500)
     }
     window.addEventListener("wheel", handleWheel, { passive: true })
@@ -108,26 +162,6 @@ export function ReelsFeed({ initialReels }: ReelsFeedProps) {
     window.addEventListener("keydown", handleKeyDown)
     return () => window.removeEventListener("keydown", handleKeyDown)
   }, [goToNext, goToPrev])
-
-  // Mobile touch on outer container
-  function handleTouchStart(e: React.TouchEvent) {
-    touchStartY.current = e.touches[0].clientY
-    touchStartX.current = e.touches[0].clientX
-    touchStartTime.current = Date.now()
-  }
-
-  function handleTouchEnd(e: React.TouchEvent) {
-    if (touchStartY.current === null) return
-    const deltaY = e.changedTouches[0].clientY - touchStartY.current
-    const deltaX = touchStartX.current !== null ? e.changedTouches[0].clientX - touchStartX.current : 0
-    const dur = Date.now() - touchStartTime.current
-    touchStartY.current = null
-    touchStartX.current = null
-    if (Math.abs(deltaY) > 50 && Math.abs(deltaY) > Math.abs(deltaX) * 1.5 && dur < 600) {
-      if (deltaY < 0) goToNext()
-      else goToPrev()
-    }
-  }
 
   const fetchComments = useCallback(async (reelId: string) => {
     setCommentsLoading(true)
@@ -157,8 +191,11 @@ export function ReelsFeed({ initialReels }: ReelsFeedProps) {
         body: JSON.stringify({ text: newCommentText.trim(), displayName: newCommentAuthor.trim() || "Anonymous" }),
       })
       const data = await res.json()
-      if (res.ok && data.comment) { setComments(prev => [data.comment, ...prev]); setCommentsTotal(prev => prev + 1); setNewCommentText("") }
-      else setCommentError(data.message || "Failed to post comment")
+      if (res.ok && data.comment) {
+        setComments(prev => [data.comment, ...prev])
+        setCommentsTotal(prev => prev + 1)
+        setNewCommentText("")
+      } else setCommentError(data.message || "Failed to post comment")
     } catch { setCommentError("Network error. Try again.") }
     finally { setCommentSubmitting(false) }
   }
@@ -175,85 +212,121 @@ export function ReelsFeed({ initialReels }: ReelsFeedProps) {
     )
   }
 
+  const activeReel = filteredReels[activeIndex]
+
   return (
     <div className="relative w-full bg-black text-white" style={{ minHeight: "100svh" }}>
 
-      {/* ══════════════════════════════════════════════════════════════
-          MOBILE: Feed bounded between top Header (56px) and BottomNav
-          Header and BottomNav remain consistent, fixed, and visible.
-          Reels content slides cleanly between them with zero overlap.
-         ══════════════════════════════════════════════════════════════ */}
+      {/* ════════════════════════════════════════════════════════
+          MOBILE — single-card, swipe overlay, nav arrows
+         ════════════════════════════════════════════════════════ */}
       <div
-        className="lg:hidden fixed left-0 right-0 bg-black z-10 overflow-hidden select-none"
+        className="lg:hidden fixed left-0 right-0 bg-black z-10 overflow-hidden"
         style={{
           top: "56px",
           bottom: "calc(env(safe-area-inset-bottom, 0px) + 76px)",
+          overscrollBehavior: "none",
+          touchAction: "none",
         }}
-        onTouchStart={handleTouchStart}
-        onTouchEnd={handleTouchEnd}
       >
-        {/* Sliding reel strip */}
-        <div
-          className="w-full transition-transform duration-300 ease-out"
-          style={{
-            height: `${filteredReels.length * 100}%`,
-            transform: `translateY(calc(-${activeIndex} * (100% / ${filteredReels.length})))`,
-          }}
-        >
-          {filteredReels.map((reel, idx) => (
-            <div
-              key={reel.id}
-              className="w-full"
-              style={{ height: `calc(100% / ${filteredReels.length})` }}
-            >
-              <ReelCard
-                reel={reel}
-                isActive={idx === activeIndex}
-                priority={idx === 0}
-                onSwipeUp={goToNext}
-                onSwipeDown={goToPrev}
-                hasPrev={idx > 0}
-                hasNext={idx < filteredReels.length - 1}
-                className="h-full w-full"
-              />
-            </div>
-          ))}
-        </div>
+        {/* Preloaded sliding strip on mobile — zero reload when switching reels */}
+        {!isDesktop && (
+          <div
+            className="w-full h-full"
+            style={{
+              transform: `translateY(-${activeIndex * 100}%)`,
+              transition: "transform 0.35s cubic-bezier(0.25, 1, 0.5, 1)",
+              willChange: "transform",
+            }}
+          >
+            {filteredReels.map((reel, idx) => {
+              const isLoaded = loadedReelIds.has(reel.id)
+              const isCurrent = idx === activeIndex
 
-        {/* Top bar over video: Back button + reel counter */}
+              return (
+                <div key={reel.id} className="relative w-full h-full shrink-0">
+                  {isLoaded ? (
+                    <ReelCard
+                      reel={reel}
+                      isActive={isCurrent && !isDesktop}
+                      priority={isCurrent}
+                      isMuted={isMuted}
+                      volume={volume}
+                      onToggleMute={toggleMute}
+                      onVolumeChange={handleVolumeChange}
+                      onSwipeUp={goToNext}
+                      onSwipeDown={goToPrev}
+                      className="h-full w-full"
+                    />
+                  ) : (
+                    <div className="w-full h-full bg-black relative flex items-center justify-center">
+                      {reel.thumbnail && (
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img src={reel.thumbnail} alt="" className="w-full h-full object-cover opacity-60" />
+                      )}
+                    </div>
+                  )}
+                </div>
+              )
+            })}
+          </div>
+        )}
+
+        {/* ── Swipe detection: handled by onTouchStart/onTouchEnd on the
+            container above — no overlay needed, taps reach the iframe. */}
+
+        {/* ── Top bar: Back + counter ── */}
         <div className="absolute top-3 left-3 z-30 flex items-center gap-2 pointer-events-auto">
           <button
             onClick={handleBack}
-            className="flex items-center gap-1.5 bg-black/60 hover:bg-black/80 backdrop-blur-md px-3 py-1.5 rounded-full border border-white/20 text-xs font-semibold text-white shadow-lg active:scale-95 transition-all cursor-pointer"
-            aria-label="Leave reel"
+            className="flex items-center gap-1.5 bg-black/60 hover:bg-black/80 backdrop-blur-md px-3 py-1.5 rounded-full border border-white/20 text-xs font-semibold text-white shadow-lg active:scale-95 transition-all"
+            aria-label="Go back"
           >
-            <ArrowLeft className="w-3.5 h-3.5 text-white" />
+            <ArrowLeft className="w-3.5 h-3.5" />
             <span>Back</span>
           </button>
-
           <div className="bg-black/50 backdrop-blur-md px-2.5 py-1.5 rounded-full border border-white/15 text-[11px] font-mono text-white/80 shadow-md pointer-events-none">
             <span className="text-white font-bold">{activeIndex + 1}</span>
             <span className="text-white/50"> / {filteredReels.length}</span>
           </div>
         </div>
+
+        {/* ── Mobile nav arrows — left edge, vertically centred ── */}
+        <div className="absolute left-2 top-1/2 -translate-y-1/2 z-30 flex flex-col gap-3 pointer-events-auto">
+          <button
+            onClick={goToPrev}
+            disabled={activeIndex === 0}
+            className="w-10 h-10 rounded-full bg-black/60 backdrop-blur-md border border-white/25 flex items-center justify-center text-white disabled:opacity-20 disabled:cursor-not-allowed active:scale-90 transition-all shadow-lg hover:bg-black/80"
+            aria-label="Previous reel"
+          >
+            <ChevronUp className="w-5 h-5" />
+          </button>
+          <button
+            onClick={goToNext}
+            disabled={activeIndex === filteredReels.length - 1}
+            className="w-10 h-10 rounded-full bg-black/60 backdrop-blur-md border border-white/25 flex items-center justify-center text-white disabled:opacity-20 disabled:cursor-not-allowed active:scale-90 transition-all shadow-lg hover:bg-black/80"
+            aria-label="Next reel"
+          >
+            <ChevronDown className="w-5 h-5" />
+          </button>
+        </div>
       </div>
 
-      {/* ══════════════════════════════════════════════════════════════
-          DESKTOP: Theater layout with right sidebar
-         ══════════════════════════════════════════════════════════════ */}
+      {/* ════════════════════════════════════════════════════════
+          DESKTOP — theater layout with right sidebar
+         ════════════════════════════════════════════════════════ */}
       <div className="hidden lg:flex flex-col min-h-screen">
         {/* Category bar */}
         <div className="pt-24 pb-4 px-8">
           <div className="max-w-6xl mx-auto flex items-center gap-3">
             <button
               onClick={handleBack}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/10 hover:bg-white/15 border border-white/10 text-xs font-semibold text-white transition-all active:scale-95 cursor-pointer mr-1 shrink-0"
-              aria-label="Leave reel"
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/10 hover:bg-white/15 border border-white/10 text-xs font-semibold text-white transition-all active:scale-95 mr-1 shrink-0"
+              aria-label="Go back"
             >
-              <ArrowLeft className="w-3.5 h-3.5 text-white" />
+              <ArrowLeft className="w-3.5 h-3.5" />
               <span>Back</span>
             </button>
-
             <div className="flex items-center gap-2 text-white font-bold text-sm mr-4 shrink-0">
               <Film className="w-4 h-4 text-[#FE2C55]" />
               <span>Reels</span>
@@ -277,39 +350,69 @@ export function ReelsFeed({ initialReels }: ReelsFeedProps) {
           </div>
         </div>
 
-        {/* Theater area */}
+        {/* Theater */}
         <div className="flex-1 flex items-center justify-center px-8 pb-8">
           <div className="max-w-6xl w-full h-[780px] max-h-[85vh] flex gap-6">
 
             {/* Video stage */}
             <div className="relative flex-1 flex items-center justify-center">
-              {/* Prev button */}
               <button
                 onClick={goToPrev}
                 disabled={activeIndex === 0}
                 className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-14 z-20 w-12 h-12 rounded-full bg-zinc-900/80 border border-zinc-700 hover:border-white flex items-center justify-center text-white disabled:opacity-20 disabled:cursor-not-allowed transition-all hover:scale-105 backdrop-blur-sm"
+                aria-label="Previous reel"
               >
                 <ChevronUp className="w-5 h-5" />
               </button>
 
-              {/* Phone-frame video */}
               <div
                 className="relative rounded-3xl overflow-hidden bg-black shadow-2xl border border-white/5"
                 style={{ aspectRatio: "9/16", height: "100%", maxWidth: "calc(100% * 9 / 16)" }}
               >
-                {currentReel && (
-                  <ReelCard
-                    key={currentReel.id}
-                    reel={currentReel}
-                    isActive={true}
-                    priority={true}
-                    showDesktopComments={true}
-                    onCommentClick={() => setDesktopTab("comments")}
-                    className="h-full"
-                  />
-                )}
+                {/* Preloading sliding strip on desktop — zero reload when switching reels */}
+                {isDesktop && (
+                  <div
+                    className="w-full h-full"
+                    style={{
+                      transform: `translateY(-${activeIndex * 100}%)`,
+                      transition: "transform 0.35s cubic-bezier(0.25, 1, 0.5, 1)",
+                      willChange: "transform",
+                    }}
+                  >
+                    {filteredReels.map((reel, idx) => {
+                      const isLoaded = loadedReelIds.has(reel.id)
+                      const isCurrent = idx === activeIndex
 
-                {/* Reel counter */}
+                      return (
+                        <div key={reel.id} className="relative w-full h-full shrink-0">
+                          {isLoaded ? (
+                            <ReelCard
+                              reel={reel}
+                              isActive={isCurrent && isDesktop}
+                              priority={isCurrent}
+                              isMuted={isMuted}
+                              volume={volume}
+                              onToggleMute={toggleMute}
+                              onVolumeChange={handleVolumeChange}
+                              onSwipeUp={goToNext}
+                              onSwipeDown={goToPrev}
+                              showDesktopComments
+                              onCommentClick={() => setDesktopTab("comments")}
+                              className="h-full w-full"
+                            />
+                          ) : (
+                            <div className="w-full h-full bg-black relative flex items-center justify-center">
+                              {reel.thumbnail && (
+                                // eslint-disable-next-line @next/next/no-img-element
+                                <img src={reel.thumbnail} alt="" className="w-full h-full object-cover opacity-60" />
+                              )}
+                            </div>
+                          )}
+                        </div>
+                      )
+                    })}
+                  </div>
+                )}
                 <div className="absolute top-3 left-3 z-30 pointer-events-none">
                   <div className="bg-black/60 backdrop-blur-md px-2.5 py-1 rounded-full border border-white/10 text-[11px] font-mono text-white/70">
                     <span className="text-white font-bold">{activeIndex + 1}</span>
@@ -318,11 +421,11 @@ export function ReelsFeed({ initialReels }: ReelsFeedProps) {
                 </div>
               </div>
 
-              {/* Next button */}
               <button
                 onClick={goToNext}
                 disabled={activeIndex === filteredReels.length - 1}
                 className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-14 z-20 w-12 h-12 rounded-full bg-zinc-900/80 border border-zinc-700 hover:border-white flex items-center justify-center text-white disabled:opacity-20 disabled:cursor-not-allowed transition-all hover:scale-105 backdrop-blur-sm"
+                aria-label="Next reel"
               >
                 <ChevronDown className="w-5 h-5" />
               </button>
@@ -331,7 +434,6 @@ export function ReelsFeed({ initialReels }: ReelsFeedProps) {
             {/* Right panel */}
             {currentReel && (
               <div className="w-[380px] shrink-0 flex flex-col bg-zinc-950 border border-zinc-800/80 rounded-3xl overflow-hidden">
-                {/* Tabs */}
                 <div className="flex border-b border-zinc-800 shrink-0">
                   {(["details", "comments", "playlist"] as const).map(tab => (
                     <button
@@ -352,10 +454,9 @@ export function ReelsFeed({ initialReels }: ReelsFeedProps) {
                   ))}
                 </div>
 
-                {/* Details tab */}
+                {/* Details */}
                 {desktopTab === "details" && (
                   <div data-scrollable-panel className="flex-1 overflow-y-auto p-5 space-y-5">
-                    {/* Creator */}
                     <div className="flex items-center gap-3 pb-4 border-b border-zinc-800">
                       <div className="w-12 h-12 rounded-full border-2 border-white overflow-hidden bg-zinc-800 shrink-0">
                         {currentReel.authorAvatar
@@ -365,34 +466,22 @@ export function ReelsFeed({ initialReels }: ReelsFeedProps) {
                       </div>
                       <div className="flex-1 min-w-0">
                         <p className="text-white font-bold text-sm">@{currentReel.authorName || "ezedinmoh"}</p>
-                        <a
-                          href={currentReel.tiktokUrl}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="text-zinc-400 text-xs hover:text-white transition-colors flex items-center gap-1 mt-0.5"
-                        >
-                          <ExternalLink className="w-3 h-3" />
-                          Watch on TikTok
+                        <a href={currentReel.tiktokUrl} target="_blank" rel="noopener noreferrer" className="text-zinc-400 text-xs hover:text-white transition-colors flex items-center gap-1 mt-0.5">
+                          <ExternalLink className="w-3 h-3" />Watch on TikTok
                         </a>
                       </div>
                       {currentReel.category && (
-                        <span className="px-2.5 py-1 rounded-full bg-white/8 border border-white/10 text-white/70 text-[11px] font-medium">
-                          {currentReel.category}
-                        </span>
+                        <span className="px-2.5 py-1 rounded-full bg-white/8 border border-white/10 text-white/70 text-[11px] font-medium">{currentReel.category}</span>
                       )}
                     </div>
 
-                    {/* Title & Caption */}
                     <div className="space-y-2">
                       {currentReel.title && <h3 className="text-white font-bold text-base leading-snug">{currentReel.title}</h3>}
                       {currentReel.caption && (
-                        <p className="text-zinc-300 text-sm leading-relaxed whitespace-pre-line bg-zinc-900 p-3 rounded-xl border border-zinc-800">
-                          {currentReel.caption}
-                        </p>
+                        <p className="text-zinc-300 text-sm leading-relaxed whitespace-pre-line bg-zinc-900 p-3 rounded-xl border border-zinc-800">{currentReel.caption}</p>
                       )}
                     </div>
 
-                    {/* Stats */}
                     <div className="grid grid-cols-2 gap-2">
                       {[
                         { icon: Eye, label: "Views", value: currentReel.views || 0, color: "text-cyan-400" },
@@ -412,7 +501,6 @@ export function ReelsFeed({ initialReels }: ReelsFeedProps) {
                       ))}
                     </div>
 
-                    {/* Music */}
                     {currentReel.musicTitle && (
                       <div className="bg-zinc-900 p-3 rounded-xl border border-zinc-800 flex items-center gap-3">
                         <div className="w-9 h-9 rounded-full bg-zinc-800 border-2 border-zinc-700 flex items-center justify-center text-white shrink-0" style={{ animation: "spin 4s linear infinite" }}>
@@ -425,22 +513,13 @@ export function ReelsFeed({ initialReels }: ReelsFeedProps) {
                       </div>
                     )}
 
-                    {/* Related project */}
                     {getRelatedProject(currentReel) && (
                       <div className="p-4 rounded-2xl bg-gradient-to-br from-[#FE2C55]/10 to-zinc-900 border border-[#FE2C55]/20 space-y-2">
                         <div className="flex items-center gap-2 text-[#FE2C55] text-xs font-bold">
-                          <Sparkles className="w-3.5 h-3.5" />
-                          Portfolio Project
+                          <Sparkles className="w-3.5 h-3.5" />Portfolio Project
                         </div>
-                        <p className="text-xs text-zinc-300">
-                          This reel showcases <strong className="text-white">{getRelatedProject(currentReel)?.name}</strong>
-                        </p>
-                        <a
-                          href={getRelatedProject(currentReel)?.url}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-[#FE2C55] hover:bg-[#FE2C55]/90 text-white font-bold text-xs transition-all"
-                        >
+                        <p className="text-xs text-zinc-300">This reel showcases <strong className="text-white">{getRelatedProject(currentReel)?.name}</strong></p>
+                        <a href={getRelatedProject(currentReel)?.url} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-[#FE2C55] hover:bg-[#FE2C55]/90 text-white font-bold text-xs transition-all">
                           <span>View Live Site</span>
                           <ArrowUpRight className="w-3.5 h-3.5" />
                         </a>
@@ -449,7 +528,7 @@ export function ReelsFeed({ initialReels }: ReelsFeedProps) {
                   </div>
                 )}
 
-                {/* Comments tab */}
+                {/* Comments */}
                 {desktopTab === "comments" && (
                   <div data-scrollable-panel className="flex-1 flex flex-col min-h-0">
                     <div className="flex-1 overflow-y-auto p-4 space-y-3">
@@ -462,56 +541,34 @@ export function ReelsFeed({ initialReels }: ReelsFeedProps) {
                           <MessageCircle className="w-8 h-8 mx-auto opacity-30" />
                           <p className="text-xs">No comments yet. Be first!</p>
                         </div>
-                      ) : (
-                        comments.map(c => (
-                          <div key={c.id} className="flex gap-3">
-                            <div className="w-7 h-7 rounded-full bg-zinc-800 flex items-center justify-center shrink-0 text-xs font-bold text-white">
-                              {c.displayName.charAt(0).toUpperCase()}
-                            </div>
-                            <div className="flex-1 min-w-0">
-                              <div className="flex items-baseline gap-2 mb-0.5">
-                                <span className="text-white text-xs font-bold truncate">{c.displayName}</span>
-                                <span className="text-zinc-500 text-[10px] shrink-0">
-                                  {new Date(c.createdAt).toLocaleDateString(undefined, { month: "short", day: "numeric" })}
-                                </span>
-                              </div>
-                              <p className="text-zinc-200 text-xs leading-relaxed">{c.text}</p>
-                            </div>
+                      ) : comments.map(c => (
+                        <div key={c.id} className="flex gap-3">
+                          <div className="w-7 h-7 rounded-full bg-zinc-800 flex items-center justify-center shrink-0 text-xs font-bold text-white">
+                            {c.displayName.charAt(0).toUpperCase()}
                           </div>
-                        ))
-                      )}
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-baseline gap-2 mb-0.5">
+                              <span className="text-white text-xs font-bold truncate">{c.displayName}</span>
+                              <span className="text-zinc-500 text-[10px] shrink-0">
+                                {new Date(c.createdAt).toLocaleDateString(undefined, { month: "short", day: "numeric" })}
+                              </span>
+                            </div>
+                            <p className="text-zinc-200 text-xs leading-relaxed">{c.text}</p>
+                          </div>
+                        </div>
+                      ))}
                     </div>
-
                     <form onSubmit={handleCommentSubmit} className="p-3 border-t border-zinc-800 bg-zinc-950 space-y-2 shrink-0">
                       {commentError && <p className="text-[#FE2C55] text-[11px]">{commentError}</p>}
                       <div className="flex items-center gap-2">
                         <div className="relative flex-1">
                           <User className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-zinc-500" />
-                          <input
-                            type="text"
-                            placeholder="Your name (optional)"
-                            value={newCommentAuthor}
-                            onChange={e => setNewCommentAuthor(e.target.value)}
-                            maxLength={50}
-                            className="w-full pl-8 pr-3 py-2 bg-zinc-900 border border-zinc-700 rounded-xl text-xs text-white placeholder-zinc-500 focus:outline-none focus:border-white/40"
-                          />
+                          <input type="text" placeholder="Your name (optional)" value={newCommentAuthor} onChange={e => setNewCommentAuthor(e.target.value)} maxLength={50} className="w-full pl-8 pr-3 py-2 bg-zinc-900 border border-zinc-700 rounded-xl text-xs text-white placeholder-zinc-500 focus:outline-none focus:border-white/40" />
                         </div>
                       </div>
                       <div className="flex items-center gap-2">
-                        <input
-                          type="text"
-                          placeholder="Add a comment..."
-                          value={newCommentText}
-                          onChange={e => setNewCommentText(e.target.value)}
-                          maxLength={500}
-                          required
-                          className="flex-1 px-3 py-2 bg-zinc-900 border border-zinc-700 rounded-xl text-xs text-white placeholder-zinc-500 focus:outline-none focus:border-white/40"
-                        />
-                        <button
-                          type="submit"
-                          disabled={commentSubmitting || !newCommentText.trim()}
-                          className="p-2 bg-[#FE2C55] hover:bg-[#FE2C55]/90 text-white rounded-xl font-bold transition-all disabled:opacity-40 disabled:cursor-not-allowed"
-                        >
+                        <input type="text" placeholder="Add a comment..." value={newCommentText} onChange={e => setNewCommentText(e.target.value)} maxLength={500} required className="flex-1 px-3 py-2 bg-zinc-900 border border-zinc-700 rounded-xl text-xs text-white placeholder-zinc-500 focus:outline-none focus:border-white/40" />
+                        <button type="submit" disabled={commentSubmitting || !newCommentText.trim()} className="p-2 bg-[#FE2C55] hover:bg-[#FE2C55]/90 text-white rounded-xl font-bold transition-all disabled:opacity-40 disabled:cursor-not-allowed">
                           <Send className="w-4 h-4" />
                         </button>
                       </div>
@@ -519,7 +576,7 @@ export function ReelsFeed({ initialReels }: ReelsFeedProps) {
                   </div>
                 )}
 
-                {/* Playlist tab */}
+                {/* Playlist */}
                 {desktopTab === "playlist" && (
                   <div data-scrollable-panel className="flex-1 overflow-y-auto p-3 space-y-1.5">
                     {filteredReels.map((reel, idx) => {
@@ -530,9 +587,7 @@ export function ReelsFeed({ initialReels }: ReelsFeedProps) {
                           onClick={() => setActiveIndex(idx)}
                           className={cn(
                             "w-full text-left p-2.5 rounded-2xl flex items-center gap-3 transition-all",
-                            isSelected
-                              ? "bg-white/10 border border-white/20"
-                              : "hover:bg-zinc-900 border border-transparent"
+                            isSelected ? "bg-white/10 border border-white/20" : "hover:bg-zinc-900 border border-transparent"
                           )}
                         >
                           <div className="w-10 h-14 rounded-xl bg-zinc-800 overflow-hidden relative shrink-0">
@@ -568,6 +623,6 @@ export function ReelsFeed({ initialReels }: ReelsFeedProps) {
           </div>
         </div>
       </div>
-    </div>
+    </div >
   )
 }

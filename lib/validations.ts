@@ -38,11 +38,20 @@ export const AnalyticsEventSchema = z.object({
 })
 
 export const ReorderSchema = z.object({
-  items: z.array(z.object({ id: z.string(), sortOrder: z.number().int() })),
+  items: z.array(z.object({
+    id: z.string(),
+    sortOrder: z.number().int(),
+    featured: z.boolean().optional(),
+  })),
 })
 
 export const FeaturedReorderSchema = z.object({
-  items: z.array(z.object({ id: z.string(), featuredSortOrder: z.number().int() })),
+  items: z.array(z.object({
+    id: z.string(),
+    featuredSortOrder: z.number().int(),
+    featured: z.boolean().optional(),
+  })),
+  hiddenIds: z.array(z.string()).optional(),
 })
 
 export const GuestbookPatchSchema = z.object({

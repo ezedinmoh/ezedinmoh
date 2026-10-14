@@ -96,6 +96,51 @@ const projects = [
         caseStudyOutcome: "Deployed on Vercel with zero build errors across 50 routes, full guest checkout, and dual OAuth login.",
     },
     {
+        id: "anbessa-footwear",
+        title: "ANBESSA — Premium Footwear Shop",
+        description: "A modern, full-featured sneaker storefront built with React 19, TanStack Start, and Tailwind CSS v4. Cinematic brand loader, depth-push hero carousel, bidirectional scroll-reveal animations, PWA-ready.",
+        image: "https://res.cloudinary.com/dzni6h38z/image/upload/v1790514736/portfolio/i5vtnbhksh447bxpofdb.png",
+        tags: ["React 19", "TanStack Start", "Tailwind CSS v4", "TypeScript", "E-Commerce", "PWA"],
+        stack: ["React 19", "TanStack Start", "Tailwind CSS 4", "TypeScript", "GSAP", "Radix UI", "PWA"],
+        category: ["Frontend", "E-Commerce", "Full-Stack"],
+        liveUrl: "https://anbessa-et.vercel.app",
+        githubUrl: "https://github.com/ezedinmoh/anbessa",
+        previewMode: "iframe", featured: true, year: "2026",
+        caseStudyProblem: "Modern sneaker enthusiasts needed an immersive digital storefront with fluid animations, tactile shoe physics, and instant page transitions.",
+        caseStudySolution: "Engineered a high-performance storefront with React 19, TanStack Start SSR, and Tailwind CSS v4 featuring depth-push physics, bidirectional scroll reveals, and a cinematic brand intro.",
+        caseStudyOutcome: "Sub-second transitions, fluid 60fps animations across all viewports, and seamless PWA installation.",
+    },
+    {
+        id: "amore-cafe",
+        title: "Amore Cafe & Restaurant — Modern PWA & Digital Dining",
+        description: "A modern, high-performance Progressive Web App (PWA) & table QR dining experience crafted for Kombolcha's premier cafe. Features bilingual English/Amharic menus, fasting specials, and online ordering.",
+        image: "https://res.cloudinary.com/dzni6h38z/image/upload/v1788777091/portfolio/jf7glekgmu87dgnpgvqz.png",
+        tags: ["React", "TanStack Start", "Tailwind CSS", "TypeScript", "PWA", "Bilingual"],
+        stack: ["React 19", "TanStack Start", "Tailwind CSS", "TypeScript", "PWA", "Cloudinary"],
+        category: ["Full-Stack", "Web Development", "UI/UX Design"],
+        liveUrl: "https://amore-cafe.vercel.app",
+        githubUrl: "https://github.com/ezedinmoh/amore-cafe",
+        previewMode: "iframe", featured: true, year: "2026",
+        caseStudyProblem: "Traditional dining required paper menus with outdated pricing and lacked support for table QR ordering, bilingual Amharic/English navigation, and seasonal fasting menus.",
+        caseStudySolution: "Crafted a production-grade Progressive Web App with 131 interactive catalog items, intelligent Amore AI assistant, table QR integration, and dual-language switching.",
+        caseStudyOutcome: "Instant table-side QR menu access, zero load latency on mobile devices, and automated offline caching.",
+    },
+    {
+        id: "byd-ethiopia",
+        title: "BYD Ethiopia — Electric Mobility & Digital Showroom",
+        description: "A premium, high-performance digital showroom showcasing the next generation of Pure Electric (BEV) and Super DM-i Plug-in Hybrid vehicles in Ethiopia.",
+        image: "https://res.cloudinary.com/dzni6h38z/image/upload/v1787499097/portfolio/a4jgczoiv9hbzbuogfjo.png",
+        tags: ["React 19", "TanStack Start", "Tailwind CSS v4", "TypeScript", "Showroom"],
+        stack: ["React 19", "TanStack Start", "Tailwind CSS 4", "TypeScript", "Vite"],
+        category: ["Web Development", "Frontend", "UI/UX Design"],
+        liveUrl: "https://byd-ethiopia.vercel.app",
+        githubUrl: "https://github.com/ezedinmoh/byd-ethiopia",
+        previewMode: "iframe", featured: true, year: "2026",
+        caseStudyProblem: "Prospective EV buyers in Ethiopia lacked an interactive, specs-rich digital showroom to compare electric and hybrid models, ranges, and battery technologies.",
+        caseStudySolution: "Developed a luxury digital showroom with interactive model visualizers, full technical specification comparisons (CLTC range, Blade Battery, acceleration), and test-drive booking.",
+        caseStudyOutcome: "A high-conversion automotive digital hub providing rapid vehicle exploration and mobile-first responsiveness.",
+    },
+    {
         id: "smart-nextjs",
         title: "Smart Library Management System (Next.js)",
         description: "A Next.js 16 full-stack library platform featuring role-based dashboards (Admin, Librarian, Student), Supabase PostgreSQL, Stripe & Chapa payment gateways, book reservations, QR code verification, and automated email notifications.",
@@ -236,18 +281,7 @@ const projects = [
 async function main() {
     console.log(`\n🌱  Seeding ${projects.length} projects...\n`)
 
-    const validIds = new Set(projects.map(p => p.id))
-
-    // Remove DB rows not in our project list
-    const existing = await prisma.project.findMany()
-    for (const p of existing) {
-        if (!validIds.has(p.id) && !validIds.has(p.slug)) {
-            await prisma.project.delete({ where: { id: p.id } })
-            console.log(`  🗑  Removed stale project: ${p.title}`)
-        }
-    }
-
-    // Upsert all projects, preserving any admin-edited images/urls
+    // Upsert all projects safely — preserving admin-edited fields and custom sort orders
     for (let i = 0; i < projects.length; i++) {
         const p = projects[i]
         const existing = await prisma.project.findUnique({ where: { slug: p.id } })
@@ -256,6 +290,11 @@ async function main() {
         const image = existing?.image || p.image
         const liveUrl = existing?.liveUrl || p.liveUrl || null
         const githubUrl = existing?.githubUrl || p.githubUrl || null
+
+        // Preserve existing sortOrder and featuredSortOrder if already customized in DB
+        const sortOrder = (existing?.sortOrder !== undefined && existing?.sortOrder !== null) ? existing.sortOrder : i
+        const featuredSortOrder = (existing?.featuredSortOrder !== undefined && existing?.featuredSortOrder !== null) ? existing.featuredSortOrder : i
+        const featured = existing ? existing.featured : (p.featured ?? false)
 
         const data = {
             title: p.title,
@@ -266,11 +305,11 @@ async function main() {
             category: p.category,
             liveUrl,
             githubUrl,
-            featured: p.featured ?? false,
+            featured,
             year: p.year,
-            previewMode: p.previewMode ?? "slideshow",
-            sortOrder: i,
-            featuredSortOrder: i,       // ← always set — prevents random ordering on new columns
+            previewMode: p.previewMode ?? "iframe",
+            sortOrder,
+            featuredSortOrder,
             caseStudyProblem: p.caseStudyProblem ?? null,
             caseStudySolution: p.caseStudySolution ?? null,
             caseStudyOutcome: p.caseStudyOutcome ?? null,

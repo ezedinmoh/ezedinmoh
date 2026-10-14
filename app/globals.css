@@ -8,9 +8,12 @@ body:has([data-project-preview-modal]) .site-bottom-nav {
 }
 
 /* ── Reels page global fixes ── */
-body:has([data-reels-page]) {
+body:has([data-reels-page]),
+html:has([data-reels-page]) {
   padding-bottom: 0 !important;
   overflow: hidden !important;
+  overscroll-behavior: none !important;
+  overscroll-behavior-y: none !important;
 }
 
 :root {

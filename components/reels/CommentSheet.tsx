@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, useEffect, useRef } from "react"
+import { createPortal } from "react-dom"
 import { X, Send, MessageCircle, Loader2 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { formatDistanceToNow } from "date-fns"
@@ -20,6 +21,7 @@ interface CommentSheetProps {
 }
 
 export function CommentSheet({ reelId, open, onOpenChange, onCommentAdded }: CommentSheetProps) {
+  const [mounted, setMounted] = useState(false)
   const [comments, setComments] = useState<Comment[]>([])
   const [total, setTotal] = useState(0)
   const [page, setPage] = useState(1)
@@ -32,6 +34,10 @@ export function CommentSheet({ reelId, open, onOpenChange, onCommentAdded }: Com
   const [submitError, setSubmitError] = useState("")
   const inputRef = useRef<HTMLInputElement>(null)
   const sheetRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    setMounted(true)
+  }, [])
 
   useEffect(() => {
     if (open) {
@@ -107,13 +113,13 @@ export function CommentSheet({ reelId, open, onOpenChange, onCommentAdded }: Com
     }
   }
 
-  if (!open) return null
+  if (!open || !mounted || typeof document === "undefined") return null
 
-  return (
+  return createPortal(
     <>
       {/* Backdrop */}
       <div
-        className="fixed inset-0 bg-black/60 z-40"
+        className="fixed inset-0 bg-black/70 z-50 transition-opacity"
         onClick={() => onOpenChange(false)}
         aria-hidden="true"
       />
@@ -125,13 +131,12 @@ export function CommentSheet({ reelId, open, onOpenChange, onCommentAdded }: Com
         aria-modal="true"
         aria-label="Comments"
         className={cn(
-          "fixed z-50 bg-zinc-900 border-t border-zinc-700 flex flex-col",
+          "fixed z-[60] bg-zinc-950 border-t border-zinc-800 flex flex-col shadow-2xl animate-in slide-in-from-bottom duration-200",
           // Mobile: bottom sheet
-          "bottom-0 left-0 right-0 rounded-t-2xl",
+          "bottom-0 left-0 right-0 rounded-t-3xl max-h-[75vh]",
           // Desktop: right panel
-          "lg:bottom-0 lg:top-0 lg:left-auto lg:right-0 lg:w-[380px] lg:rounded-none lg:border-t-0 lg:border-l"
+          "lg:bottom-0 lg:top-0 lg:left-auto lg:right-0 lg:w-[380px] lg:rounded-none lg:border-t-0 lg:border-l lg:max-h-full"
         )}
-        style={{ maxHeight: "85dvh" }}
       >
         {/* Header */}
         <div className="flex items-center justify-between px-4 py-3 border-b border-zinc-800 shrink-0">
@@ -232,6 +237,7 @@ export function CommentSheet({ reelId, open, onOpenChange, onCommentAdded }: Com
           </form>
         </div>
       </div>
-    </>
+    </>,
+    document.body
   )
 }

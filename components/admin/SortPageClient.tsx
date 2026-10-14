@@ -93,9 +93,8 @@ export function SortPageClient({ projects }: { projects: ProjectWithFeaturedOrde
                     <>
                         <Star className="w-4 h-4 shrink-0 mt-0.5" />
                         <span>
-                            <strong>Featured Section order</strong> — controls the display order in the &quot;Featured Projects&quot; section on the home page.
-                            The first project becomes the large Hero card. Only featured-marked projects appear here.
-                            This order is <em>independent</em> from the Projects page.
+                            <strong>Featured Section Order & Visibility</strong> — choose which projects appear on the home page featured section and arrange their order.
+                            Use <strong>Hide</strong> or <strong>Show in Featured</strong> to toggle visibility, and drag or use arrows to reorder. The first project becomes the Hero card.
                         </span>
                     </>
                 ) : (

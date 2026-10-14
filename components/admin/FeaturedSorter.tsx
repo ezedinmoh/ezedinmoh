@@ -4,7 +4,7 @@ import { useState, useRef, useMemo } from "react"
 import { useRouter } from "next/navigation"
 import {
     GripVertical, ChevronUp, ChevronDown, CheckCircle2,
-    RefreshCw, Save, X, ShieldAlert, Sparkles, Star
+    RefreshCw, Save, X, ShieldAlert, Sparkles, Star, EyeOff, Plus
 } from "lucide-react"
 import { toast } from "sonner"
 import type { Project } from "@prisma/client"
@@ -22,13 +22,22 @@ function getGroupHeroIdx(idx: number) {
 export function FeaturedSorter({ projects: initial }: { projects: ProjectWithFeaturedOrder[] }) {
     const router = useRouter()
 
-    const sorted = (arr: ProjectWithFeaturedOrder[]) =>
+    const sortFeatured = (arr: ProjectWithFeaturedOrder[]) =>
         [...arr].filter(p => p.featured).sort((a, b) =>
             ((a.featuredSortOrder ?? a.sortOrder ?? 0) - (b.featuredSortOrder ?? b.sortOrder ?? 0))
         )
 
-    const [saved, setSaved] = useState<ProjectWithFeaturedOrder[]>(() => sorted(initial))
-    const [projects, setProjects] = useState<ProjectWithFeaturedOrder[]>(() => sorted(initial))
+    const sortUnfeatured = (arr: ProjectWithFeaturedOrder[]) =>
+        [...arr].filter(p => !p.featured).sort((a, b) =>
+            ((a.sortOrder ?? 0) - (b.sortOrder ?? 0))
+        )
+
+    const [savedFeatured, setSavedFeatured] = useState<ProjectWithFeaturedOrder[]>(() => sortFeatured(initial))
+    const [savedUnfeatured, setSavedUnfeatured] = useState<ProjectWithFeaturedOrder[]>(() => sortUnfeatured(initial))
+
+    const [projects, setProjects] = useState<ProjectWithFeaturedOrder[]>(() => sortFeatured(initial))
+    const [unfeaturedProjects, setUnfeaturedProjects] = useState<ProjectWithFeaturedOrder[]>(() => sortUnfeatured(initial))
+
     const [isSaving, setIsSaving] = useState(false)
     const [showConfirm, setShowConfirm] = useState(false)
     const [previewOpen, setPreviewOpen] = useState(true)
@@ -36,12 +45,16 @@ export function FeaturedSorter({ projects: initial }: { projects: ProjectWithFea
     const [draggedIdx, setDraggedIdx] = useState<number | null>(null)
     const dragItem = useRef<number | null>(null)
 
-    const hasChanges = useMemo(() =>
-        projects.length !== saved.length || projects.some((p, i) => p.id !== saved[i]?.id),
-        [projects, saved]
-    )
+    const hasChanges = useMemo(() => {
+        if (projects.length !== savedFeatured.length || unfeaturedProjects.length !== savedUnfeatured.length) {
+            return true
+        }
+        const featuredChanged = projects.some((p, i) => p.id !== savedFeatured[i]?.id)
+        const unfeaturedChanged = unfeaturedProjects.some((p, i) => p.id !== savedUnfeatured[i]?.id)
+        return featuredChanged || unfeaturedChanged
+    }, [projects, savedFeatured, unfeaturedProjects, savedUnfeatured])
 
-    /** Move a project up or down by 1 */
+    /** Move a project up or down by 1 within featured list */
     function move(id: string, dir: "up" | "down") {
         const idx = projects.findIndex(p => p.id === id)
         if (dir === "up" && idx === 0) return
@@ -50,6 +63,30 @@ export function FeaturedSorter({ projects: initial }: { projects: ProjectWithFea
         const swap = dir === "up" ? idx - 1 : idx + 1
             ;[next[idx], next[swap]] = [next[swap], next[idx]]
         setProjects(next)
+    }
+
+    /** Hide a project from Featured -> moves to unfeaturedProjects */
+    function hideFromFeatured(id: string) {
+        const item = projects.find(p => p.id === id)
+        if (!item) return
+        setProjects(prev => prev.filter(p => p.id !== id))
+        setUnfeaturedProjects(prev => [{ ...item, featured: false }, ...prev])
+        toast.info(`"${item.title}" hidden from Featured — save to apply.`)
+    }
+
+    /** Add an unfeatured project to Featured -> appends to featured projects */
+    function addToFeatured(id: string) {
+        const item = unfeaturedProjects.find(p => p.id === id)
+        if (!item) return
+        setUnfeaturedProjects(prev => prev.filter(p => p.id !== id))
+        setProjects(prev => [...prev, { ...item, featured: true, featuredSortOrder: prev.length }])
+        toast.info(`"${item.title}" added to Featured — save to apply.`)
+    }
+
+    /** Discard all changes */
+    function discardChanges() {
+        setProjects([...savedFeatured])
+        setUnfeaturedProjects([...savedUnfeatured])
     }
 
     /**
@@ -96,20 +133,22 @@ export function FeaturedSorter({ projects: initial }: { projects: ProjectWithFea
     /* ── Save ── */
     async function confirmSave() {
         setIsSaving(true)
-        const items = projects.map((p, i) => ({ id: p.id, featuredSortOrder: i }))
+        const items = projects.map((p, i) => ({ id: p.id, featuredSortOrder: i, featured: true }))
+        const hiddenIds = unfeaturedProjects.map(p => p.id)
         try {
             const res = await fetch("/api/projects/reorder-featured", {
                 method: "PATCH",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ items }),
+                body: JSON.stringify({ items, hiddenIds }),
             })
             const data = await res.json().catch(() => ({}))
             if (res.ok && data.success !== false) {
-                setSaved([...projects])
+                setSavedFeatured([...projects])
+                setSavedUnfeatured([...unfeaturedProjects])
                 setShowConfirm(false)
                 // Force a hard cache-busted refresh so the preview picks up the new DB order
                 setPreviewKey(Date.now())
-                toast.success("Featured order saved — home page updated!", {
+                toast.success("Featured projects and order saved — home page updated!", {
                     icon: <CheckCircle2 className="w-4 h-4 text-emerald-400" />,
                 })
                 router.refresh()
@@ -117,25 +156,14 @@ export function FeaturedSorter({ projects: initial }: { projects: ProjectWithFea
                 throw new Error(data.message || "Save failed")
             }
         } catch (err) {
-            setProjects([...saved])
+            discardChanges()
             setShowConfirm(false)
-            toast.error("Failed to save. Order reverted.", {
+            toast.error("Failed to save. Changes reverted.", {
                 description: err instanceof Error ? err.message : String(err),
             })
         } finally {
             setIsSaving(false)
         }
-    }
-
-    /* ── Empty state ── */
-    if (projects.length === 0) {
-        return (
-            <div className="rounded-2xl border border-border bg-card p-12 text-center text-muted-foreground">
-                <Star className="w-10 h-10 mx-auto mb-3 opacity-30" />
-                <p className="font-medium">No featured projects yet</p>
-                <p className="text-xs mt-1">Mark projects as featured in the edit form to appear here.</p>
-            </div>
-        )
     }
 
     /* ── Group headers: show divider + label before each group of 6 ── */
@@ -183,70 +211,163 @@ export function FeaturedSorter({ projects: initial }: { projects: ProjectWithFea
                 {/* ── Left: sortable list ── */}
                 <div className="space-y-4 min-w-0">
                     <div className="bg-card border border-border rounded-xl overflow-hidden">
-                        {projects.map((p, idx) => {
-                            const isDragging = draggedIdx === idx
-                            const groupStart = getGroupHeroIdx(idx)
-                            const isGroupHero = idx === groupStart
-                            const groupNum = Math.floor(idx / GROUP_SIZE) + 1
+                        {projects.length === 0 ? (
+                            <div className="p-8 text-center text-muted-foreground">
+                                <Star className="w-8 h-8 mx-auto mb-2 opacity-30" />
+                                <p className="font-medium text-sm">No featured projects yet</p>
+                                <p className="text-xs text-muted-foreground mt-1">
+                                    Click &quot;+ Add to Featured&quot; below to feature projects on the home page.
+                                </p>
+                            </div>
+                        ) : (
+                            projects.map((p, idx) => {
+                                const isDragging = draggedIdx === idx
+                                const groupStart = getGroupHeroIdx(idx)
+                                const isGroupHero = idx === groupStart
+                                const groupNum = Math.floor(idx / GROUP_SIZE) + 1
 
-                            return (
-                                <div key={p.id}>
-                                    {/* Group divider before first item of each group */}
-                                    {renderGroupDivider(idx)}
+                                return (
+                                    <div key={p.id}>
+                                        {/* Group divider before first item of each group */}
+                                        {renderGroupDivider(idx)}
 
-                                    <div
-                                        draggable
-                                        onDragStart={e => handleDragStart(e, idx)}
-                                        onDragOver={e => handleDragOver(e, idx)}
-                                        onDragEnd={handleDragEnd}
-                                        className={[
-                                            "flex items-center gap-2 sm:gap-3 px-3 sm:px-4 py-3 cursor-grab active:cursor-grabbing transition-all group",
-                                            "border-b border-border/50 last:border-b-0",
-                                            isDragging
-                                                ? "bg-primary/10 opacity-60 border-2 border-dashed border-primary"
-                                                : isGroupHero
-                                                    ? "bg-yellow-400/5 hover:bg-yellow-400/10"
-                                                    : "hover:bg-secondary/20",
-                                        ].join(" ")}
-                                    >
-                                        {/* Drag handle */}
-                                        <GripVertical className="w-4 h-4 text-muted-foreground/40 group-hover:text-primary transition-colors shrink-0" />
+                                        <div
+                                            draggable
+                                            onDragStart={e => handleDragStart(e, idx)}
+                                            onDragOver={e => handleDragOver(e, idx)}
+                                            onDragEnd={handleDragEnd}
+                                            className={[
+                                                "flex items-center gap-2 sm:gap-3 px-3 sm:px-4 py-3 cursor-grab active:cursor-grabbing transition-all group",
+                                                "border-b border-border/50 last:border-b-0",
+                                                isDragging
+                                                    ? "bg-primary/10 opacity-60 border-2 border-dashed border-primary"
+                                                    : isGroupHero
+                                                        ? "bg-yellow-400/5 hover:bg-yellow-400/10"
+                                                        : "hover:bg-secondary/20",
+                                            ].join(" ")}
+                                        >
+                                            {/* Drag handle */}
+                                            <GripVertical className="w-4 h-4 text-muted-foreground/40 group-hover:text-primary transition-colors shrink-0" />
 
-                                        {/* Position number */}
-                                        <span className="text-xs font-bold text-muted-foreground tabular-nums w-5 text-center shrink-0">
-                                            {idx + 1}
-                                        </span>
+                                            {/* Position number */}
+                                            <span className="text-xs font-bold text-muted-foreground tabular-nums w-5 text-center shrink-0">
+                                                {idx + 1}
+                                            </span>
 
-                                        {/* Arrow buttons */}
-                                        <div className="flex flex-col gap-0.5 shrink-0">
-                                            <button
-                                                type="button"
-                                                onClick={() => move(p.id, "up")}
-                                                disabled={idx === 0}
-                                                className="p-0.5 text-muted-foreground hover:text-primary transition-colors disabled:opacity-20"
-                                            >
-                                                <ChevronUp className="w-3.5 h-3.5" />
-                                            </button>
-                                            <button
-                                                type="button"
-                                                onClick={() => move(p.id, "down")}
-                                                disabled={idx === projects.length - 1}
-                                                className="p-0.5 text-muted-foreground hover:text-primary transition-colors disabled:opacity-20"
-                                            >
-                                                <ChevronDown className="w-3.5 h-3.5" />
-                                            </button>
+                                            {/* Arrow buttons */}
+                                            <div className="flex flex-col gap-0.5 shrink-0">
+                                                <button
+                                                    type="button"
+                                                    onClick={() => move(p.id, "up")}
+                                                    disabled={idx === 0}
+                                                    className="p-0.5 text-muted-foreground hover:text-primary transition-colors disabled:opacity-20"
+                                                >
+                                                    <ChevronUp className="w-3.5 h-3.5" />
+                                                </button>
+                                                <button
+                                                    type="button"
+                                                    onClick={() => move(p.id, "down")}
+                                                    disabled={idx === projects.length - 1}
+                                                    className="p-0.5 text-muted-foreground hover:text-primary transition-colors disabled:opacity-20"
+                                                >
+                                                    <ChevronDown className="w-3.5 h-3.5" />
+                                                </button>
+                                            </div>
+
+                                            {/* Thumbnail */}
+                                            {p.image ? (
+                                                // eslint-disable-next-line @next/next/no-img-element
+                                                <img
+                                                    src={p.image} alt={p.title}
+                                                    className="w-12 h-8 sm:w-14 sm:h-10 rounded-lg object-cover border border-border shrink-0"
+                                                />
+                                            ) : (
+                                                <div className="w-12 h-8 sm:w-14 sm:h-10 rounded-lg bg-primary/10 border border-border shrink-0 flex items-center justify-center">
+                                                    <span className="text-xs font-bold text-primary">{p.title.charAt(0)}</span>
+                                                </div>
+                                            )}
+
+                                            {/* Title + meta */}
+                                            <div className="flex-1 min-w-0">
+                                                <p className="font-semibold text-foreground text-sm truncate">{p.title}</p>
+                                                <p className="text-xs text-muted-foreground truncate hidden sm:block">
+                                                    {p.category.join(", ")} · {p.year}
+                                                </p>
+                                            </div>
+
+                                            {/* Actions: Hero star & Hide from featured */}
+                                            <div className="flex items-center gap-1 shrink-0">
+                                                {/* Hero badge / Set Hero star button */}
+                                                {isGroupHero ? (
+                                                    <span className="flex items-center gap-1 px-2 py-0.5 text-[10px] font-bold bg-yellow-400/15 text-yellow-400 rounded-full border border-yellow-400/30">
+                                                        <Star className="w-3 h-3 fill-yellow-400" />
+                                                        Group {groupNum} Hero
+                                                    </span>
+                                                ) : (
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => setGroupHero(p.id)}
+                                                        title={`Set as Group ${groupNum} Hero`}
+                                                        className="p-1.5 rounded-lg text-muted-foreground/40 hover:text-yellow-400 hover:bg-yellow-400/10 transition-all border border-transparent hover:border-yellow-400/30"
+                                                    >
+                                                        <Star className="w-3.5 h-3.5" />
+                                                    </button>
+                                                )}
+
+                                                {/* Hide from featured button */}
+                                                <button
+                                                    type="button"
+                                                    onClick={() => hideFromFeatured(p.id)}
+                                                    title="Hide project from home page Featured Section"
+                                                    className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold text-rose-400 bg-rose-500/10 hover:bg-rose-500/20 border border-rose-500/20 transition-all cursor-pointer"
+                                                >
+                                                    <EyeOff className="w-3.5 h-3.5" />
+                                                    <span>Hide</span>
+                                                </button>
+                                            </div>
                                         </div>
+                                    </div>
+                                )
+                            })
+                        )}
+                    </div>
 
+                    {/* ── Unfeatured / Hidden from Featured section ── */}
+                    <div className="space-y-3 pt-2">
+                        <div className="flex items-center justify-between px-1">
+                            <div className="flex items-center gap-2">
+                                <EyeOff className="w-4 h-4 text-muted-foreground" />
+                                <h3 className="text-sm font-semibold text-foreground">
+                                    Hidden from Featured ({unfeaturedProjects.length})
+                                </h3>
+                            </div>
+                            <p className="text-[11px] text-muted-foreground">
+                                Click &quot;Show in Featured&quot; to make visible on home page
+                            </p>
+                        </div>
+
+                        {unfeaturedProjects.length === 0 ? (
+                            <div className="p-4 text-center rounded-xl bg-secondary/20 border border-border text-xs text-muted-foreground">
+                                All projects are currently featured!
+                            </div>
+                        ) : (
+                            <div className="bg-card border border-border rounded-xl overflow-hidden divide-y divide-border/50">
+                                {unfeaturedProjects.map(p => (
+                                    <div
+                                        key={p.id}
+                                        className="flex items-center gap-2 sm:gap-3 px-3 sm:px-4 py-2.5 hover:bg-secondary/15 transition-all"
+                                    >
                                         {/* Thumbnail */}
                                         {p.image ? (
                                             // eslint-disable-next-line @next/next/no-img-element
                                             <img
-                                                src={p.image} alt={p.title}
-                                                className="w-12 h-8 sm:w-14 sm:h-10 rounded-lg object-cover border border-border shrink-0"
+                                                src={p.image}
+                                                alt={p.title}
+                                                className="w-12 h-8 sm:w-14 sm:h-10 rounded-lg object-cover border border-border shrink-0 opacity-80"
                                             />
                                         ) : (
-                                            <div className="w-12 h-8 sm:w-14 sm:h-10 rounded-lg bg-primary/10 border border-border shrink-0 flex items-center justify-center">
-                                                <span className="text-xs font-bold text-primary">{p.title.charAt(0)}</span>
+                                            <div className="w-12 h-8 sm:w-14 sm:h-10 rounded-lg bg-secondary border border-border shrink-0 flex items-center justify-center">
+                                                <span className="text-xs font-bold text-muted-foreground">{p.title.charAt(0)}</span>
                                             </div>
                                         )}
 
@@ -258,26 +379,20 @@ export function FeaturedSorter({ projects: initial }: { projects: ProjectWithFea
                                             </p>
                                         </div>
 
-                                        {/* Hero badge / Set Hero star button */}
-                                        {isGroupHero ? (
-                                            <span className="shrink-0 flex items-center gap-1 px-2 py-0.5 text-[10px] font-bold bg-yellow-400/15 text-yellow-400 rounded-full border border-yellow-400/30">
-                                                <Star className="w-3 h-3 fill-yellow-400" />
-                                                Group {groupNum} Hero
-                                            </span>
-                                        ) : (
-                                            <button
-                                                type="button"
-                                                onClick={() => setGroupHero(p.id)}
-                                                title={`Set as Group ${groupNum} Hero`}
-                                                className="shrink-0 p-1.5 rounded-lg text-muted-foreground/40 hover:text-yellow-400 hover:bg-yellow-400/10 transition-all border border-transparent hover:border-yellow-400/30"
-                                            >
-                                                <Star className="w-3.5 h-3.5" />
-                                            </button>
-                                        )}
+                                        {/* Action: Add to Featured */}
+                                        <button
+                                            type="button"
+                                            onClick={() => addToFeatured(p.id)}
+                                            title="Make project visible in Featured Section"
+                                            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-emerald-400 bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/20 transition-all shrink-0 hover:scale-[1.02] cursor-pointer"
+                                        >
+                                            <Plus className="w-3.5 h-3.5" />
+                                            <span>Show in Featured</span>
+                                        </button>
                                     </div>
-                                </div>
-                            )
-                        })}
+                                ))}
+                            </div>
+                        )}
                     </div>
 
                     {/* Floating save bar */}
@@ -288,14 +403,14 @@ export function FeaturedSorter({ projects: initial }: { projects: ProjectWithFea
                                     <Sparkles className="w-4 h-4 text-primary" />
                                 </div>
                                 <div>
-                                    <p className="font-semibold text-foreground text-sm">Unsaved Featured Order</p>
+                                    <p className="font-semibold text-foreground text-sm">Unsaved Featured Changes</p>
                                     <p className="text-xs text-muted-foreground hidden sm:block">Save to update the home page featured section.</p>
                                 </div>
                             </div>
                             <div className="flex items-center gap-2 ml-auto">
                                 <button
                                     type="button"
-                                    onClick={() => setProjects([...saved])}
+                                    onClick={discardChanges}
                                     disabled={isSaving}
                                     className="flex items-center gap-1.5 px-3 sm:px-4 py-2 bg-secondary text-secondary-foreground hover:bg-secondary/80 rounded-xl text-xs font-medium transition-all"
                                 >
@@ -308,7 +423,7 @@ export function FeaturedSorter({ projects: initial }: { projects: ProjectWithFea
                                     className="flex items-center gap-2 px-3 sm:px-5 py-2 bg-primary text-primary-foreground hover:opacity-90 rounded-xl text-xs font-semibold shadow-lg shadow-primary/20 transition-all hover:scale-105"
                                 >
                                     <Save className="w-3.5 h-3.5" />
-                                    <span className="hidden sm:inline">Save Featured Order</span>
+                                    <span className="hidden sm:inline">Save Changes</span>
                                     <span className="sm:hidden">Save</span>
                                 </button>
                             </div>

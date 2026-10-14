@@ -9,19 +9,33 @@ export async function PATCH(req: Request) {
     try { await requireAuth() } catch (e) { return e as Response }
 
     try {
-        const { items } = await validateBody(req, FeaturedReorderSchema)
+        const { items, hiddenIds } = await validateBody(req, FeaturedReorderSchema)
 
         for (const item of items) {
             await prisma.project.update({
                 where: { id: item.id },
-                data: { featuredSortOrder: item.featuredSortOrder },
+                data: {
+                    featuredSortOrder: item.featuredSortOrder,
+                    featured: typeof item.featured === "boolean" ? item.featured : true,
+                },
             })
         }
 
-        revalidatePath("/")
-        revalidatePath("/admin/projects")
+        if (Array.isArray(hiddenIds) && hiddenIds.length > 0) {
+            for (const id of hiddenIds) {
+                await prisma.project.update({
+                    where: { id },
+                    data: { featured: false },
+                })
+            }
+        }
 
-        return NextResponse.json({ success: true, message: "Featured order updated" })
+        revalidatePath("/")
+        revalidatePath("/projects")
+        revalidatePath("/admin/projects")
+        revalidatePath("/admin/projects/sort")
+
+        return NextResponse.json({ success: true, message: "Featured order and visibility updated" })
     } catch (e) {
         if (e instanceof Response || (e as { status?: number })?.status) return e as Response
         const msg = e instanceof Error ? e.message : String(e)

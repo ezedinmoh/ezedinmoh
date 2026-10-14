@@ -3,7 +3,7 @@
 import { useState } from "react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
-import { Pencil, Trash2, Star } from "lucide-react"
+import { Pencil, Trash2, Star, EyeOff, Loader2 } from "lucide-react"
 import { toast } from "sonner"
 import type { Project } from "@prisma/client"
 
@@ -13,9 +13,40 @@ export function ProjectsTable({ projects: initial }: { projects: Project[] }) {
     [...initial].sort((a, b) => (a.sortOrder ?? 0) - (b.sortOrder ?? 0))
   )
   const [deleting, setDeleting] = useState<string | null>(null)
+  const [togglingId, setTogglingId] = useState<string | null>(null)
 
   // Hero = first featured project
   const firstFeatured = projects.find(p => p.featured)
+
+  async function handleToggleFeatured(id: string, currentFeatured: boolean) {
+    setTogglingId(id)
+    const nextFeatured = !currentFeatured
+    // Optimistic UI update
+    setProjects(prev => prev.map(p => p.id === id ? { ...p, featured: nextFeatured } : p))
+    try {
+      const res = await fetch(`/api/projects/${id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ featured: nextFeatured }),
+      })
+      if (res.ok) {
+        toast.success(
+          nextFeatured
+            ? "Project marked as Featured on home page!"
+            : "Project hidden from Featured section."
+        )
+        router.refresh()
+      } else {
+        throw new Error("Failed to update status")
+      }
+    } catch {
+      // Revert optimistic update
+      setProjects(prev => prev.map(p => p.id === id ? { ...p, featured: currentFeatured } : p))
+      toast.error("Failed to update featured status.")
+    } finally {
+      setTogglingId(null)
+    }
+  }
 
   async function handleDelete(id: string) {
     if (!confirm("Are you sure you want to delete this project?")) return
@@ -82,13 +113,25 @@ export function ProjectsTable({ projects: initial }: { projects: Project[] }) {
                     {p.year}
                   </td>
 
-                  <td className="px-4 py-3 cursor-pointer"
-                    onClick={() => router.push(`/admin/projects/${p.id}`)}>
-                    {p.featured && (
-                      <span className="inline-flex items-center gap-1 px-2.5 py-0.5 bg-primary/10 text-primary text-xs rounded-full font-medium">
-                        <Star className="w-3 h-3" /> Featured
-                      </span>
-                    )}
+                  <td className="px-4 py-3">
+                    <button
+                      type="button"
+                      disabled={togglingId === p.id}
+                      onClick={() => handleToggleFeatured(p.id, Boolean(p.featured))}
+                      title={p.featured ? "Currently visible in Featured — Click to hide from home page" : "Currently hidden from Featured — Click to make visible on home page"}
+                      className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold transition-all cursor-pointer ${
+                        p.featured
+                          ? "bg-yellow-400/15 text-yellow-400 border border-yellow-400/30 hover:bg-yellow-400/25"
+                          : "bg-secondary text-muted-foreground/60 border border-border hover:text-foreground hover:bg-secondary/80"
+                      } disabled:opacity-50`}
+                    >
+                      {togglingId === p.id ? (
+                        <Loader2 className="w-3 h-3 animate-spin" />
+                      ) : (
+                        <Star className={`w-3 h-3 ${p.featured ? "fill-yellow-400 text-yellow-400" : "text-muted-foreground/40"}`} />
+                      )}
+                      <span>{p.featured ? "Featured" : "Hidden"}</span>
+                    </button>
                   </td>
 
                   <td className="px-4 py-3">
@@ -138,11 +181,27 @@ export function ProjectsTable({ projects: initial }: { projects: Project[] }) {
                       Hero
                     </span>
                   )}
-                  {p.featured && (
-                    <span className="px-1.5 py-0.5 bg-primary/10 text-primary text-[10px] rounded-full font-medium">
-                      Featured
-                    </span>
-                  )}
+                  <button
+                    type="button"
+                    disabled={togglingId === p.id}
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      handleToggleFeatured(p.id, Boolean(p.featured))
+                    }}
+                    title={p.featured ? "Click to hide from featured" : "Click to feature"}
+                    className={`px-2 py-0.5 rounded-full text-[10px] font-semibold border flex items-center gap-1 transition-all ${
+                      p.featured
+                        ? "bg-yellow-400/15 text-yellow-400 border-yellow-400/30"
+                        : "bg-secondary text-muted-foreground/60 border-border"
+                    } disabled:opacity-50`}
+                  >
+                    {togglingId === p.id ? (
+                      <Loader2 className="w-2.5 h-2.5 animate-spin" />
+                    ) : (
+                      <Star className={`w-2.5 h-2.5 ${p.featured ? "fill-yellow-400 text-yellow-400" : ""}`} />
+                    )}
+                    <span>{p.featured ? "Featured" : "Hidden"}</span>
+                  </button>
                 </div>
                 <p className="font-semibold text-foreground group-hover/card:text-primary group-hover/card:underline text-sm truncate">
                   {p.title}

@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server"
+import { revalidatePath } from "next/cache"
 import { prisma } from "@/lib/db"
 import { requireAuth } from "@/lib/api/auth"
 import { validateBody } from "@/lib/api/validate"
@@ -122,3 +123,68 @@ export async function DELETE(_req: Request, { params }: { params: Promise<{ id: 
     return NextResponse.json({ message: "Deleted" }, { status: 200 })
   }
 }
+
+export async function PATCH(req: Request, { params }: { params: Promise<{ id: string }> }) {
+  try { await requireAuth() } catch (e) { return e as Response }
+
+  const { id } = await params
+  const decodedId = decodeURIComponent(id)
+  const body = await req.json().catch(() => ({}))
+
+  try {
+    let existing = await prisma.project.findFirst({
+      where: { OR: [{ id: decodedId }, { slug: decodedId }] },
+    })
+
+    let updated
+    if (existing) {
+      updated = await prisma.project.update({
+        where: { id: existing.id },
+        data: {
+          ...(typeof body.featured === "boolean" ? { featured: body.featured } : {}),
+          ...(typeof body.sortOrder === "number" ? { sortOrder: body.sortOrder } : {}),
+          ...(typeof body.featuredSortOrder === "number" ? { featuredSortOrder: body.featuredSortOrder } : {}),
+        },
+      })
+    } else {
+      const staticProj = allProjects.find(p => p.id === decodedId)
+      if (!staticProj) {
+        return NextResponse.json({ error: "Project not found" }, { status: 404 })
+      }
+      const slug = staticProj.id
+      updated = await prisma.project.upsert({
+        where: { slug },
+        update: {
+          ...(typeof body.featured === "boolean" ? { featured: body.featured } : {}),
+        },
+        create: {
+          slug,
+          title: staticProj.title,
+          description: staticProj.description,
+          image: staticProj.image ?? "",
+          tags: staticProj.tags,
+          stack: staticProj.stack,
+          category: staticProj.category,
+          liveUrl: staticProj.liveUrl ?? staticProj.link ?? null,
+          githubUrl: staticProj.github ?? null,
+          featured: typeof body.featured === "boolean" ? body.featured : (staticProj.featured ?? false),
+          year: staticProj.year,
+        },
+      })
+    }
+
+    revalidatePath("/")
+    revalidatePath("/projects")
+    revalidatePath("/admin/projects")
+    revalidatePath("/admin/projects/sort")
+
+    return NextResponse.json({ success: true, project: updated })
+  } catch (err) {
+    console.error("PATCH /api/projects/[id] error:", err)
+    return NextResponse.json(
+      { error: err instanceof Error ? err.message : "Failed to update project" },
+      { status: 500 }
+    )
+  }
+}
+

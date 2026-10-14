@@ -15,13 +15,17 @@ export async function PATCH(req: Request) {
     for (const item of items) {
       await prisma.project.update({
         where: { id: item.id },
-        data: { sortOrder: item.sortOrder },
+        data: {
+          sortOrder: item.sortOrder,
+          ...(typeof item.featured === "boolean" ? { featured: item.featured } : {}),
+        },
       })
     }
 
     revalidatePath("/")
     revalidatePath("/projects")
     revalidatePath("/admin/projects")
+    revalidatePath("/admin/projects/sort")
 
     return NextResponse.json({ success: true, message: "Reordered successfully" })
   } catch (e) {

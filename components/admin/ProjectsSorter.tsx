@@ -4,7 +4,7 @@ import { useState, useRef, useMemo } from "react"
 import { useRouter } from "next/navigation"
 import {
     GripVertical, ChevronUp, ChevronDown, CheckCircle2,
-    RefreshCw, Save, X, ShieldAlert, Sparkles, FolderKanban
+    RefreshCw, Save, X, ShieldAlert, Sparkles, FolderKanban, Star
 } from "lucide-react"
 import { toast } from "sonner"
 import type { Project } from "@prisma/client"
@@ -27,7 +27,8 @@ export function ProjectsSorter({ projects: initial }: { projects: Project[] }) {
     const dragItem = useRef<number | null>(null)
 
     const hasChanges = useMemo(() =>
-        projects.length !== saved.length || projects.some((p, i) => p.id !== saved[i]?.id),
+        projects.length !== saved.length ||
+        projects.some((p, i) => p.id !== saved[i]?.id || p.featured !== saved[i]?.featured),
         [projects, saved]
     )
 
@@ -39,6 +40,17 @@ export function ProjectsSorter({ projects: initial }: { projects: Project[] }) {
         const swap = dir === "up" ? idx - 1 : idx + 1
             ;[next[idx], next[swap]] = [next[swap], next[idx]]
         setProjects(next)
+    }
+
+    function toggleFeatured(id: string) {
+        setProjects(prev =>
+            prev.map(p => {
+                if (p.id !== id) return p
+                const nextFeatured = !p.featured
+                toast.info(`"${p.title}" ${nextFeatured ? "marked Featured" : "hidden from Featured"} — save to apply.`)
+                return { ...p, featured: nextFeatured }
+            })
+        )
     }
 
     function handleDragStart(e: React.DragEvent, idx: number) {
@@ -64,7 +76,7 @@ export function ProjectsSorter({ projects: initial }: { projects: Project[] }) {
 
     async function confirmSave() {
         setIsSaving(true)
-        const items = projects.map((p, i) => ({ id: p.id, sortOrder: i }))
+        const items = projects.map((p, i) => ({ id: p.id, sortOrder: i, featured: p.featured }))
         try {
             const res = await fetch("/api/projects/reorder", {
                 method: "PATCH",
@@ -77,7 +89,7 @@ export function ProjectsSorter({ projects: initial }: { projects: Project[] }) {
                 setShowConfirm(false)
                 // Force cache-busted reload — picked up by the useEffect in ProjectsPreviewPane
                 setPreviewKey(Date.now())
-                toast.success("Projects page order saved!", {
+                toast.success("Projects order and featured status saved!", {
                     icon: <CheckCircle2 className="w-4 h-4 text-emerald-400" />,
                 })
                 router.refresh()
@@ -101,7 +113,7 @@ export function ProjectsSorter({ projects: initial }: { projects: Project[] }) {
             <div className="flex flex-wrap items-center justify-between gap-3 px-4 py-3 bg-secondary/30 border border-border rounded-xl text-xs text-muted-foreground">
                 <span className="flex items-center gap-2 font-medium">
                     <GripVertical className="w-4 h-4 text-primary" />
-                    Drag or use arrows to set display order on <strong className="text-foreground">/projects</strong>. Does not affect the home featured section.
+                    Drag or use arrows to set display order on <strong className="text-foreground">/projects</strong>. Click the <Star className="w-3.5 h-3.5 inline text-yellow-400 mx-0.5" /> badge to toggle Featured status on home page.
                 </span>
                 <div className="flex items-center gap-2">
                     {hasChanges && (
@@ -173,11 +185,19 @@ export function ProjectsSorter({ projects: initial }: { projects: Project[] }) {
                                             <div className="flex-1 min-w-0">
                                                 <div className="flex items-center gap-2 flex-wrap">
                                                     <p className="font-semibold text-foreground text-sm truncate">{p.title}</p>
-                                                    {p.featured && (
-                                                        <span className="shrink-0 px-1.5 py-0.5 text-[10px] font-medium bg-primary/10 text-primary rounded-full border border-primary/20">
-                                                            Featured
-                                                        </span>
-                                                    )}
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => toggleFeatured(p.id)}
+                                                        title={p.featured ? "Featured on home page — click to hide/unfeature" : "Hidden from home featured — click to feature"}
+                                                        className={`shrink-0 flex items-center gap-1 px-2 py-0.5 text-[10px] font-semibold rounded-full border transition-all ${
+                                                            p.featured
+                                                                ? "bg-yellow-400/15 text-yellow-400 border-yellow-400/30 hover:bg-yellow-400/25"
+                                                                : "bg-secondary text-muted-foreground/60 border-border hover:text-foreground hover:bg-secondary/80"
+                                                        }`}
+                                                    >
+                                                        <Star className={`w-3 h-3 ${p.featured ? "fill-yellow-400 text-yellow-400" : "text-muted-foreground/40"}`} />
+                                                        <span>{p.featured ? "Featured" : "Not Featured"}</span>
+                                                    </button>
                                                 </div>
                                                 <p className="text-xs text-muted-foreground truncate hidden sm:block">
                                                     {p.category.join(", ")} · {p.year}
