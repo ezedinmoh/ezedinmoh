@@ -396,7 +396,7 @@ function ReelCardComponent({
     <div className={cn("relative w-full h-full bg-black overflow-hidden select-none", className)}>
 
       {/* ══ VIDEO LAYER ══ */}
-      <div className="absolute inset-0 w-full h-full overflow-hidden">
+      <div suppressHydrationWarning className="absolute inset-0 w-full h-full overflow-hidden">
         {!iframeError ? (
           <>
             {iframeLoading && (
@@ -415,6 +415,7 @@ function ReelCardComponent({
               ref={iframeRef}
               key={`tk-${tiktokId}`}
               src={iframeSrc}
+              suppressHydrationWarning
               className="absolute inset-0 border-none pointer-events-none"
               style={{
                 background: "black",
