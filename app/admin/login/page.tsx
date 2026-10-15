@@ -119,8 +119,9 @@ function LoginForm() {
               autoCapitalize="none"
               autoCorrect="off"
               spellCheck="false"
+              autoComplete="username"
               disabled={loading || success}
-              placeholder="e.g. ezedinmoh or email"
+              placeholder="Username or email"
               className="w-full px-3.5 py-2.5 bg-background border border-border rounded-xl text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-primary/40 focus:border-primary transition-all disabled:opacity-50"
             />
           </div>
@@ -135,6 +136,7 @@ function LoginForm() {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
+                autoComplete="current-password"
                 disabled={loading || success}
                 placeholder="••••••••"
                 className="w-full px-3.5 py-2.5 pr-10 bg-background border border-border rounded-xl text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-primary/40 focus:border-primary transition-all disabled:opacity-50"

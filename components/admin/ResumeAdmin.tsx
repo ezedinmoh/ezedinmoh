@@ -155,9 +155,9 @@ export function ResumeAdmin({ initial }: { initial: ResumeData }) {
       {/* Basics */}
       <Section id="basics" title="Basic Info" open={openSection === "basics"} onToggle={() => toggle("basics")}>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <Field label="Full Name"  value={data.name}     onChange={v => setBasic("name", v)}     placeholder="Ezedin Mohammed" />
+          <Field label="Full Name"  value={data.name}     onChange={v => setBasic("name", v)}     placeholder="Your Full Name" />
           <Field label="Job Title"  value={data.title}    onChange={v => setBasic("title", v)}    placeholder="Software Engineer" />
-          <Field label="Location"   value={data.location} onChange={v => setBasic("location", v)} placeholder="Kombolcha, Ethiopia" />
+          <Field label="Location"   value={data.location} onChange={v => setBasic("location", v)} placeholder="City, Country" />
           <Field label="Email"      value={data.email}    onChange={v => setBasic("email", v)}    placeholder="you@example.com" />
           <Field label="Website"    value={data.website}  onChange={v => setBasic("website", v)}  placeholder="yoursite.dev" />
           <Field label="GitHub"     value={data.github}   onChange={v => setBasic("github", v)}   placeholder="github.com/username" />

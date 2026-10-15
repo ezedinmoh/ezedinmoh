@@ -350,7 +350,7 @@ export function ProjectForm({ initial, projectId }: ProjectFormProps) {
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             {field("Live URL",   "liveUrl",   "text", "https://yourproject.vercel.app")}
-            {field("GitHub URL", "githubUrl", "text", "https://github.com/ezedinmoh/project-name")}
+            {field("GitHub URL", "githubUrl", "text", "https://github.com/username/project-name")}
           </div>
 
           <div className="flex items-center gap-3">

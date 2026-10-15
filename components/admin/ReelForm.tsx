@@ -140,7 +140,7 @@ export function ReelForm({ reel }: { reel?: ReelData }) {
             value={tiktokUrl}
             onChange={(e) => setTiktokUrl(e.target.value)}
             onBlur={() => { if (!title && tiktokUrl) fetchMetadata() }}
-            placeholder="https://www.tiktok.com/@ezedinmoh/video/..."
+            placeholder="https://www.tiktok.com/@username/video/..."
             required
             disabled={isEdit}
             className="flex-1 px-3 py-2 bg-card border border-border rounded-lg text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary transition-colors disabled:opacity-60"
