@@ -66,7 +66,7 @@ export function getRelatedProject(reel: { tiktokId?: string; title?: string | nu
     return { name: "BYD Ethiopia Brand Site", url: "https://byd-ethiopia.vercel.app" }
   }
   if (id === "7682790473752186133" || id === "7683112730294865173" || t.includes("amore")) {
-    return { name: "Amore Cafe & Restaurant", url: "https://amore-cafe.vercel.app" }
+    return { name: "Amore Cafe & Restaurant", url: "https://amore-cafe-restaurant.vercel.app" }
   }
   if (id === "7690214314351037717" || id === "7690919403667377460" || t.includes("shoes") || t.includes("ecommerce") || t.includes("streetwear")) {
     return { name: "WEARIFY E-Commerce App", url: "https://wearify-et.vercel.app" }

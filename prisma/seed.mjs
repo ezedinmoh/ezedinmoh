@@ -118,7 +118,7 @@ const projects = [
         tags: ["React", "TanStack Start", "Tailwind CSS", "TypeScript", "PWA", "Bilingual"],
         stack: ["React 19", "TanStack Start", "Tailwind CSS", "TypeScript", "PWA", "Cloudinary"],
         category: ["Full-Stack", "Web Development", "UI/UX Design"],
-        liveUrl: "https://amore-cafe.vercel.app",
+        liveUrl: "https://amore-cafe-restaurant.vercel.app",
         githubUrl: "https://github.com/ezedinmoh/amore-cafe",
         previewMode: "iframe", featured: true, year: "2026",
         caseStudyProblem: "Traditional dining required paper menus with outdated pricing and lacked support for table QR ordering, bilingual Amharic/English navigation, and seasonal fasting menus.",
