@@ -9,6 +9,7 @@ import { PwaRegister } from '@/components/pwa/pwa-register'
 import { NetworkStatus } from '@/components/pwa/network-status'
 import { PwaUpdatePrompt } from '@/components/pwa/pwa-update-prompt'
 import { BottomNav } from '@/components/bottom-nav'
+import { SITE_URL, absoluteUrl } from '@/lib/site'
 import './globals.css'
 
 const inter = Inter({ 
@@ -22,7 +23,7 @@ const spaceGrotesk = Space_Grotesk({
 });
 
 export const metadata: Metadata = {
-  metadataBase: new URL('https://ezedinmoh.pro.et'),
+  metadataBase: new URL(SITE_URL),
   title: {
     default: 'Ezedin Mohammed | Software Engineer & Full-Stack Developer',
     template: '%s | Ezedin Mohammed',
@@ -43,16 +44,16 @@ export const metadata: Metadata = {
     'Addis Ababa',
   ],
   applicationName: 'Ezedin Mohammed',
-  authors: [{ name: 'Ezedin Mohammed', url: 'https://ezedinmoh.pro.et' }],
+  authors: [{ name: 'Ezedin Mohammed', url: SITE_URL }],
   creator: 'Ezedin Mohammed',
   publisher: 'Ezedin Mohammed',
   alternates: {
-    canonical: 'https://ezedinmoh.pro.et',
+    canonical: SITE_URL,
   },
   openGraph: {
     title: 'Ezedin Mohammed | Software Engineer & Full-Stack Developer',
     description: 'Explore selected full-stack projects, interactive web applications, career journey, and technical insights by Ezedin Mohammed.',
-    url: 'https://ezedinmoh.pro.et',
+    url: SITE_URL,
     siteName: 'Ezedin Mohammed',
     images: [
       {
@@ -135,9 +136,9 @@ export default function RootLayout({
       alternateName: "ezedinmoh",
       description:
         "Software Engineer & Full-Stack Developer specializing in React, Next.js, TypeScript, and AI applications.",
-      image: "https://ezedinmoh.pro.et/icons/icon-512.png",
+      image: absoluteUrl("/icons/icon-512.png"),
       jobTitle: "Software Engineer & Full-Stack Developer",
-      url: "https://ezedinmoh.pro.et",
+      url: SITE_URL,
       address: {
         "@type": "PostalAddress",
         addressLocality: "Kombolcha",
@@ -166,20 +167,20 @@ export default function RootLayout({
     "@context": "https://schema.org",
     "@type": "WebSite",
     name: "Ezedin Mohammed",
-    alternateName: ["Ezedin Moh", "ezedinmoh", "ezedinmoh.pro.et"],
-    url: "https://ezedinmoh.pro.et/",
+    alternateName: ["Ezedin Moh", "ezedinmoh", "ezedinmoh.dev"],
+    url: absoluteUrl("/"),
     description:
       "Explore selected full-stack projects, interactive web applications, career journey, and technical insights by Ezedin Mohammed.",
     author: {
       "@type": "Person",
       name: "Ezedin Mohammed",
-      url: "https://ezedinmoh.pro.et",
+      url: SITE_URL,
     },
     potentialAction: {
       "@type": "SearchAction",
       target: {
         "@type": "EntryPoint",
-        urlTemplate: "https://ezedinmoh.pro.et/projects?q={search_term_string}",
+        urlTemplate: `${SITE_URL}/projects?q={search_term_string}`,
       },
       "query-input": "required name=search_term_string",
     },

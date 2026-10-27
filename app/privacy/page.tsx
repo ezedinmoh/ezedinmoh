@@ -1,5 +1,6 @@
 import type { Metadata } from "next"
 import Link from "next/link"
+import { absoluteUrl } from "@/lib/site"
 import { Navigation } from "@/components/navigation"
 import { Footer } from "@/components/footer"
 import { ScrollProgress } from "@/components/scroll-progress"
@@ -23,20 +24,20 @@ import {
 
 export const metadata: Metadata = {
   title: "Privacy Policy",
-  description: "Privacy Policy for ezedinmoh.pro.et and authorized TikTok developer applications including TikTok Display API integrations for @ezedinmoh.",
+  description: "Privacy Policy for ezedinmoh.dev and authorized TikTok developer applications including TikTok Display API integrations for @ezedinmoh.",
   alternates: {
-    canonical: "https://ezedinmoh.pro.et/privacy",
+    canonical: absoluteUrl("/privacy"),
   },
   openGraph: {
     title: "Privacy Policy | Ezedin Mohammed",
-    description: "Privacy Policy governing data collection, usage, and TikTok Display API integrations on ezedinmoh.pro.et.",
-    url: "https://ezedinmoh.pro.et/privacy",
+    description: "Privacy Policy governing data collection, usage, and TikTok Display API integrations on ezedinmoh.dev.",
+    url: absoluteUrl("/privacy"),
     images: [{ url: "/opengraph-image", width: 1200, height: 630, alt: "Ezedin Mohammed Privacy Policy" }],
   },
   twitter: {
     card: "summary_large_image",
     title: "Privacy Policy | Ezedin Mohammed",
-    description: "Privacy Policy governing data collection, usage, and TikTok Display API integrations on ezedinmoh.pro.et.",
+    description: "Privacy Policy governing data collection, usage, and TikTok Display API integrations on ezedinmoh.dev.",
     images: ["/opengraph-image"],
   },
 }
@@ -92,7 +93,7 @@ export default function PrivacyPage() {
             </h1>
 
             <p className="text-sm sm:text-base text-muted-foreground leading-relaxed max-w-2xl mb-6">
-              This Privacy Policy explains how <span className="text-foreground font-medium">ezedinmoh.pro.et</span> collects,
+              This Privacy Policy explains how <span className="text-foreground font-medium">ezedinmoh.dev</span> collects,
               handles, stores, and protects data when interacting with authorized developer tools, including the personal
               TikTok Display API application for <span className="text-foreground font-medium">@ezedinmoh</span>.
             </p>
@@ -102,7 +103,7 @@ export default function PrivacyPage() {
               <span>•</span>
               <span><strong>Last Updated:</strong> October 13, 2026</span>
               <span>•</span>
-              <span><strong>Domain:</strong> https://ezedinmoh.pro.et</span>
+              <span><strong>Domain:</strong> https://ezedinmoh.dev</span>
             </div>
           </div>
         </div>
@@ -170,7 +171,7 @@ export default function PrivacyPage() {
                 </h2>
                 <p className="text-sm text-muted-foreground leading-relaxed">
                   This Privacy Policy applies to the personal developer portfolio website located at{" "}
-                  <strong className="text-foreground">https://ezedinmoh.pro.et</strong> (the &quot;Website&quot;) and the personal developer
+                  <strong className="text-foreground">https://ezedinmoh.dev</strong> (the &quot;Website&quot;) and the personal developer
                   application registered with the <strong className="text-foreground">TikTok Developer Portal</strong> operated by{" "}
                   <strong className="text-foreground">Ezedin Mohammed</strong> (&quot;Developer&quot;, &quot;we&quot;, &quot;us&quot;, or &quot;our&quot;).
                 </p>
@@ -291,7 +292,7 @@ export default function PrivacyPage() {
                   <div className="p-3.5 rounded-xl bg-secondary/30 border border-border/40 text-xs space-y-1">
                     <strong className="text-foreground">Vercel Inc.</strong>
                     <p className="text-muted-foreground leading-relaxed">
-                      Provides global cloud hosting, edge CDN caching, and serverless execution for <strong className="text-foreground">ezedinmoh.pro.et</strong>.
+                      Provides global cloud hosting, edge CDN caching, and serverless execution for <strong className="text-foreground">ezedinmoh.dev</strong>.
                     </p>
                   </div>
                 </div>
@@ -441,7 +442,7 @@ export default function PrivacyPage() {
                 <div className="p-4 rounded-xl bg-secondary/30 border border-border/40 text-xs space-y-2">
                   <p><strong className="text-foreground">Developer:</strong> Ezedin Mohammed</p>
                   <p><strong className="text-foreground">Email:</strong> <a href="mailto:ezedinmoh1@gmail.com" className="text-primary hover:underline">ezedinmoh1@gmail.com</a></p>
-                  <p><strong className="text-foreground">Website:</strong> <a href="https://ezedinmoh.pro.et" className="text-primary hover:underline">https://ezedinmoh.pro.et</a></p>
+                  <p><strong className="text-foreground">Website:</strong> <a href="https://ezedinmoh.dev" className="text-primary hover:underline">https://ezedinmoh.dev</a></p>
                   <p><strong className="text-foreground">TikTok Handle:</strong> @ezedinmoh</p>
                   <p><strong className="text-foreground">Location:</strong> Ethiopia</p>
                 </div>

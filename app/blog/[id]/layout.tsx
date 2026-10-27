@@ -1,5 +1,6 @@
 import type { Metadata } from "next"
 import { blogPosts } from "@/lib/blog"
+import { SITE_URL, absoluteUrl } from "@/lib/site"
 
 export async function generateMetadata({
   params,
@@ -19,7 +20,7 @@ export async function generateMetadata({
 
   const title = post.title
   const description = post.excerpt
-  const url = `https://ezedinmoh.pro.et/blog/${post.id}`
+  const url = absoluteUrl(`/blog/${post.id}`)
 
   return {
     title,
@@ -34,7 +35,7 @@ export async function generateMetadata({
       images: [{ url: "/opengraph-image", width: 1200, height: 630, alt: title }],
       type: "article",
       publishedTime: new Date(post.date).toISOString(),
-      authors: ["https://ezedinmoh.pro.et"],
+      authors: [SITE_URL],
     },
     twitter: {
       card: "summary_large_image",

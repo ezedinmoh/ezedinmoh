@@ -1,5 +1,6 @@
 import type { Metadata } from "next"
 import Link from "next/link"
+import { absoluteUrl } from "@/lib/site"
 import { Navigation } from "@/components/navigation"
 import { Footer } from "@/components/footer"
 import { ScrollProgress } from "@/components/scroll-progress"
@@ -21,20 +22,20 @@ import {
 
 export const metadata: Metadata = {
   title: "Terms of Service",
-  description: "Terms of Service for ezedinmoh.pro.et and authorized developer integrations including the TikTok Display API application for @ezedinmoh.",
+  description: "Terms of Service for ezedinmoh.dev and authorized developer integrations including the TikTok Display API application for @ezedinmoh.",
   alternates: {
-    canonical: "https://ezedinmoh.pro.et/terms",
+    canonical: absoluteUrl("/terms"),
   },
   openGraph: {
     title: "Terms of Service | Ezedin Mohammed",
-    description: "Terms of Service governing the use of ezedinmoh.pro.et and authorized TikTok developer integrations.",
-    url: "https://ezedinmoh.pro.et/terms",
+    description: "Terms of Service governing the use of ezedinmoh.dev and authorized TikTok developer integrations.",
+    url: absoluteUrl("/terms"),
     images: [{ url: "/opengraph-image", width: 1200, height: 630, alt: "Ezedin Mohammed Terms of Service" }],
   },
   twitter: {
     card: "summary_large_image",
     title: "Terms of Service | Ezedin Mohammed",
-    description: "Terms of Service governing the use of ezedinmoh.pro.et and authorized TikTok developer integrations.",
+    description: "Terms of Service governing the use of ezedinmoh.dev and authorized TikTok developer integrations.",
     images: ["/opengraph-image"],
   },
 }
@@ -88,7 +89,7 @@ export default function TermsPage() {
             </h1>
 
             <p className="text-sm sm:text-base text-muted-foreground leading-relaxed max-w-2xl mb-6">
-              These Terms of Service govern your access to <span className="text-foreground font-medium">ezedinmoh.pro.et</span> and
+              These Terms of Service govern your access to <span className="text-foreground font-medium">ezedinmoh.dev</span> and
               our authorized developer applications, including the personal TikTok Display API integration created for{" "}
               <span className="text-foreground font-medium">@ezedinmoh</span>.
             </p>
@@ -98,7 +99,7 @@ export default function TermsPage() {
               <span>•</span>
               <span><strong>Last Updated:</strong> October 13, 2026</span>
               <span>•</span>
-              <span><strong>Domain:</strong> https://ezedinmoh.pro.et</span>
+              <span><strong>Domain:</strong> https://ezedinmoh.dev</span>
             </div>
           </div>
         </div>
@@ -153,7 +154,7 @@ export default function TermsPage() {
                   <Globe className="w-5 h-5 text-primary" /> 1. Introduction & Purpose
                 </h2>
                 <p className="text-sm text-muted-foreground leading-relaxed">
-                  Welcome to <strong className="text-foreground">ezedinmoh.pro.et</strong> (the &quot;Website&quot;), operated by{" "}
+                  Welcome to <strong className="text-foreground">ezedinmoh.dev</strong> (the &quot;Website&quot;), operated by{" "}
                   <strong className="text-foreground">Ezedin Mohammed</strong> (&quot;Developer&quot;, &quot;we&quot;, &quot;us&quot;, or &quot;our&quot;).
                   By accessing, browsing, or using this Website and our associated software applications, you acknowledge that you have read,
                   understood, and agree to be bound by these Terms of Service (&quot;Terms&quot;).
@@ -267,7 +268,7 @@ export default function TermsPage() {
                 </p>
                 <p className="text-sm text-muted-foreground leading-relaxed">
                   <strong className="text-foreground">Website Rights:</strong> All website design, branding, code, logos, styling, and original
-                  articles on <strong className="text-foreground">ezedinmoh.pro.et</strong> are the exclusive property of Ezedin Mohammed and
+                  articles on <strong className="text-foreground">ezedinmoh.dev</strong> are the exclusive property of Ezedin Mohammed and
                   are protected by applicable copyright, trademark, and intellectual property laws.
                 </p>
               </div>
@@ -351,7 +352,7 @@ export default function TermsPage() {
                 <div className="p-4 rounded-xl bg-secondary/30 border border-border/40 text-xs space-y-2">
                   <p><strong className="text-foreground">Developer:</strong> Ezedin Mohammed</p>
                   <p><strong className="text-foreground">Email:</strong> <a href="mailto:ezedinmoh1@gmail.com" className="text-primary hover:underline">ezedinmoh1@gmail.com</a></p>
-                  <p><strong className="text-foreground">Website:</strong> <a href="https://ezedinmoh.pro.et" className="text-primary hover:underline">https://ezedinmoh.pro.et</a></p>
+                  <p><strong className="text-foreground">Website:</strong> <a href="https://ezedinmoh.dev" className="text-primary hover:underline">https://ezedinmoh.dev</a></p>
                   <p><strong className="text-foreground">TikTok Handle:</strong> @ezedinmoh</p>
                 </div>
                 <div className="flex flex-wrap gap-3 pt-2">

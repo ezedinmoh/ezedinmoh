@@ -56,10 +56,10 @@ export default function manifest(): MetadataRoute.Manifest {
         icons: [{ src: "/icons/icon-192.png", sizes: "192x192" }],
       },
       {
-        name: "Blog",
-        short_name: "Blog",
-        description: "Read technical articles and insights",
-        url: "/blog",
+        name: "Reels",
+        short_name: "Reels",
+        description: "Watch tech showcases and developer reels",
+        url: "/reels",
         icons: [{ src: "/icons/icon-192.png", sizes: "192x192" }],
       },
       {

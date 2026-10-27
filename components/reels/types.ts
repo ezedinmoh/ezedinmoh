@@ -1,3 +1,5 @@
+import { SITE_URL } from "@/lib/site"
+
 export const CATEGORIES = [
   "All",
   "Web Design",
@@ -72,7 +74,7 @@ export function getRelatedProject(reel: { tiktokId?: string; title?: string | nu
     return { name: "WEARIFY E-Commerce App", url: "https://wearify-et.vercel.app" }
   }
   if (id === "7668291336642645269" || t.includes("haliyung") || t.includes("portfolio")) {
-    return { name: "Personal Portfolio v2", url: "https://ezedinmoh.pro.et" }
+    return { name: "Personal Portfolio v2", url: SITE_URL }
   }
   return null
 }

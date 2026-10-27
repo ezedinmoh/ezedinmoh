@@ -1,4 +1,5 @@
 import { ImageResponse } from "next/og"
+import { SITE_DOMAIN } from "@/lib/site"
 
 export const runtime = "edge"
 export const alt = "Ezedin Mohammed — Software Engineer"
@@ -64,7 +65,7 @@ export default function OGImage() {
 
         {/* Domain */}
         <div style={{ position: "absolute", bottom: 48, right: 80, fontSize: 18, color: "rgba(255,255,255,0.3)" }}>
-          ezedinmoh.pro.et
+          {SITE_DOMAIN}
         </div>
       </div>
     ),

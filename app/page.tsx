@@ -1,4 +1,5 @@
 import type { Metadata } from "next"
+import { SITE_URL } from "@/lib/site"
 import { Navigation } from "@/components/navigation"
 import { Hero } from "@/components/hero"
 import { StatsBar } from "@/components/stats-bar"
@@ -16,12 +17,12 @@ export const metadata: Metadata = {
   title: "Ezedin Mohammed | Software Engineer & Full-Stack Developer",
   description: "Portfolio of Ezedin Mohammed — Software Engineer & Full-Stack Developer specializing in React, Next.js, TypeScript, and modern web applications.",
   alternates: {
-    canonical: "https://ezedinmoh.pro.et",
+    canonical: SITE_URL,
   },
   openGraph: {
     title: "Ezedin Mohammed | Software Engineer & Full-Stack Developer",
     description: "Portfolio of Ezedin Mohammed — Software Engineer & Full-Stack Developer specializing in React, Next.js, TypeScript, and modern web applications.",
-    url: "https://ezedinmoh.pro.et",
+    url: SITE_URL,
     siteName: "Ezedin Mohammed",
     images: [{ url: "/opengraph-image", width: 1200, height: 630, alt: "Ezedin Mohammed Portfolio" }],
     type: "website",

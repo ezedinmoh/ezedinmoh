@@ -2,6 +2,7 @@ import { notFound } from "next/navigation"
 import { Navigation } from "@/components/navigation"
 import { ReelsFeed } from "@/components/reels/ReelsFeed"
 import { ReelData } from "@/components/reels/types"
+import { absoluteUrl } from "@/lib/site"
 import type { Metadata } from "next"
 
 export const dynamic = "force-dynamic"
@@ -22,11 +23,13 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     if (reel?.caption) description = reel.caption.slice(0, 160)
   } catch {}
 
+  const url = absoluteUrl(`/reels/${id}`)
+
   return {
     title,
     description,
-    alternates: { canonical: `https://ezedinmoh.pro.et/reels/${id}` },
-    openGraph: { title, description, url: `https://ezedinmoh.pro.et/reels/${id}` },
+    alternates: { canonical: url },
+    openGraph: { title, description, url },
   }
 }
 

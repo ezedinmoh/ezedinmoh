@@ -14,7 +14,7 @@
 
 <div align="center">
 
-<a href="https://ezedinmoh.pro.et"><img src="https://img.shields.io/badge/%F0%9F%8C%90%20Portfolio-ezedinmoh.pro.et-16a37c?style=for-the-badge&labelColor=0d1117" /></a>
+<a href="https://ezedinmoh.dev"><img src="https://img.shields.io/badge/%F0%9F%8C%90%20Portfolio-ezedinmoh.dev-16a37c?style=for-the-badge&labelColor=0d1117" /></a>
 &nbsp;
 <a href="mailto:ezedinmoh1@gmail.com"><img src="https://img.shields.io/badge/%E2%9C%89%EF%B8%8F%20Email-ezedinmoh1%40gmail.com-EA4335?style=for-the-badge&labelColor=0d1117" /></a>
 &nbsp;
@@ -231,6 +231,10 @@ const ezedin: Developer = {
 
 <br/>
 
+<a href="https://ezedinmoh.dev">
+  <img src="https://img.shields.io/badge/Website-ezedinmoh.dev-16a37c?style=for-the-badge&labelColor=0d1117" />
+</a>
+&nbsp;
 <a href="mailto:ezedinmoh1@gmail.com">
   <img src="https://img.shields.io/badge/Gmail-Send%20me%20an%20email-EA4335?style=for-the-badge&logo=gmail&logoColor=white&labelColor=0d1117" />
 </a>

@@ -7,6 +7,7 @@ import { prisma } from "@/lib/db"
 import { allProjects, type Project } from "@/lib/projects"
 import { Navigation } from "@/components/navigation"
 import { Footer } from "@/components/footer"
+import { SITE_URL, absoluteUrl } from "@/lib/site"
 
 interface ProjectPageProps {
   params: Promise<{ id: string }>
@@ -75,8 +76,8 @@ export async function generateMetadata({ params }: ProjectPageProps): Promise<Me
 
   const title = `${project.title} | Software Project`
   const description = project.description
-  const url = `https://ezedinmoh.pro.et/projects/${project.id}`
-  const image = project.image || "https://ezedinmoh.pro.et/opengraph-image"
+  const url = absoluteUrl(`/projects/${project.id}`)
+  const image = project.image || absoluteUrl("/opengraph-image")
 
   return {
     title,
@@ -121,13 +122,13 @@ export default async function ProjectDetailPage({ params }: ProjectPageProps) {
     name: project.title,
     description: project.description,
     image: project.image,
-    url: `https://ezedinmoh.pro.et/projects/${project.id}`,
+    url: absoluteUrl(`/projects/${project.id}`),
     applicationCategory: project.category.join(", "),
     operatingSystem: "Web Browser",
     author: {
       "@type": "Person",
       name: "Ezedin Mohammed",
-      url: "https://ezedinmoh.pro.et",
+      url: SITE_URL,
     },
     ...(project.github ? { codeRepository: project.github } : {}),
     ...(project.liveUrl ? { installUrl: project.liveUrl } : {}),

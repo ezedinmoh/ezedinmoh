@@ -1,15 +1,16 @@
 import type { Metadata } from "next"
+import { absoluteUrl } from "@/lib/site"
 
 export const metadata: Metadata = {
   title: "Blog & Technical Articles",
   description: "Read articles and insights on React, Next.js, TypeScript, web performance, and software engineering by Ezedin Mohammed.",
   alternates: {
-    canonical: "https://ezedinmoh.pro.et/blog",
+    canonical: absoluteUrl("/blog"),
   },
   openGraph: {
     title: "Blog & Technical Articles | Ezedin Mohammed",
     description: "Read articles and insights on React, Next.js, TypeScript, web performance, and software engineering by Ezedin Mohammed.",
-    url: "https://ezedinmoh.pro.et/blog",
+    url: absoluteUrl("/blog"),
     images: [{ url: "/opengraph-image", width: 1200, height: 630, alt: "Ezedin Mohammed Blog" }],
   },
   twitter: {
